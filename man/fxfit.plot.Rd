@@ -1,0 +1,38 @@
+\name{fxfit.plot}
+\alias{fxfit.plot}
+\title{Detection function fit plotting.}
+\usage{
+  fxfit.plot(hmmlt, allx = FALSE, values = TRUE,
+    breaks = NULL, ylim = NULL, xlab = NULL, ylab = NULL,
+    type = "prob", text.cex = 0.66)
+}
+\arguments{
+  \item{hmmlt}{object produced by \code{\link{est.hmltm}}.}
+
+  \item{allx}{If TRUE, returns matrix with p(see at x,
+  given covars) for each x in data in hmmlt (dashed gray
+  lines).}
+
+  \item{values}{If TRUE, returns function values used in
+  plot.}
+
+  \item{breaks}{histogram break points.}
+
+  \item{ylim}{y-value limits.}
+
+  \item{xlab}{x-axis label.}
+
+  \item{ylab}{y-axis label.}
+
+  \item{type}{"prob" for probability function, "density"
+  for pdf.}
+
+  \item{text.cex}{relative text size.}
+
+  \item{.}{}
+}
+\description{
+  Plots detection function on top of forward detection
+  distance distribution. Returns a bunch of stuff.
+}
+

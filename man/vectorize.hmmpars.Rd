@@ -1,0 +1,19 @@
+\name{vectorize.hmmpars}
+\alias{vectorize.hmmpars}
+\title{Reformat hmm.pars object as a vector.}
+\usage{
+  vectorize.hmmpars(hmmpars)
+}
+\arguments{
+  \item{hmm.pars}{list with availability HMM paramters, as
+  for the \code{hmm.pars} parameter of
+  \code{\link{est.hmltm}}.}
+}
+\value{
+  A numeric vector.
+}
+\description{
+  Reformats hmm.pars object as a vector - so that it can
+  easily be written to file.
+}
+

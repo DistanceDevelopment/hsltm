@@ -1,0 +1,18 @@
+\name{unvectorize.hmmpars}
+\alias{unvectorize.hmmpars}
+\title{Reformat vector as hmm.pars object.}
+\usage{
+  unvectorize.hmmpars(hv)
+}
+\arguments{
+  \item{hv}{vector that was vectorised using
+  \code{\link{vectorize.hmmpars}}.}
+}
+\value{
+  A hmm.pars object.
+}
+\description{
+  Reformats vector that was vectorised using
+  \code{\link{vectorize.hmmpars}}, as a hmm.pars object.
+}
+

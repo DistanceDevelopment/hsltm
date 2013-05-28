@@ -1,0 +1,39 @@
+\name{bootsum.p}
+\alias{bootsum.p}
+\title{Summarise detection probability bootstrap results.}
+\usage{
+  bootsum.p(bs, probs = c(0.025, 0.975), pcut = 0)
+}
+\arguments{
+  \item{bs}{output from \code{\link{bootstrap.p.with.Et}}
+  or \code{\link{bootstrap.p.with.hmm}}.}
+
+  \item{probs}{lower and upper percentile points for
+  confidence interval reporting.}
+
+  \item{pcut}{a quick and dirty min phat to consider; this
+  robustifies 1/phat for small samples, but it is ad-hoc.
+  If you use it, do histogram of $bs$phat to see if there
+  is a reasonable cutpoint.}
+}
+\value{
+  Returns a list with elements \itemize{ \item{nboot:}{
+  number of bootstrap estimates used in constructing
+  bootstrap statistics.} \item{nbad:}{ number of bad
+  estimates excluded from results.} \item{parcov:}{
+  parameter estimate variance-covariance matrix.}
+  \item{parcorr:}{ parameter estimate correlation matrix.}
+  \item{bests:}{ bootstrap estimate statistics, comprising
+  meand, standard error, percentage CV and confidence
+  interval limits for: (a) estimated mean detection
+  probability, (a) 1/(estimated mean detection
+  probability), (c) estimated p(0), ad (d) detection hazard
+  function parameters.} }
+}
+\description{
+  Uses bootstrap results from
+  \code{\link{bootstrap.p.with.Et}} or
+  \code{\link{bootstrap.p.with.hmm}} to work out bootstrap
+  means, variance estimates, CVs and confidence intervals.
+}
+

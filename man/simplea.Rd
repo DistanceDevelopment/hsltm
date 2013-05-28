@@ -1,0 +1,22 @@
+\name{simplea}
+\alias{simplea}
+\title{Simple availability correction factor calculation.}
+\usage{
+  simplea(Pi, E = NULL)
+}
+\arguments{
+  \item{Pi}{is Markov model transition matrix (state 1 is
+  UNavailable).}
+
+  \item{E}{is expected time in each state (state 1 in
+  UNavailable).}
+}
+\description{
+  Calculates proportion of time an animal with a Markov
+  availability process is available.
+}
+\details{
+  If \code{E} is NULL, uses Pi to calculate proportion of
+  time available, else uses \code{E}.
+}
+

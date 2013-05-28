@@ -1,0 +1,17 @@
+\name{is.nullmodel}
+\alias{is.nullmodel}
+\title{Decides if model is a null model.}
+\usage{
+  is.nullmodel(models)
+}
+\arguments{
+  \item{models}{list of characters with elements \code{$y}
+  and \code{$x} specifying y- and x-covariate models.
+  Either \code{NULL} or regression model format (without
+  response on left).}
+}
+\description{
+  Logical function: true if \code{models} includes no
+  covariates
+}
+

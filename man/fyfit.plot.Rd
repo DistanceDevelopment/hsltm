@@ -1,0 +1,39 @@
+\name{fyfit.plot}
+\alias{fyfit.plot}
+\title{Plotting pdf of forward detection distances.}
+\usage{
+  fyfit.plot(hmmlt, values = TRUE, breaks = NULL,
+    allx = FALSE, nys = 250, xlab = "Forward distance (y)",
+    ylab = "pdf(y)", main = "", ylim = NULL, theta.b = 90)
+}
+\arguments{
+  \item{hmmlt}{object produced by \code{\link{est.hmltm}}.}
+
+  \item{values}{If TRUE, returns function values used in
+  plot.}
+
+  \item{breaks}{histogram break points.}
+
+  \item{allx}{If TRUE, returns matrix with p(see at y,
+  given x) for each x in data in hmmlt (dashed gray
+  lines).}
+
+  \item{nys}{number of y-values to use in plotting, spaced
+  equally from 0 to \code{hmmlt$fitsurvey.pars$ymax}.}
+
+  \item{xlab}{x-axis label.}
+
+  \item{ylab}{y-axis label.}
+
+  \item{main}{title.}
+
+  \item{ylim}{y-value limits.}
+
+  \item{theta.b}{REDUNDANT must = 90.}
+}
+\description{
+  Plots pdf of forward detection distances (f(y)) averaged
+  over detectoins on top of forward detection distance
+  distribution.
+}
+

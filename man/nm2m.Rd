@@ -1,0 +1,13 @@
+\name{nm2m}
+\alias{nm2m}
+\title{Converts nm to metres.}
+\usage{
+  nm2m(x)
+}
+\arguments{
+  \item{x}{Distance in nautical miles.}
+}
+\description{
+  Utility function
+}
+

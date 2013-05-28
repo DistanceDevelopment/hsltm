@@ -1,0 +1,13 @@
+\name{inv.logit}
+\alias{inv.logit}
+\title{Inverse logit function.}
+\usage{
+  inv.logit(x)
+}
+\arguments{
+  \item{x}{scalar or .}
+}
+\description{
+  Inverse logit function
+}
+

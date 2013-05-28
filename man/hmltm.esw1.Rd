@@ -1,0 +1,56 @@
+\name{hmltm.esw1}
+\alias{hmltm.esw1}
+\title{Calculates esw from model.}
+\usage{
+  hmltm.esw1(pars, hfun, models, cov, survey.pars,
+    hmm.pars, ID, nx = 100, type = "response",
+    to.x = FALSE, W = NULL)
+}
+\arguments{
+  \item{pars}{parameters (e.g. \code{$fit$par} output from
+  \code{\link{fit.hmltm}})}
+
+  \item{hfun}{detection hazard type (character)}
+
+  \item{models}{list with elements \code{$y} and \code{$x}
+  speficying covariate model (as for
+  \code{\link{est.hstltm}}).}
+
+  \item{cov}{data frame with covariates for detections.}
+
+  \item{survey.pars}{survey pars list (as for
+  \code{\link{est.hstltm}}).}
+
+  \item{hmm.pars:}{hmm pars list (as for
+  \code{\link{est.hstltm}})}
+
+  \item{ID}{list with elements \code{$stratum},
+  \code{$transect}, \code{$object} - to uniquely identify
+  detections.}
+
+  \item{nx}{number of x values for Simpson's rule
+  integration}
+
+  \item{type}{"response" (default) or "link". If "link",
+  interprets pars as being on link scale, else natural
+  scale}
+
+  \item{to.x}{If TRUE integrates only to observed x, else
+  integrates to W}
+
+  \item{W}{limit of perpendicular dist integration. If
+  NULL, uses \code{survey.pars$W}}
+}
+\description{
+  Calculates effective strip width from fitted model.
+}
+\details{
+  Designed to be called by \code{\link{fitted.esw1}}.
+  Identical to hmltm.esw but returns list instead of
+  numerical scalar or vector. This is to allow it to be
+  used in \code{\link{NDest}} for estimating density and
+  abundance. Returns effective stript width (esw) for 1
+  observer for fitted object \code{hmmlt}, integrating
+  using Simpson's rule.
+}
+

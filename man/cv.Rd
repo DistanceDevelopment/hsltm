@@ -1,0 +1,13 @@
+\name{cv}
+\alias{cv}
+\title{Caclulates coefficient of variation.}
+\usage{
+  cv(x)
+}
+\arguments{
+  \item{x}{Random variable.}
+}
+\description{
+  Utility function
+}
+

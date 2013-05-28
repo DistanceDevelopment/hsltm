@@ -1,0 +1,26 @@
+\name{truncdat}
+\alias{truncdat}
+\title{Distance data truncation.}
+\usage{
+  truncdat(dat, minx = 0, maxx = max(dat$x),
+    twosit = FALSE)
+}
+\arguments{
+  \item{dat}{distance data frame.}
+
+  \item{minx}{perpendicular distance left-truncation
+  point.}
+
+  \item{maxx}{perpendicular distance right-truncation
+  point.}
+
+  \item{twosit}{If TRUE, assumes this is an mrds-type
+  dataset with two lines per detection.}
+}
+\description{
+  Truncates perp dists in data frame dat, inserting
+  effort-only record if truncation removes all detections
+  on a transect. Subtracts left-trunction point off all
+  perp distances - after all truncation.
+}
+

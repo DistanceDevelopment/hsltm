@@ -1,0 +1,42 @@
+\name{negllik.xy}
+\alias{negllik.xy}
+\title{HMM line transect model likelihood.}
+\usage{
+  negllik.xy(b, xy, FUN, models = list(y = NULL, x = NULL),
+    pm, Pi, delta, theta.f, theta.b, W, ymax, dy, nx = 100)
+}
+\arguments{
+  \item{b}{likelihood function parameters.}
+
+  \item{xy}{detections data, including x and y values for
+  each detection, plus any covariates in \code{model}).}
+
+  \item{FUN}{detection hazard function name.}
+
+  \item{models}{model specification, as in
+  \code{\link{est.hmltm}}.}
+
+  \item{pm}{state-dependent Bernoulli parameters.}
+
+  \item{Pi}{Markov model transition probability matrix.}
+
+  \item{delta}{Markov model stationary distribution.}
+
+  \item{theta.f}{REDUNDANT must = 0.}
+
+  \item{theta.b}{REDUNDANT must = 90.}
+
+  \item{W}{perpendicular truncation distance for fitting.}
+
+  \item{ymax}{forward distance by which detection hazard
+  has fallen to zero.}
+
+  \item{dy}{Markov model distance step size.}
+
+  \item{nx}{number of x-values to use in evaluating
+  detection function.}
+}
+\description{
+  Evaluates HMM line transect model likelihood.
+}
+

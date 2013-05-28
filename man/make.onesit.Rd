@@ -1,0 +1,18 @@
+\name{make.onesit}
+\alias{make.onesit}
+\title{Reduces MRDS data frame to CDS data frame.}
+\usage{
+  make.onesit(dat)
+}
+\arguments{
+  \item{dat}{MRDS data frame.}
+}
+\description{
+  Reduces mark-recapture Distance sampling (MRDS) data
+  frame dat, with two lines per detectoin, to a
+  conventional distance sampling (CDS) data frame with a
+  single line per detection. In the case of duplicates
+  ("recaptures"), takes the information from the detection
+  made farthest ahead (i.e. that with larger \code{y}).
+}
+
