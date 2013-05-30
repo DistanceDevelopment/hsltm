@@ -32,7 +32,6 @@ int calls = 0;
 
 //#define P(x) cout << x << endl;
 #define P(x) ;
-#define PP(x) ;
 
 
 #include "function_cache.hpp"
@@ -411,7 +410,6 @@ for(unsigned i = 0; i < n; ++i)
     {
       double hval = h::h(x[i], yi[u], bb);
       
-      PP(x[i] << "," << yi[u] << ",");
       P("," << hval);
 #ifdef NC
       for(int i = 0; i < m; ++i)
@@ -422,7 +420,6 @@ for(unsigned i = 0; i < n; ++i)
       { lambda.at(i,i) = 1 - pcu[i] * hval; }
 #endif
 
-      PP("pi:\\n" << Pi << " lamdba:\\n" << lambda);
 #ifdef NC
       for(int i = 0; i < m; ++i)
       {
@@ -436,18 +433,15 @@ for(unsigned i = 0; i < n; ++i)
       prodB = ( Pi * lambda) * prodB;
 #endif
 
-      PP("prodB update:\\n" << prodB << std::endl);
     }
   }
 
-  PP("prodB: " << std::endl << prodB << std::endl);
 
 #ifdef NC
 
 #else
     lambda.fill(0);
 #endif
-    PP("pdf || ally: " << (cdf || ally) << std::endl);
 
     if(cdf || ally)
     {
@@ -473,8 +467,6 @@ for(unsigned i = 0; i < n; ++i)
     prodB = ( Pi * lambda ) * prodB;
 #endif
 
-    PP("final prodB:" << std::endl << prodB);
-    PP("delta: " << std::endl << arma::rowvec(&*delta.begin(), delta.size(), false));
 
  #ifdef NC
     p[i] = as_scalar(arma::rowvec(&*delta.begin(), delta.size(), false)*prodB);
@@ -482,7 +474,6 @@ for(unsigned i = 0; i < n; ++i)
     p[i] = as_scalar(arma::rowvec(&*delta.begin(), delta.size(), false)*prodB*arma::colvec(&*one.begin(), one.size(), false));
   #endif
 
-    PP("p[" << i << "] = " << p[i] << std::endl);
 
     if(abs(p[i]-1) < 1e-10) p[i]=1; //# very clunky way of dealing with numerical underflow
   // TODO: Investigate p[i]
