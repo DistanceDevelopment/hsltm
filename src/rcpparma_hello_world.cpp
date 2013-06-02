@@ -315,99 +315,92 @@ struct IP_0
 
 vector<double> gety_obs(double x, bool null_yobs, double yobs, double theta_f, double theta_b, double ymax, double dy)
 {
-              double maxy=-999, miny=-999;
-              if(theta_f==0) { maxy=ymax; } else { maxy=yfrom_xtheta(x,theta_f); }  //# max y is as enter dectectable pie slice
-                if(theta_b==180) 
-                { miny=-ymax; }
-              else if(theta_b==0)
-              { miny = 0; }
-              else 
-              { miny=yfrom_xtheta(x,theta_b); } //  # min y is as leave dectectable pie slice
-                P("Before nullcheck");
-              if(!null_yobs) { miny = max(miny, yobs); }
+  double maxy=-999, miny=-999;
+  if(theta_f==0) { maxy=ymax; } else { maxy=yfrom_xtheta(x,theta_f); }  //# max y is as enter dectectable pie slice
+  
+  if(theta_b==180) 
+  { miny=-ymax; }
+  else if(theta_b==0)
+  { miny = 0; }
+  else 
+  { miny=yfrom_xtheta(x,theta_b); } //  # min y is as leave dectectable pie slice
+  
+  if(!null_yobs) { miny = max(miny, yobs); }
               // # ensure that ys dont fall short of maxy:
-                if(maxy<=miny) {
-                  // TODO : Is this acceptable?
-                  vector<double> yi;
-                  yi.push_back(miny);
-                  return yi; 
-                  // warning(paste("maxy=",maxy,"<miny=",miny,"; maxy set = miny",sep=""))
-                  // return(miny)
-                }
-              double yrange=maxy-miny;
-              double ndiv=floor(yrange/dy);
-              // TODO: This loop was risky, now re-written
+  if(maxy<=miny) {
+    vector<double> yi;
+    yi.push_back(miny);
+    return yi; 
+  }
+  double yrange=maxy-miny;
+  double ndiv=floor(yrange/dy);
+              // This loop was risky, now re-written
               //  if((yrange-ndiv*dy)>0) maxy=miny+(ndiv+1)*dy;
-              vector<double> yi;
-              yi.reserve(ndiv+1);
-              for(int i = 0; i <= ndiv + 1; ++i)
-              {
-                yi.push_back(miny + i * dy);
-                P(yi.back() << " ");
-              }
-              P("loop done");
-              
-              return yi;
-            }
+  vector<double> yi;
+  yi.reserve(ndiv+1);
+  for(int i = 0; i <= ndiv + 1; ++i)
+  {
+    yi.push_back(miny + i * dy);
+    P(yi.back() << " ");
+  }
+  P("loop done");
+  return yi;
+}
 
 template<typename h>
 void do_pxy(vector<double>& x, vector<double>& y, vector<double>& b, vector<double>& pcu,
             arma::mat& Pi, vector<double>& delta, double ymax, double dy, double theta_f,
             double theta_b, bool ally, bool cdf, vector<double>& p)
 {
-int m = pcu.size();
+  int m = pcu.size();
 
-// stuff for manipulating b:
-int n = x.size();
-int nb = b.size()/n;
-vector <double> bb (nb);
+  // stuff for manipulating b:
+  int n = x.size();
+  int nb = b.size()/n;
 
-vector<double> yi;
+  vector<double> bb (nb);
+  vector<double> yi;
+  vector<double> one(m, 1);
 
-vector<double> one(m, 1);
+  // Only declare these once for efficency
+  arma::vec prodB(m);
+  arma::vec lambda(m);
+  arma::mat pi_mult(m,m);
 
-// Only declare these once!
-
-#define NC
-
-arma::vec prodB(m);
-arma::vec lambda(m);
-arma::mat pi_mult(m,m);
-
-for(unsigned i = 0; i < n; ++i)
-{
-  prodB = one;
-
-  for(unsigned j = 0; j <nb; j++) bb[j] = b[i*nb+j]; // select appropriate row of b
-
-  if(ally) 
-    yi=gety_obs(x[i],true,0,theta_f,theta_b,ymax,dy); // # get ys from min y in view to ymax
-  else
-    yi=gety_obs(x[i],false,y[i],theta_f,theta_b,ymax,dy);
-  
-  int nT = yi.size();
-
-  if(nT > 1)
+  for(unsigned i = 0; i < n; ++i)
   {
+    prodB = one;
 
-    for(int u = nT - 1; u >= 1; --u)
+    for(unsigned j = 0; j <nb; j++) bb[j] = b[i*nb+j]; // select appropriate row of b
+
+    if(ally) 
+      yi=gety_obs(x[i],true,0,theta_f,theta_b,ymax,dy); // # get ys from min y in view to ymax
+    else
+      yi=gety_obs(x[i],false,y[i],theta_f,theta_b,ymax,dy);
+    
+    int nT = yi.size();
+
+    if(nT > 1)
     {
-      double hval = h::h(x[i], yi[u], bb);
-      
-      P("," << hval);
-      for(int i = 0; i < m; ++i)
-        lambda.at(i) = 1 - pcu[i] * hval;
 
-      for(int i = 0; i < m; ++i)
+      for(int u = nT - 1; u >= 1; --u)
       {
-        for(int j = 0; j < m; ++j)
+        double hval = h::h(x[i], yi[u], bb);
+        
+        P("," << hval);
+        for(int i = 0; i < m; ++i)
+          lambda.at(i) = 1 - pcu[i] * hval;
+
+        for(int i = 0; i < m; ++i)
         {
-          pi_mult.at(i,j) = Pi.at(i,j) * lambda(j);
+          for(int j = 0; j < m; ++j)
+          {
+            pi_mult.at(i,j) = Pi.at(i,j) * lambda(j);
+          }
         }
+        prodB = (pi_mult * prodB);
       }
-      prodB = (pi_mult * prodB);
     }
-  }
 
     if(cdf || ally)
     {
@@ -420,21 +413,19 @@ for(unsigned i = 0; i < n; ++i)
       { lambda.at(j,j) = pcu[j] * h::h(x[i], yi[0], bb); }
     }
 
-      for(int t = 0; t < m; ++t)
+    for(int t = 0; t < m; ++t)
+    {
+      for(int j = 0; j < m; ++j)
       {
-        for(int j = 0; j < m; ++j)
-        {
-          pi_mult.at(t,j) = Pi.at(t,j) * lambda(j);
-        }
+        pi_mult.at(t,j) = Pi.at(t,j) * lambda(j);
       }
-      prodB = (pi_mult * prodB);
-
+    }
+    prodB = (pi_mult * prodB);
 
     p[i] = as_scalar(arma::rowvec(&*delta.begin(), delta.size(), false)*prodB);
 
-
     if(abs(p[i]-1) < 1e-10) p[i]=1; //# very clunky way of dealing with numerical underflow
-}
+  }
 
   if(cdf || ally)
   {
@@ -450,6 +441,8 @@ double cpu_start = get_cpu_time();
 
 using namespace std;
 using namespace Rcpp;
+
+// This is just a nice macro we can reuse.
 #define RVAR(type, x) type x; \
 try { x = as<type>(I ## x); } \
 catch(Rcpp::not_compatible& e) \
@@ -461,56 +454,52 @@ catch(Rcpp::not_compatible& e) \
 SEXP bias_p_xy1(SEXP Ix, SEXP Iy, SEXP Ihfun, SEXP Ib, SEXP Ipcu, SEXP IPi, SEXP Idelta, SEXP Iymax, 
 				SEXP Idy, SEXP Itheta_f, SEXP Itheta_b, SEXP Ially, SEXP Icdf)
 {
+  RVAR(vector<double>, x);
 
+  vector<double> y;
+  if(!RObject(Iy).isNULL())
+  { y = as<vector<double> >(Iy); }
 
-RVAR(vector<double>, x);
+  RVAR(string, hfun);
+  RVAR(vector<double>, b);
+  RVAR(vector<double>, pcu);
 
-vector<double> y;
-if(!RObject(Iy).isNULL())
-{ y = as<vector<double> >(Iy); } // RVAR(vector<double>, y);
+  NumericMatrix NMPi = IPi;
 
-RVAR(string, hfun);
-RVAR(vector<double>, b);
-RVAR(vector<double>, pcu);
-// RVAR(vector<vector<double> >, Pi);
+  arma::mat Pi(NMPi.begin(), NMPi.nrow(), NMPi.ncol(), true);
 
-NumericMatrix NMPi = IPi;
+  RVAR(vector<double>, delta);
+  RVAR(double, ymax);
+  RVAR(double, dy);
+  RVAR(double, theta_f);
+  RVAR(double, theta_b);
+  RVAR(bool, ally);
+  RVAR(bool, cdf);
 
-arma::mat Pi(NMPi.begin(), NMPi.nrow(), NMPi.ncol(), true);
+  vector<double> p(x.size());
+  #define DOFUN(Type) do_pxy< Type >(x, y, b, pcu, Pi, delta, ymax, dy, theta_f, theta_b, ally, cdf, p);
 
-RVAR(vector<double>, delta);
-RVAR(double, ymax);
-RVAR(double, dy);
-RVAR(double, theta_f);
-RVAR(double, theta_b);
-RVAR(bool, ally);
-RVAR(bool, cdf);
-
-
-vector<double> p(x.size());
-#define DOFUN(Type) do_pxy< Type >(x, y, b, pcu, Pi, delta, ymax, dy, theta_f, theta_b, ally, cdf, p);
-
-if(hfun == "h.EP1")
-{ DOFUN(EP1); }
-else if(hfun == "h.EP1.0")
-{ DOFUN(EP1_0); }
-else if(hfun == "h.EP1x.0")
-{ DOFUN(EP1x_0); }
-else if(hfun == "h.EP2")
-{ DOFUN(EP2); }
-else if(hfun == "h.EP2.0")
-{ DOFUN(EP2_0); }
-else if(hfun == "h.EP2x.0")
-{ DOFUN(EP2x_0); }
-else if(hfun == "h.IP")
-{ DOFUN(IP); }
-else if(hfun == "h.IP.0")
-{ DOFUN(IP_0); }
-else
-{
-  cout << "Unknown type : " << hfun << endl;
-  exit(0);
-}
+  if(hfun == "h.EP1")
+  { DOFUN(EP1); }
+  else if(hfun == "h.EP1.0")
+  { DOFUN(EP1_0); }
+  else if(hfun == "h.EP1x.0")
+  { DOFUN(EP1x_0); }
+  else if(hfun == "h.EP2")
+  { DOFUN(EP2); }
+  else if(hfun == "h.EP2.0")
+  { DOFUN(EP2_0); }
+  else if(hfun == "h.EP2x.0")
+  { DOFUN(EP2x_0); }
+  else if(hfun == "h.IP")
+  { DOFUN(IP); }
+  else if(hfun == "h.IP.0")
+  { DOFUN(IP_0); }
+  else
+  {
+    cout << "Unknown type : " << hfun << endl;
+    exit(0);
+  }
 
 #ifdef DOTIME
   double cpu_end = get_cpu_time();
