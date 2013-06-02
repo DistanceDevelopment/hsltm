@@ -368,27 +368,15 @@ vector<double> one(m, 1);
 
 // Only declare these once!
 
-//#define NC
+#define NC
 
-
-#ifdef NC
 arma::vec prodB(m);
 arma::vec lambda(m);
 arma::mat pi_mult(m,m);
-#else
-arma::mat prodB(m,m);
-arma::mat lambda(m,m);
-#endif
-
-
 
 for(unsigned i = 0; i < n; ++i)
 {
-#ifdef NC
   prodB = one;
-#else
-  prodB.eye();
-#endif
 
   for(unsigned j = 0; j <nb; j++) bb[j] = b[i*nb+j]; // select appropriate row of b
 
@@ -397,10 +385,6 @@ for(unsigned i = 0; i < n; ++i)
   else
     yi=gety_obs(x[i],false,y[i],theta_f,theta_b,ymax,dy);
   
-//for(int i = 0; i < yi.size(); ++i)
-  //std::cout << yi[i] << " ";
-//std::cout << std::endl;
-
   int nT = yi.size();
 
   if(nT > 1)
@@ -411,16 +395,9 @@ for(unsigned i = 0; i < n; ++i)
       double hval = h::h(x[i], yi[u], bb);
       
       P("," << hval);
-#ifdef NC
       for(int i = 0; i < m; ++i)
         lambda.at(i) = 1 - pcu[i] * hval;
-#else
-      lambda.fill(0);
-      for(int i = 0; i < m; ++i)
-      { lambda.at(i,i) = 1 - pcu[i] * hval; }
-#endif
 
-#ifdef NC
       for(int i = 0; i < m; ++i)
       {
         for(int j = 0; j < m; ++j)
@@ -429,19 +406,8 @@ for(unsigned i = 0; i < n; ++i)
         }
       }
       prodB = (pi_mult * prodB);
-#else
-      prodB = ( Pi * lambda) * prodB;
-#endif
-
     }
   }
-
-
-#ifdef NC
-
-#else
-    lambda.fill(0);
-#endif
 
     if(cdf || ally)
     {
@@ -454,7 +420,6 @@ for(unsigned i = 0; i < n; ++i)
       { lambda.at(j,j) = pcu[j] * h::h(x[i], yi[0], bb); }
     }
 
-#ifdef NC
       for(int t = 0; t < m; ++t)
       {
         for(int j = 0; j < m; ++j)
@@ -463,21 +428,14 @@ for(unsigned i = 0; i < n; ++i)
         }
       }
       prodB = (pi_mult * prodB);
-#else
-    prodB = ( Pi * lambda ) * prodB;
-#endif
 
 
- #ifdef NC
     p[i] = as_scalar(arma::rowvec(&*delta.begin(), delta.size(), false)*prodB);
- #else
-    p[i] = as_scalar(arma::rowvec(&*delta.begin(), delta.size(), false)*prodB*arma::colvec(&*one.begin(), one.size(), false));
-  #endif
 
 
     if(abs(p[i]-1) < 1e-10) p[i]=1; //# very clunky way of dealing with numerical underflow
-  // TODO: Investigate p[i]
 }
+
   if(cdf || ally)
   {
     for(int i = 0; i < p.size(); ++i)
