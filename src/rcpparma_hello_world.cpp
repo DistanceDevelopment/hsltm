@@ -7,6 +7,43 @@ typedef double floattype;
 #include <assert.h>
 #include <RcppArmadillo.h>
 #include <vector>
+#include <string>
+
+// This slightly nasty looking macro provides us a general method
+// of switching between the string names, and types, of the different
+// measurement functions
+
+#define TYPE_DISPATCH(type_string, funct) \
+  if(type_string == "h.EP1") \
+  { funct(EP1); } \
+  else if(type_string == "h.EP1.0") \
+  { funct(EP1_0); } \
+  else if(type_string == "h.EP1x.0") \
+  { funct(EP1x_0); } \
+  else if(type_string == "h.EP2") \
+  { funct(EP2); } \
+  else if(type_string == "h.EP2.0") \
+  { funct(EP2_0); } \
+  else if(type_string == "h.EP2x.0") \
+  { funct(EP2x_0); } \
+  else if(type_string == "h.IP") \
+  { funct(IP); } \
+  else if(type_string == "h.IP.0") \
+  { funct(IP_0); } \
+  else \
+  { \
+    cout << "Unknown type : " << type_string << endl; \
+    exit(0); \
+  }
+
+// This is just a nice macro we can reuse.
+#define RVAR(type, x) type x; \
+try { x = as<type>(I ## x); } \
+catch(Rcpp::not_compatible& e) \
+{ \
+  cout << "Parameter " << #x << " has invalid type!" << endl; \
+  exit(1); \
+}
 
 
 //#define DOTIME
@@ -117,6 +154,8 @@ struct EP1
     return ret;
   }
 };
+
+
 
 struct EP1_0
 {
@@ -313,6 +352,27 @@ struct IP_0
   }
 };
 
+#define GET_TFM(T) v = T::tfm(v)
+#define GET_INVTFM(T) v = T::invtfm(v)
+
+SEXP hsltm_get_tfm(SEXP Iv, SEXP Ifun)
+{
+  RVAR(std::string, fun);
+  RVAR(vector<double>, v);
+  TYPE_DISPATCH(fun, GET_TFM);
+  return wrap(v);
+}
+
+SEXP hsltm_get_invtfm(SEXP Iv, SEXP Ifun)
+{
+  RVAR(std::string, fun);
+  RVAR(vector<double>, v);
+  TYPE_DISPATCH(fun, GET_INVTFM);
+  return wrap(v);
+}
+
+
+
 vector<double> gety_obs(double x, bool null_yobs, double yobs, double theta_f, double theta_b, double ymax, double dy)
 {
   double maxy=-999, miny=-999;
@@ -442,14 +502,7 @@ double cpu_start = get_cpu_time();
 using namespace std;
 using namespace Rcpp;
 
-// This is just a nice macro we can reuse.
-#define RVAR(type, x) type x; \
-try { x = as<type>(I ## x); } \
-catch(Rcpp::not_compatible& e) \
-{ \
-  cout << "Parameter " << #x << " has invalid type!" << endl; \
-  exit(1); \
-}
+
 
 SEXP bias_p_xy1(SEXP Ix, SEXP Iy, SEXP Ihfun, SEXP Ib, SEXP Ipcu, SEXP IPi, SEXP Idelta, SEXP Iymax, 
 				SEXP Idy, SEXP Itheta_f, SEXP Itheta_b, SEXP Ially, SEXP Icdf)
@@ -479,27 +532,10 @@ SEXP bias_p_xy1(SEXP Ix, SEXP Iy, SEXP Ihfun, SEXP Ib, SEXP Ipcu, SEXP IPi, SEXP
   vector<double> p(x.size());
   #define DOFUN(Type) do_pxy< Type >(x, y, b, pcu, Pi, delta, ymax, dy, theta_f, theta_b, ally, cdf, p);
 
-  if(hfun == "h.EP1")
-  { DOFUN(EP1); }
-  else if(hfun == "h.EP1.0")
-  { DOFUN(EP1_0); }
-  else if(hfun == "h.EP1x.0")
-  { DOFUN(EP1x_0); }
-  else if(hfun == "h.EP2")
-  { DOFUN(EP2); }
-  else if(hfun == "h.EP2.0")
-  { DOFUN(EP2_0); }
-  else if(hfun == "h.EP2x.0")
-  { DOFUN(EP2x_0); }
-  else if(hfun == "h.IP")
-  { DOFUN(IP); }
-  else if(hfun == "h.IP.0")
-  { DOFUN(IP_0); }
-  else
-  {
-    cout << "Unknown type : " << hfun << endl;
-    exit(0);
-  }
+
+
+  TYPE_DISPATCH(hfun, DOFUN)
+
 
 #ifdef DOTIME
   double cpu_end = get_cpu_time();

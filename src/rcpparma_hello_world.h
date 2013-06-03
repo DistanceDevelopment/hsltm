@@ -12,4 +12,8 @@ RcppExport SEXP bias_p_xy1(SEXP Ix, SEXP Iy, SEXP Ihfun, SEXP Ib, SEXP Ipcu, SEX
 RcppExport SEXP bias_gety_obs(SEXP Ix, SEXP Inull_yobs, SEXP Iyobs, SEXP Itheta_f,
                               SEXP Itheta_b, SEXP Iymax, SEXP Idy);
 
+RcppExport SEXP hsltm_get_tfm(SEXP Istype, SEXP Iv);
+
+RcppExport SEXP hsltm_get_invtfm(SEXP Istype, SEXP Iv);
+
 #endif

@@ -43,6 +43,15 @@ p.xy1 <- function(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, It
   .Call( "bias_p_xy1", Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b, Ially, Icdf, PACKAGE = "hsltm" )
 }
 
+tfm <- function(x,y) {
+  .Call("hsltm_get_tfm", x, y, PACKAGE = "hsltm" )
+}
+
+invtfm <- function(x,y) {
+  .Call("hsltm_get_invtfm", x, y, PACKAGE = "hsltm" )
+}
+
+
 
 #---------------------  End C++ functions --------------------
 #                      -------------------
@@ -988,47 +997,6 @@ invtfm.IP.0=function(b) return(exp(b))
 d.dp.IP.0=function(b) return(exp(b))
                                                          
 
-#' @title Parameter transformation function for all models.
-#'
-#' @description
-#'  Parameter transformation for all models
-#'  
-#' @param par parameters on original scale.
-#' @param fun detection hazard function name.
-tfm=function(par,fun)
-{
-  switch(fun,
-         h.EP1=tfm.EP1(par),
-         h.EP1.0=tfm.EP1.0(par),
-         h.EP1x.0=tfm.EP1x.0(par),
-         h.EP2=tfm.EP2(par),
-         h.EP2.0=tfm.EP2.0(par),
-         h.EP2x.0=tfm.EP2x.0(par),
-         h.IP=tfm.IP(par),
-         h.IP.0=tfm.IP.0(par),
-  )
-}
-
-#' @title Parameter inverse transformation function for all models.
-#'
-#' @description
-#'  Parameter inverse transformation for all models.
-#'  
-#' @param b parameters on transformed scale
-#' @param fun detection hazard function name.
-invtfm=function(b,fun)
-{
-  switch(fun,
-         h.EP1=invtfm.EP1(b),
-         h.EP1.0=invtfm.EP1.0(b),
-         h.EP1x.0=invtfm.EP1x.0(b),
-         h.EP2=invtfm.EP2(b),
-         h.EP2.0=invtfm.EP2.0(b),
-         h.EP2x.0=invtfm.EP2x.0(b),
-         h.IP=invtfm.IP(b),
-         h.IP.0=invtfm.IP.0(b),
-  )
-}
 
 
 #' @title Parameter dreivative function for all models.
