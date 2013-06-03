@@ -32,18 +32,11 @@ typedef double floattype;
   { funct(IP_0); } \
   else \
   { \
-    cout << "Unknown type : " << type_string << endl; \
-    exit(0); \
+    throw std::runtime_error("Unrecognised hazard function name"); \
   }
 
 // This is just a nice macro we can reuse.
-#define RVAR(type, x) type x; \
-try { x = as<type>(I ## x); } \
-catch(Rcpp::not_compatible& e) \
-{ \
-  cout << "Parameter " << #x << " has invalid type!" << endl; \
-  exit(1); \
-}
+#define RVAR(type, x) type x = as<type>(I ## x); 
 
 
 //#define DOTIME
@@ -357,18 +350,22 @@ struct IP_0
 
 SEXP hsltm_get_tfm(SEXP Iv, SEXP Ifun)
 {
+BEGIN_RCPP
   RVAR(std::string, fun);
   RVAR(vector<double>, v);
   TYPE_DISPATCH(fun, GET_TFM);
   return wrap(v);
+END_RCPP
 }
 
 SEXP hsltm_get_invtfm(SEXP Iv, SEXP Ifun)
 {
+BEGIN_RCPP
   RVAR(std::string, fun);
   RVAR(vector<double>, v);
   TYPE_DISPATCH(fun, GET_INVTFM);
   return wrap(v);
+END_RCPP
 }
 
 
@@ -507,6 +504,7 @@ using namespace Rcpp;
 SEXP bias_p_xy1(SEXP Ix, SEXP Iy, SEXP Ihfun, SEXP Ib, SEXP Ipcu, SEXP IPi, SEXP Idelta, SEXP Iymax, 
 				SEXP Idy, SEXP Itheta_f, SEXP Itheta_b, SEXP Ially, SEXP Icdf)
 {
+BEGIN_RCPP
   RVAR(vector<double>, x);
 
   vector<double> y;
@@ -548,11 +546,13 @@ SEXP bias_p_xy1(SEXP Ix, SEXP Iy, SEXP Ihfun, SEXP Ib, SEXP Ipcu, SEXP IPi, SEXP
 #endif
 
   return wrap(p);
+END_RCPP
 }
 
 SEXP bias_gety_obs(SEXP Ix, SEXP Inull_yobs, SEXP Iyobs, SEXP Itheta_f,
                    SEXP Itheta_b, SEXP Iymax, SEXP Idy)
 {
+BEGIN_RCPP
   RVAR(double, x);
   RVAR(bool, null_yobs);
   RVAR(double, yobs);
@@ -563,4 +563,5 @@ SEXP bias_gety_obs(SEXP Ix, SEXP Inull_yobs, SEXP Iyobs, SEXP Itheta_f,
 
   vector<double> p = gety_obs(x,null_yobs,yobs,theta_f,theta_b,ymax,dy);
   return wrap(p);
+END_RCPP
 }
