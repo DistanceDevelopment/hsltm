@@ -43,12 +43,12 @@ p.xy1 <- function(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, It
   .Call( "bias_p_xy1", Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b, Ially, Icdf, PACKAGE = "hsltm" )
 }
 
-tfm <- function(x,y) {
-  .Call("hsltm_get_tfm", x, y, PACKAGE = "hsltm" )
+tfm <- function(b, fun) {
+  .Call("hsltm_get_tfm", b, fun, PACKAGE = "hsltm" )
 }
 
-invtfm <- function(x,y) {
-  .Call("hsltm_get_invtfm", x, y, PACKAGE = "hsltm" )
+invtfm <- function(b, fun) {
+  .Call("hsltm_get_invtfm", b, fun, PACKAGE = "hsltm" )
 }
 
 
