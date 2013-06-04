@@ -2,14 +2,25 @@
 \alias{tfm}
 \title{Parameter transformation function for all models.}
 \usage{
-  tfm(par, fun)
+  tfm(b, fun)
 }
 \arguments{
   \item{par}{parameters on original scale.}
 
-  \item{fun}{detection hazard function name.}
+  \item{fun}{detection hazard function name (character) -
+  see details below.}
 }
 \description{
   Parameter transformation for all models
+}
+\details{
+  Valid detection hazard function names for detection
+  hazards with certain detection at radial distance zero
+  are "h.EP1.0", "h.EP1x.0", "h.EP2.0", "h.EP2x.0",
+  "h.IP.0". #' Transformations are: \describe{
+  \item{h.EP1.0}{log transform} \item{h.EP1x.0}{log
+  transform} \item{h.EP2.0}{log transform}
+  \item{h.EP2x.0}{log transform} \item{h.IP.0}{log
+  transform} }
 }
 

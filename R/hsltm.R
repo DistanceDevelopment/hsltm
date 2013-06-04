@@ -43,10 +43,48 @@ p.xy1 <- function(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, It
   .Call( "bias_p_xy1", Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b, Ially, Icdf, PACKAGE = "hsltm" )
 }
 
+#' @title Parameter transformation function for all models.
+#'
+#' @description
+#'  Parameter transformation for all models
+#'  
+#' @param par parameters on original scale.
+#' @param fun detection hazard function name (character) - see details below.
+#' 
+#' @details
+#' Valid detection hazard function names for detection hazards with certain detection at radial
+#' distance zero are "h.EP1.0", "h.EP1x.0", "h.EP2.0", "h.EP2x.0", "h.IP.0".
+#' #' Transformations are:
+#' \describe{
+#' \item{h.EP1.0}{log transform}
+#' \item{h.EP1x.0}{log transform}
+#' \item{h.EP2.0}{log transform}
+#' \item{h.EP2x.0}{log transform}
+#' \item{h.IP.0}{log transform}
+#' }
 tfm <- function(b, fun) {
   .Call("hsltm_get_tfm", b, fun, PACKAGE = "hsltm" )
 }
 
+#' @title Parameter inverse transformation function for all models.
+#'
+#' @description
+#'  Parameter inverse transformation for all models.
+#'  
+#' @param b parameters on transformed scale
+#' @param fun detection hazard function name (character) - see details below.
+#'  
+#' @details
+#' Valid detection hazard function names for detection hazards with certain detection at radial
+#' distance zero are "h.EP1.0", "h.EP1x.0", "h.EP2.0", "h.EP2x.0", "h.IP.0".
+#' Inverse transformations are:
+#' \describe{
+#' \item{h.EP1.0}{exponential}
+#' \item{h.EP1x.0}{exponential}
+#' \item{h.EP2.0}{exponential}
+#' \item{h.EP2x.0}{exponential}
+#' \item{h.IP.0}{exponential}
+#' }
 invtfm <- function(b, fun) {
   .Call("hsltm_get_invtfm", b, fun, PACKAGE = "hsltm" )
 }
@@ -708,21 +746,13 @@ logit=function(p) return(log(p/(1-p)))  # returns logit of p
 #' @param x scalar or .
 inv.logit=function(x) return(1/(1+exp(-x))) # returns p from x=(logit of p)
 
-#' @title Derivative of inverse logit function with respect to arguments.
-#'
-#' @description
-#'  Derivative of inverse logit function
-#'  
-#' @param x scalar or vector.
-d.dx.inv.logit=function(x) return(exp(-x)/(1+exp(-x))^2) # dervivative of inverse logit w.r.t. x=logit(p)
-
 #--------------------- End DLB's utility functions --------------------
 #                      ---------------------------
 
 
 #                        --------------------------------
 #----------------------- Start detection hazard functions --------------------------------------
-
+#                      (C++ code makes this all redundant)
 
 #h.EP1=function(x,y,b)
   #----------------------------------------------------------
@@ -733,29 +763,8 @@ d.dx.inv.logit=function(x) return(exp(-x)/(1+exp(-x))^2) # dervivative of invers
 #  par=invtfm.EP1(b)
 #  return(par[1]*exp(-(abs(x)^par[2] + y^par[2])/(par[3]^par[2])))
 #}
-
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param par.
-tfm.EP1=function(par) return(c(logit(par[1]),log(par[2:3]))) # Transforms EP1 parameters from natural to link scale
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param b.
-invtfm.EP1=function(b) return(c(inv.logit(b[1]),exp(b[2:3]))) # Transforms EP1 parameters from link to natural scale
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivatives
-#'  
-#' @param b.
-d.dp.EP1=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:3]))) # Returns derivative w.r.t p of link functions at parameter estimates (parameters on link scale)
-
+#tfm.EP1=function(par) return(c(logit(par[1]),log(par[2:3]))) # Transforms EP1 parameters from natural to link scale
+#invtfm.EP1=function(b) return(c(inv.logit(b[1]),exp(b[2:3]))) # Transforms EP1 parameters from link to natural scale
 
 #h.EP1.0=function(x,y,b)
   #----------------------------------------------------------
@@ -766,30 +775,8 @@ d.dp.EP1=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:3]))) # Returns deriv
 #  par=invtfm.EP1.0(b)
 #  return(exp(-(abs(x)^par[1] + abs(y)^par[1])/(par[2]^par[1])))
 #}
-
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param par.
-tfm.EP1.0=function(par) return(log(par))
-#' @title Parameter inverse transformation function.
-#'
-#' @description
-#'  Parameter inverse transformation
-#'  
-#' @param b.
-invtfm.EP1.0=function(b) return(exp(b))
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivative
-#'  
-#' @param b.
-d.dp.EP1.0=function(b) return(exp(b))
-
-
+#tfm.EP1.0=function(par) return(log(par))
+#invtfm.EP1.0=function(b) return(exp(b))
 
 #h.EP1x.0=function(x,y,b)
   #----------------------------------------------------------
@@ -802,30 +789,8 @@ d.dp.EP1.0=function(b) return(exp(b))
 #  par=invtfm.EP1x.0(b)
 #  return(exp(-((abs(x)/par[3])^par[1] + (abs(y)/par[2])^par[1])))
 #}
-
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param various.
-tfm.EP1x.0=function(par) return(log(par))
-#' @title Parameter inverse transformation function.
-#'
-#' @description
-#'  Parameter inverse transformation
-#'  
-#' @param various.
-invtfm.EP1x.0=function(b) return(exp(b))
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivative
-#'  
-#' @param various.
-d.dp.EP1x.0=function(b) return(exp(b))
-
-
+#tfm.EP1x.0=function(par) return(log(par))
+#invtfm.EP1x.0=function(b) return(exp(b))
 
 #h.EP2=function(x,y,b)
   #----------------------------------------------------------
@@ -836,30 +801,8 @@ d.dp.EP1x.0=function(b) return(exp(b))
 #  par=invtfm.EP2(b)
 #  return(par[1]*exp(-((abs(x)/par[4])^par[2] + (abs(y)/par[4])^par[3])))
 #}
-
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param various.
-tfm.EP2=function(par) return(c(logit(par[1]),log(par[2:4])))
-#' @title Parameter inverse transformation function.
-#'
-#' @description
-#'  Parameter inverse transformation
-#'  
-#' @param various.
-invtfm.EP2=function(b) return(c(inv.logit(b[1]),exp(b[2:4])))
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivative
-#'  
-#' @param various.
-d.dp.EP2=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:4])))
-
-
+#tfm.EP2=function(par) return(c(logit(par[1]),log(par[2:4])))
+#invtfm.EP2=function(b) return(c(inv.logit(b[1]),exp(b[2:4])))
 
 #h.EP2.0=function(x,y,b)
   #----------------------------------------------------------
@@ -870,30 +813,8 @@ d.dp.EP2=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:4])))
 #  par=invtfm.EP2.0(b)
 #  return(exp(-((abs(x)/par[3])^par[1] + (abs(y)/par[3])^par[2])))
 #}
-
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param various.
-tfm.EP2.0=function(par) return(log(par))
-#' @title Parameter inverse transformation function.
-#'
-#' @description
-#'  Parameter inverse transformation
-#'  
-#' @param various.
-invtfm.EP2.0=function(b) return(exp(b))
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivative
-#'  
-#' @param various.
-d.dp.EP2.0=function(b) return(exp(b))
-                                                            
-
+#tfm.EP2.0=function(par) return(log(par))
+#invtfm.EP2.0=function(b) return(exp(b))
 
 #h.EP2x.0=function(x,y,b)
   #----------------------------------------------------------
@@ -906,31 +827,8 @@ d.dp.EP2.0=function(b) return(exp(b))
 #  par=invtfm.EP2x.0(b)
 #  return(exp(-((abs(x)/par[4])^par[1] + (abs(y)/par[3])^par[2])))
 #}
-
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param various.
-tfm.EP2x.0=function(par) return(log(par))
-#' @title Parameter inverse transformation function.
-#'
-#' @description
-#'  Parameter inverse transformation
-#'  
-#' @param various.
-invtfm.EP2x.0=function(b) return(exp(b))
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivative
-#'  
-#' @param various.
-d.dp.EP2x.0=function(b) return(exp(b))
-
-
-
+#tfm.EP2x.0=function(par) return(log(par))
+#invtfm.EP2x.0=function(b) return(exp(b))
 
 #h.IP=function(x,y,b)
   #----------------------------------------------------------
@@ -941,30 +839,9 @@ d.dp.EP2x.0=function(b) return(exp(b))
 #  par=invtfm.IP(b)
 #  return(par[1]*exp(par[2]*log(par[3])-(par[2]/2)*log(par[3]^2+x^2+y^2)))
 #}
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param various.
-tfm.IP=function(par) return(c(logit(par[1]),log(par[2:3])))
-#' @title Parameter inverse transformation function.
-#'
-#' @description
-#'  Parameter inverse transformation
-#'  
-#' @param various.
-invtfm.IP=function(b) return(c(inv.logit(b[1]),exp(b[2:3])))
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivative
-#'  
-#' @param various.
-d.dp.IP=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:3])))
+#tfm.IP=function(par) return(c(logit(par[1]),log(par[2:3])))
+#invtfm.IP=function(b) return(c(inv.logit(b[1]),exp(b[2:3])))
                                                             
-
-
 #h.IP.0=function(x,y,b)
   #----------------------------------------------------------
   # Detection hazard function prob(detect | available at x,y).
@@ -974,52 +851,33 @@ d.dp.IP=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:3])))
 #  par=invtfm.IP.0(b)
 #  return(exp(par[1]*log(par[2])-(par[1]/2)*log(par[2]^2+x^2+y^2)))
 #}
-#' @title Parameter transformation function.
-#'
-#' @description
-#'  Parameter transformation
-#'  
-#' @param various.
-tfm.IP.0=function(par) return(log(par))
-#' @title Parameter inverse transformation function.
-#'
-#' @description
-#'  Parameter inverse transformation
-#'  
-#' @param various.
-invtfm.IP.0=function(b) return(exp(b))
-#' @title Parameter derivative function.
-#'
-#' @description
-#'  Parameter derivative
-#'  
-#' @param various.
-d.dp.IP.0=function(b) return(exp(b))
-                                                         
+#tfm.IP.0=function(par) return(log(par))
+#invtfm.IP.0=function(b) return(exp(b))
 
+# Derivative stuff below from earlier version: now redundant
+#dinvt.dpar=function(b,fun)
+#{
+#  switch(fun,
+#         h.EP1=d.dp.EP1(b),
+#         h.EP1.0=d.dp.EP1.0(b),
+#         h.EP1x.0=d.dp.EP1x.0(b),
+#         h.EP2=d.dp.EP2(b),
+#         h.EP2.0=d.dp.EP2.0(b),
+#         h.EP2x.0=d.dp.EP2x.0(b),
+#         h.IP=d.dp.IP(b),
+#         h.IP.0=d.dp.IP.0(b),
+#  )
+#}
+#d.dp.EP1=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:3]))) # Returns derivative w.r.t p of link functions at parameter estimates (parameters on link scale)
+#d.dp.EP1.0=function(b) return(exp(b))
+#d.dp.EP1x.0=function(b) return(exp(b))
+#d.dp.EP2=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:4])))
+#d.dp.EP2.0=function(b) return(exp(b))
+#d.dp.EP2x.0=function(b) return(exp(b))
+#d.dp.IP=function(b) return(c(d.dx.inv.logit(b[1]),exp(b[2:3])))
+#d.dp.IP.0=function(b) return(exp(b))
 
-
-#' @title Parameter dreivative function for all models.
-#'
-#' @description
-#'  Parameter derivatives for all models.
-#'  
-#' @param b parameters on transformed scale
-#' @param fun detection hazard function name.
-dinvt.dpar=function(b,fun)
-{
-  switch(fun,
-         h.EP1=d.dp.EP1(b),
-         h.EP1.0=d.dp.EP1.0(b),
-         h.EP1x.0=d.dp.EP1x.0(b),
-         h.EP2=d.dp.EP2(b),
-         h.EP2.0=d.dp.EP2.0(b),
-         h.EP2x.0=d.dp.EP2x.0(b),
-         h.IP=d.dp.IP(b),
-         h.IP.0=d.dp.IP.0(b),
-  )
-}
-
+#d.dx.inv.logit=function(x) return(exp(-x)/(1+exp(-x))^2) # dervivative of inverse logit w.r.t. x=logit(p)
 
 #----------------------- End detection hazard functions --------------------------------------
 #                        ------------------------------

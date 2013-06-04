@@ -7,9 +7,19 @@
 \arguments{
   \item{b}{parameters on transformed scale}
 
-  \item{fun}{detection hazard function name.}
+  \item{fun}{detection hazard function name (character) -
+  see details below.}
 }
 \description{
   Parameter inverse transformation for all models.
+}
+\details{
+  Valid detection hazard function names for detection
+  hazards with certain detection at radial distance zero
+  are "h.EP1.0", "h.EP1x.0", "h.EP2.0", "h.EP2x.0",
+  "h.IP.0". Inverse transformations are: \describe{
+  \item{h.EP1.0}{exponential} \item{h.EP1x.0}{exponential}
+  \item{h.EP2.0}{exponential} \item{h.EP2x.0}{exponential}
+  \item{h.IP.0}{exponential} }
 }
 
