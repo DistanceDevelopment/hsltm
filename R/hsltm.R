@@ -1083,25 +1083,22 @@ h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx
   }
 }
 
-#' @title Survivor function plotting.
+#' @title detection function plotting.
 #'
 #' @description
-#' Plots contours of (1- the survivor function) with HMM availbility pars (Pi, pm) and 
-#' detection hazard hfun(x,y,b,...).
+#' Plots the detection function (1- the survivor function) of a fitted model in two dimensions.
 #'  
-#' @param hfun detection hazard function name
-#' @param dat data frame.
-#' @param models model list, as for \code{\link{est.hmltm}} for example.
-#' @param pm state-dependent Bernoulli parameter values.
-#' @param Pi Markov chain transition probability matrix.
-#' @param delta stationary distribution of \code{Pi}.
-#' @param ymax a forward distance beyond which things can't be detected.
+#' @param hmltm output from \code{\link{est.hmltm}}
+#' @param obs row (observation) in data to use in plotting
+#' @param new.ymax a forward distance beyond which things can't be detected (used to override the 
+#' ymax already in \code{hmltm}).
+#' @param new.pars model parameter vector  (used to override the pars already in \code{hmltm}).
 #' @param theta.f REDUNDANT must = 0.
 #' @param theta.b REDUNDANT must = 90.
 #' @param xrange range of x-axis.
 #' @param yrange range of y-axis.
-#' @param nx number of points on x-axis at which to evaluate detection hazard function.
-#' @param ny number of points on y-axis at which to evaluate detection hazard function.
+#' @param nx number of points on x-axis at which to evaluate detection function.
+#' @param ny number of points on y-axis at which to evaluate detection function.
 #' @param xlab x label.
 #' @param ylab y label.
 #' @param type "contour", "persp", "image" or "both" (for image and contour).
@@ -1112,14 +1109,29 @@ h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx
 #' @param theta argument for \code{\link{image}}.
 #' @param phi argument for \code{\link{image}}.
 #' @param zlab label in z-dimension for persp plots
-#' @param values If TRUE, returns hazard function values on nx by by grid.
-#' @param ... other arguments to image, contour or persp.
-f.plot=function(hfun,pars,dat=NULL, models=NULL,pm,Pi,delta,ymax,dy,theta.f=0,theta.b=90,
-                xrange=c(0,50),yrange=xrange,nx=50,ny=nx,
+#' @param values If TRUE, returns hazard function values on nx by ny grid.
+#' @param ... other arguments to \code{\link{image}}, \code{\link{contour}} or \code{\link{persp}}.
+f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=NULL,
+                theta.f=0,theta.b=90,
+                xrange=c(0,max(hmltm$hmltm.fit$xy$x)),yrange=c(0,1.5*max(hmltm$hmltm.fit$xy$y)),
+                nx=50,ny=nx,
                 xlab="Perpendicular distance",ylab="Forward distance",type="contour",
                 nlevels=20,add=FALSE,col="black",logscale=FALSE,theta=90,phi=35,
                 zlab="pdf of first detections",values=FALSE,...)
-{
+  {
+  hfun=hmltm$hmltm.fit$h.fun
+  pars=hmltm$hmltm.fit$fit$par
+  dat=hmltm$hmltm.fit$xy
+  models=hmltm$hmltm.fit$models
+  Pi=hmltm$hmltm.fit$fitpars$hmm.pars$Pi
+  pm=hmltm$hmltm.fit$fitpars$hmm.pars$pm
+  delta=hmltm$hmltm.fit$fitpars$hmm.pars$delta
+  ymax=hmltm$hmltm.fit$fitpars$survey.pars$ymax
+  dy=hmltm$hmltm.fit$fitpars$survey.pars$dy
+  xmax=hmltm$hmltm.fit$fitpars$survey.pars$W
+  if(!is.null(new.pars)) pars=new.pars
+  if(!is.null(new.ymax)) ymax=new.ymax
+  
   if(type!="persp" & type!="both" & type!="contour" & type!="image") stop("Agrument `type' must be `persp', `contour', `image'or `both' (for contour on image).")
 #  if(max(xrange)>ymax) {
 #    ymax=max(xrange)+dy
@@ -1132,9 +1144,9 @@ f.plot=function(hfun,pars,dat=NULL, models=NULL,pm,Pi,delta,ymax,dy,theta.f=0,th
 #  h=match.fun(hfun)
   b=tfm(pars,hfun)
   nb=length(b)
-  n=dim(dat)[1]
+  n=dim(dat[obs,])[1]
   if(n>1) {
-    warning("Only allowed to plot at one level of dat. Only using first row of dat")
+    warning("Only allowed to plot at one level of covariates. Only using first row of dat[obs,]")
     dat=dat[1,]
     n=1
   }
@@ -1541,7 +1553,7 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,thet
 
 
 
-#' @title Calculates probability of observing animal at (x,y).
+#' @title Calculates probability of first observing animal at (x,y).
 #'
 #' @description
 #' Just calls p.xy1 >= once, cycling through 3rd index of Pi and 2nd indices of pm and delta.
@@ -1639,11 +1651,22 @@ hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
 #' @title Calculates a bunch of derived statistics from model.
 #'
 #' @description
-#' Calculates a bunch of derived statistics from model.
+#' Calculates a one of a variety of derived statistics from model (see below).
 # 
-#' @param stat.
-#' @param hmmlt.
-#' @param obs.
+#' @param stat the statistic name (character variable).
+#' @param hmmlt the model (as ouput by \code{\link{est.hmltm}}.
+#' @param obs indices of rows of \code{hmmlt$xy} (i.e. which observations) to use in calculating 
+#' the statistics.
+#' 
+#' @details
+#' The following are the options for argument \code{stat}:
+#' \describe{
+#' \item{esw:}{effective strip width estimate.}
+#' \item{invesw:}{inverse effective strip width estimate.}
+#' \item{p0:}{estimated probability of detection at perpendicular distance zero.}
+#' \item{p:}{estimated mean probability of detection.}
+#' \item{invp:}{estimated inverse mean probability of detection.}
+#' }
 calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
   if(stat=="esw") {return(fitted.esw(hmmlt,obs))}
   else if(stat=="invesw") {return(fitted.invesw(hmmlt,obs))}
@@ -1659,20 +1682,23 @@ calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
 #' @description
 #' Calculates fitted values, p(x) for given observations, from model (optionally at given x-value).
 # 
-#' @param hmmlt.
-#' @param obs.
-#' @param at.x.
-#' @param ny.
-#' 
+#' @param hmmlt output from \code{\link{fit.hmltm}}
+#' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#' @param at.x values at which to evaluate p(x) - see below.
+#' @param ny number of y-values (forward distance values) to use in calculation.
 #' @details 
-#' If hmmlt$models is NULL and
-#'   at.x is NULL  : returns vector of values of p(x=hmmlt$xy$x[obs]) if obs given,
-#'                   or vector of values of p(x=hmmlt$xy$x) if obs not given;
-#'   at.x specified: returns vector of values of p(x=at.x).
-#' If hmmlt$models is not NULL and
-#'   at.x is NULL  : returns vector of values of p_obs[i](x=hmmlt$xy$x[j]) if obs given,
-#'                   or vector of values of p_i(x=hmmlt$xy$x[j]) for all i if obs not given;
-#'   at.x specified: as when at.x is NULL, but with x=at.x instead of hmmlt$xy$x.
+#' If \code{hmmlt$models} is NULL and
+#' \describe{
+#'   \item{at.x is NULL}{returns vector of values of p(x=hmmlt$xy$x[obs]) if obs given, or vector 
+#'   of values of p(x=hmmlt$xy$x) if obs not given;}
+#'   \item{at.x is specified}{returns vector of values of p(x=at.x).}
+#' }
+#' If \code{hmmlt$models} is not NULL and
+#' \describe{
+#'   \item{at.x is NULL}{returns vector of values of p_obs[i](x=hmmlt$xy$x[j]) if obs given, or 
+#'   vector of values of p_i(x=hmmlt$xy$x[j]) for all i if obs not given;}
+#'   \item{at.x is specified}{as when at.x is NULL, but with x=at.x instead of hmmlt$xy$x.}
+#'}
 fitted.px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL,ny=100){
   cov=hmmlt$xy
   if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
@@ -1736,9 +1762,9 @@ fitted.invp=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @description
 #' Calculates E[1/esw] from model.
 # 
-#' @param hmmlt.
-#' @param obs.
-#' @param nx.
+#'  @param hmmlt output from fit.hmltm()
+#'  @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#'  @param nx number of x values to use to implement Simpson's rule in perp dist dimension;
 fitted.invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
   return(1/fitted.esw(hmmlt,obs,nx))
 }
@@ -1748,25 +1774,18 @@ fitted.invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @description
 #' Calculates esw from model.
 # 
-#' @param hmmlt.
-#' @param obs.
-#' @param nx.
-#' @param to.x.
-#' @param all.
+#'  @param hmmlt output from \code{\link{fit.hmltm}}
+#'  @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#'  @param b parameters (on link scale) at which to evaluate mu. If NULL, uses parameter estimates 
+#'  in hmmlt
+#'  @param nx number of x values to use to implement Simpson's rule in perp dist dimension;
+#'  @param to.x If TRUE integrates only to observed x, else integrates to W
+#'  @param all If TRUE then returns esw for every observation, else returns only that for first obs 
+#'  if there are no covariates; always returns esw for every observation if there are covariates.
 #' 
 #' @details 
-#' Calls hmltm.esw to calclate effective stript width (esw) for fitted object hmmlt.
+#' Calls \code{\link{hmltm.esw}} to calclate effective stript width (esw) for fitted object \code{hmmlt}.
 #
-#' Input: 
-#'  hmmlt: output from fit.hmltm()
-#'  obs  : observations (row numbers of hmmlt$xy) for which to calculate esw 
-#'  b    : parameters (on link scale) at which to evaluate mu. If NULL, uses parameter
-#'         estimates in hmmlt
-#'  nx   : number of x values to use to implement Simpson's rule in perp dist dimension;
-#'  to.x : If TRUE integrates only to observed x, else integrates to W
-#'  all  : If TRUE then returns esw for every observation, else returns only that for
-#'         first obs if there are no covariates; always returns esw for every observation
-#'         if there are covariates.
 fitted.esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
   if(!is.null(obs)){
     if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
@@ -2439,8 +2458,8 @@ est.hmltm=function(dat,
 #' @description
 #' Produces summarry of bootstrap results, in a list
 #' 
-#' @param bests  : output from bs.hmltm().
-#' @param cilevel: confidence level for confidence intervals by percentile method  
+#' @param bests output from \code{\link{bs.hmltm}}.
+#' @param cilevel confidence level for confidence intervals by percentile method. 
 #'
 #' @return Returns a list with elements as follows for each statistic in \code{bests}:
 #' \itemize{
@@ -2510,7 +2529,17 @@ bootsum=function(bests,cilevel=0.95){
 #' @seealso \code{\link{bootsum}} summarises output from this function.
 #' 
 #' @details
-#' If 
+#' If \code{fixed.avail}=FALSE, then: (1) IF \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Et} is not 
+#' \code{NULL}, the availability process is bootstrapped by drawing pairs of mean times available 
+#' (Ea) and unavailable (Eu) from a bivariate lognormal distribution with mean 
+#' \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Et} and standard deviation 
+#' \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Sigma.Et} and converting this to Markov Model transition
+#' probability matrix parameters using \code{\link{MakePi}}, ELSE IF \code{hmm.pars.bs} is not 
+#' \code{NULL}, random samples with replacement, of HMM parameter sets are taken from 
+#' \code{hmm.pars.bs}.
+#' 
+#' @seealso \code{\link{hmmpars.boot}}, which is is used to generate \code{\link{hmm.pars.bs}}.
+#' 
 bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.avail=FALSE){
   #------------------------------------------------------------------------------------------
   # Produces 3-dim array containing B sets of density and abundance estimates from
@@ -2624,11 +2653,6 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
 #' @param mu multivariate logNormal distribution variace-covarice matrix.
 #' 
 Npars.from.lNpars=function(mu,Sigma){
-  #-------------------------------------------------------------------------------
-  # Returns mean and covariance matrix of multivariate normal random variables 
-  # which, when logged generate lognormal random variables with mean mu and 
-  # covariance matrix Sigma, 
-  #-------------------------------------------------------------------------------
   cv2=diag(Sigma)/mu^2 # Sigma is variance matrix
   logvar=log(cv2+1)
   logmu=log(mu)-logvar/2
@@ -2664,9 +2688,9 @@ Npars.from.lNpars=function(mu,Sigma){
 #' @param printprog if TRUE, prints progress through animals as it resamples.
 #'
 #' @details
-#' Simulates a new series of availability observations (0s and 1s) using functions \code{\link{dthmm}} 
-#' and \code{\link{simulate}} from library \code{\link{HiddenMarkov}}, then fits a HMM to these data
-#' using function \code{\link{BaumWelch}} from library \code{\link{HiddenMarkov}}. Constructs a new 
+#' Simulates a new series of availability observations (0s and 1s) using functions \code{dthmm} 
+#' and \code{simulate} from library \code{\link{HiddenMarkov}}, then fits a HMM to these data
+#' using function \code{BaumWelch} from library \code{\link{HiddenMarkov}}. Constructs a new 
 #' hmm.pars object from the fitted HMM parameters.
 #' 
 #' @return A list with the same format as the input \code{availhmm}
@@ -2734,7 +2758,7 @@ vectorize.hmmpars=function(hmmpars) {
 #' 
 #' @param hv vector that was vectorised using \code{\link{vectorize.hmmpars}}.
 #' 
-#' @return A hmm.pars object.
+#' @return A hmm.pars object (a list).
 unvectorize.hmmpars=function(hv) {
   m3d=hv[1:3]
   m2d=c(m3d[1],m3d[3])
@@ -2764,18 +2788,17 @@ unvectorize.hmmpars=function(hv) {
 #' @param printprog if TRUE prints progress through animals as it resamples.
 #'
 #' @details
-#' Simulates a new series of availability observations (0s and 1s) using functions \code{\link{HiddenMarkov::dthmm}} 
-#' and \code{\link{HiddenMarkov::simulate}} from library \code{\link{HiddenMarkov}}, then fits a HMM to these data
-#' using function \code{\link{HiddenMarkov::BaumWelch}} from library \code{\link{HiddenMarkov}}. Constructs a new 
+#' Simulates a new series of availability observations (0s and 1s) using functions \code{dthmm} 
+#' and \code{simulate} from library \code{\link{HiddenMarkov}}, then fits a HMM to these data
+#' using function \code{BaumWelch} from library \code{\link{HiddenMarkov}}. Constructs a new 
 #' hmm.pars object from the fitted HMM parameters. 
 #' 
 #' Does the above \code{B} times, each time reformtting the hmm.pars object as a vector using 
 #' \code{\link{vectorize.hmm}} and then entering this as the next row in a matrix of dimension 
-#' \code{B}xT, where T is the length of the longest of the vectors in \code{adat}. Rows of the 
-#' matrix that have fewer than T observations are padded with NAs.
+#' \code{B}xT, where T=\code{3+length(animals)*(nstate^2+nstate*2)} and \code{nstate} is the 
+#' number of states in the HMM.
 #' 
-#' @return A matrix of dimension \code{B}xT, where T is the length of the longest of the vectors 
-#' in \code{adat}. Rows of the matrix that have fewer than T observations are padded with NAs.
+#' @return A matrix of dimension \code{B}xT, where T is as described above.
 #' 
 #' @examples
 #' data(bowhead.hmm.pars)
@@ -2786,15 +2809,19 @@ unvectorize.hmmpars=function(hv) {
 hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
   # initialise matrix of correct dimensions:
   na=length(adat)
-  ncol=1
-  for(i in 1:na) if(length(adat[[i]])>ncol) ncol=length(adat[[i]])
+#  ncol=1
+#  for(i in 1:na) if(length(adat[[i]])>ncol) ncol=length(adat[[i]])
+  onlength=length(vectorize.hmmpars(list(Pi=availhmm$Pi[,,1,drop=FALSE],
+              pm=availhmm$pm[,1,drop=FALSE],delta=availhmm$delta[,1,drop=FALSE])))
+  ncol=3+(onelength-3)*length(animals) # 3 numbers specify vectorized length parameters
   hmmat=matrix(rep(NA,ncol*B),ncol=ncol)
   # do the bootstrapping
   for(b in 1:B) {
     hmp=resample.hmmpars(availhmm,adat,animals,seed=NULL)
     hmmvec=vectorize.hmmpars(hmp)
-    nobs=length(hmmvec)
-    hmmat[b,nobs]=hmmvec
+#    nobs=length(hmmvec)
+#    hmmat[b,nobs]=hmmvec
+    hmmat[b,]=hmmvec
     if(printprog) cat("Resamples done: ",b,"\n")
   }
   cat("\n Total=",b," Resamples done\n")
@@ -2996,8 +3023,10 @@ bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
 #' 
 #' @param bs output from \code{\link{bootstrap.p.with.Et}} or \code{\link{bootstrap.p.with.hmm}}.
 #' @param probs lower and upper percentile points for confidence interval reporting.
-#' @param pcut a quick and dirty min phat to consider; this robustifies 1/phat for small samples, 
-#' but it is ad-hoc. If you use it, do histogram of $bs$phat to see if there is a reasonable cutpoint.
+#' @param pcut minimum estimated detection probability to use. This is a quick and dirty method to 
+#' robustify against small detection probability estimates skewing the distribution of \code{1/phat} 
+#' badly for small samples. It is ad-hoc. If you use it, do histogram of $bs$phat to see if there is 
+#' a reasonable cutpoint.
 #' 
 #' @return 
 #' Returns a list with elements
@@ -3758,10 +3787,12 @@ NULL
 #' @name bowhead.hmm.pars.bs
 #' @title Bootstrapped Greenland bowhead whale availability HMM parameters.
 #' @docType data
-#' @description Hidden Markov model (HMM) parameter estimates for bowhead whale availability obtained 
-#' from fitting HMMs (using library \code{\link{HiddenMarkov}}) to parametric bootstrap samples of 
-#' availability data \code{\link{bowhead.hmm.pars}}. *** Need to complete the documentatoin ***.
-#' @format A vector of parameters created using \code{\link{vectorize.hmmpars}}.
+#' @description Bootstrapped Hidden Markov model (HMM) parameter estimates for bowhead whale 
+#' availability, obtained using by passing \code{\link{bowhead.hmm.pars}} and 
+#' \code{\link{bowhead.hmm.adat}} to \code{\link{hmmpars.boot}}.
+#' @format A matrix in which each row is a set of HMM parameters converted to vector format by 
+#' \code{\link{vectorize.hmmpars}}. Each row can be converted back to the format required by
+#' \code{\link{est.hmltm}} using \code{\link{unvectorize.hmmpars}}
 #' @usage bowhead.hmm.pars.bs
 NULL
 

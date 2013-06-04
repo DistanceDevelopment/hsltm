@@ -9,7 +9,7 @@
   \code{\link{vectorize.hmmpars}}.}
 }
 \value{
-  A hmm.pars object.
+  A hmm.pars object (a list).
 }
 \description{
   Reformats vector that was vectorised using

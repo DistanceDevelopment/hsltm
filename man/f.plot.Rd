@@ -1,32 +1,28 @@
 \name{f.plot}
 \alias{f.plot}
-\title{Survivor function plotting.}
+\title{detection function plotting.}
 \usage{
-  f.plot(hfun, pars, dat = NULL, models = NULL, pm, Pi,
-    delta, ymax, dy, theta.f = 0, theta.b = 90,
-    xrange = c(0, 50), yrange = xrange, nx = 50, ny = nx,
-    xlab = "Perpendicular distance",
+  f.plot(hmltm, obs = 1:length(hmltm$hmltm.fit$xy$x),
+    new.ymax = NULL, new.pars = NULL, theta.f = 0,
+    theta.b = 90, xrange = c(0, max(hmltm$hmltm.fit$xy$x)),
+    yrange = c(0, 1.5 * max(hmltm$hmltm.fit$xy$y)),
+    nx = 50, ny = nx, xlab = "Perpendicular distance",
     ylab = "Forward distance", type = "contour",
     nlevels = 20, add = FALSE, col = "black",
     logscale = FALSE, theta = 90, phi = 35,
     zlab = "pdf of first detections", values = FALSE, ...)
 }
 \arguments{
-  \item{hfun}{detection hazard function name}
+  \item{hmltm}{output from \code{\link{est.hmltm}}}
 
-  \item{dat}{data frame.}
+  \item{obs}{row (observation) in data to use in plotting}
 
-  \item{models}{model list, as for \code{\link{est.hmltm}}
-  for example.}
+  \item{new.ymax}{a forward distance beyond which things
+  can't be detected (used to override the ymax already in
+  \code{hmltm}).}
 
-  \item{pm}{state-dependent Bernoulli parameter values.}
-
-  \item{Pi}{Markov chain transition probability matrix.}
-
-  \item{delta}{stationary distribution of \code{Pi}.}
-
-  \item{ymax}{a forward distance beyond which things can't
-  be detected.}
+  \item{new.pars}{model parameter vector (used to override
+  the pars already in \code{hmltm}).}
 
   \item{theta.f}{REDUNDANT must = 0.}
 
@@ -37,10 +33,10 @@
   \item{yrange}{range of y-axis.}
 
   \item{nx}{number of points on x-axis at which to evaluate
-  detection hazard function.}
+  detection function.}
 
   \item{ny}{number of points on y-axis at which to evaluate
-  detection hazard function.}
+  detection function.}
 
   \item{xlab}{x label.}
 
@@ -66,13 +62,13 @@
   \item{zlab}{label in z-dimension for persp plots}
 
   \item{values}{If TRUE, returns hazard function values on
-  nx by by grid.}
+  nx by ny grid.}
 
-  \item{...}{other arguments to image, contour or persp.}
+  \item{...}{other arguments to \code{\link{image}},
+  \code{\link{contour}} or \code{\link{persp}}.}
 }
 \description{
-  Plots contours of (1- the survivor function) with HMM
-  availbility pars (Pi, pm) and detection hazard
-  hfun(x,y,b,...).
+  Plots the detection function (1- the survivor function)
+  of a fitted model in two dimensions.
 }
 

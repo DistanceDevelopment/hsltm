@@ -38,12 +38,11 @@
 }
 \details{
   Simulates a new series of availability observations (0s
-  and 1s) using functions \code{\link{dthmm}} and
-  \code{\link{simulate}} from library
-  \code{\link{HiddenMarkov}}, then fits a HMM to these data
-  using function \code{\link{BaumWelch}} from library
-  \code{\link{HiddenMarkov}}. Constructs a new hmm.pars
-  object from the fitted HMM parameters.
+  and 1s) using functions \code{dthmm} and \code{simulate}
+  from library \code{\link{HiddenMarkov}}, then fits a HMM
+  to these data using function \code{BaumWelch} from
+  library \code{\link{HiddenMarkov}}. Constructs a new
+  hmm.pars object from the fitted HMM parameters.
 }
 \examples{
 data(bowhead.hmm.pars)

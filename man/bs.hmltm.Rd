@@ -36,10 +36,25 @@
   units.
 }
 \details{
-  If
+  If \code{fixed.avail}=FALSE, then: (1) IF
+  \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Et} is not
+  \code{NULL}, the availability process is bootstrapped by
+  drawing pairs of mean times available (Ea) and
+  unavailable (Eu) from a bivariate lognormal distribution
+  with mean \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Et}
+  and standard deviation
+  \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Sigma.Et} and
+  converting this to Markov Model transition probability
+  matrix parameters using \code{\link{MakePi}}, ELSE IF
+  \code{hmm.pars.bs} is not \code{NULL}, random samples
+  with replacement, of HMM parameter sets are taken from
+  \code{hmm.pars.bs}.
 }
 \seealso{
   \code{\link{bootsum}} summarises output from this
   function.
+
+  \code{\link{hmmpars.boot}}, which is is used to generate
+  \code{\link{hmm.pars.bs}}.
 }
 

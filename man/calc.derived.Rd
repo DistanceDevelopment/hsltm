@@ -5,13 +5,25 @@
   calc.derived(stat, hmmlt, obs = 1:dim(hmmlt$xy)[1])
 }
 \arguments{
-  \item{stat.}{}
+  \item{stat}{the statistic name (character variable).}
 
-  \item{hmmlt.}{}
+  \item{hmmlt}{the model (as ouput by
+  \code{\link{est.hmltm}}.}
 
-  \item{obs.}{}
+  \item{obs}{indices of rows of \code{hmmlt$xy} (i.e. which
+  observations) to use in calculating the statistics.}
 }
 \description{
-  Calculates a bunch of derived statistics from model.
+  Calculates a one of a variety of derived statistics from
+  model (see below).
+}
+\details{
+  The following are the options for argument \code{stat}:
+  \describe{ \item{esw:}{effective strip width estimate.}
+  \item{invesw:}{inverse effective strip width estimate.}
+  \item{p0:}{estimated probability of detection at
+  perpendicular distance zero.} \item{p:}{estimated mean
+  probability of detection.} \item{invp:}{estimated inverse
+  mean probability of detection.} }
 }
 

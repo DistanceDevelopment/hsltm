@@ -6,27 +6,31 @@
     ny = 100)
 }
 \arguments{
-  \item{hmmlt.}{}
+  \item{hmmlt}{output from \code{\link{fit.hmltm}}}
 
-  \item{obs.}{}
+  \item{obs}{observations (row numbers of \code{hmmlt$xy})
+  for which to calculate esw}
 
-  \item{at.x.}{}
+  \item{at.x}{values at which to evaluate p(x) - see
+  below.}
 
-  \item{ny.}{}
+  \item{ny}{number of y-values (forward distance values) to
+  use in calculation.}
 }
 \description{
   Calculates fitted values, p(x) for given observations,
   from model (optionally at given x-value).
 }
 \details{
-  If hmmlt$models is NULL and at.x is NULL : returns vector
-  of values of p(x=hmmlt$xy$x[obs]) if obs given, or vector
-  of values of p(x=hmmlt$xy$x) if obs not given; at.x
-  specified: returns vector of values of p(x=at.x). If
-  hmmlt$models is not NULL and at.x is NULL : returns
-  vector of values of p_obs[i](x=hmmlt$xy$x[j]) if obs
-  given, or vector of values of p_i(x=hmmlt$xy$x[j]) for
-  all i if obs not given; at.x specified: as when at.x is
-  NULL, but with x=at.x instead of hmmlt$xy$x.
+  If \code{hmmlt$models} is NULL and \describe{ \item{at.x
+  is NULL}{returns vector of values of p(x=hmmlt$xy$x[obs])
+  if obs given, or vector of values of p(x=hmmlt$xy$x) if
+  obs not given;} \item{at.x is specified}{returns vector
+  of values of p(x=at.x).} } If \code{hmmlt$models} is not
+  NULL and \describe{ \item{at.x is NULL}{returns vector of
+  values of p_obs[i](x=hmmlt$xy$x[j]) if obs given, or
+  vector of values of p_i(x=hmmlt$xy$x[j]) for all i if obs
+  not given;} \item{at.x is specified}{as when at.x is
+  NULL, but with x=at.x instead of hmmlt$xy$x.} }
 }
 

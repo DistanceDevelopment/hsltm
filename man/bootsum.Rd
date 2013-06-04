@@ -5,10 +5,10 @@
   bootsum(bests, cilevel = 0.95)
 }
 \arguments{
-  \item{bests}{: output from bs.hmltm().}
+  \item{bests}{output from \code{\link{bs.hmltm}}.}
 
-  \item{cilevel:}{confidence level for confidence intervals
-  by percentile method}
+  \item{cilevel}{confidence level for confidence intervals
+  by percentile method.}
 }
 \value{
   Returns a list with elements as follows for each

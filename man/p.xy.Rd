@@ -1,6 +1,6 @@
 \name{p.xy}
 \alias{p.xy}
-\title{Calculates probability of observing animal at (x,y).}
+\title{Calculates probability of first observing animal at (x,y).}
 \usage{
   p.xy(x, y, hfun, b, pm, Pi, delta, ymax, dy, theta.f,
     theta.b, ally = FALSE, cdf = FALSE)

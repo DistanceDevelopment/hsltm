@@ -2,14 +2,15 @@
 \name{bowhead.hmm.pars.bs}
 \alias{bowhead.hmm.pars.bs}
 \title{Bootstrapped Greenland bowhead whale availability HMM parameters.}
-\format{A vector of parameters created using \code{\link{vectorize.hmmpars}}.}
+\format{A matrix in which each row is a set of HMM parameters converted to vector format by
+\code{\link{vectorize.hmmpars}}. Each row can be converted back to the format required by
+\code{\link{est.hmltm}} using \code{\link{unvectorize.hmmpars}}}
 \description{
-  Hidden Markov model (HMM) parameter estimates for bowhead
-  whale availability obtained from fitting HMMs (using
-  library \code{\link{HiddenMarkov}}) to parametric
-  bootstrap samples of availability data
-  \code{\link{bowhead.hmm.pars}}. *** Need to complete the
-  documentatoin ***.
+  Bootstrapped Hidden Markov model (HMM) parameter
+  estimates for bowhead whale availability, obtained using
+  by passing \code{\link{bowhead.hmm.pars}} and
+  \code{\link{bowhead.hmm.adat}} to
+  \code{\link{hmmpars.boot}}.
 }
 \keyword{datasets}
 

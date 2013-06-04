@@ -11,10 +11,12 @@
   \item{probs}{lower and upper percentile points for
   confidence interval reporting.}
 
-  \item{pcut}{a quick and dirty min phat to consider; this
-  robustifies 1/phat for small samples, but it is ad-hoc.
-  If you use it, do histogram of $bs$phat to see if there
-  is a reasonable cutpoint.}
+  \item{pcut}{minimum estimated detection probability to
+  use. This is a quick and dirty method to robustify
+  against small detection probability estimates skewing the
+  distribution of \code{1/phat} badly for small samples. It
+  is ad-hoc. If you use it, do histogram of $bs$phat to see
+  if there is a reasonable cutpoint.}
 }
 \value{
   Returns a list with elements \itemize{ \item{nboot:}{

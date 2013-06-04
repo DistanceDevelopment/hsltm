@@ -55,5 +55,11 @@ data(bowhead.hmm.pars)
   Role of bowhead whale as a predator in West Rreenland.
   Marine Ecology Progress Series 346, 285–297.
 }
+\seealso{
+  The depth time series data are in object
+  \code{\link{bowhead.depths}} and the binary
+  presence/absence data obtained from these are in object
+  \code{\link{bowhead.adat}}.
+}
 \keyword{datasets}
 

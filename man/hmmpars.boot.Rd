@@ -26,10 +26,8 @@
   as it resamples.}
 }
 \value{
-  A matrix of dimension \code{B}xT, where T is the length
-  of the longest of the vectors in \code{adat}. Rows of the
-  matrix that have fewer than T observations are padded
-  with NAs.
+  A matrix of dimension \code{B}xT, where T is as described
+  above.
 }
 \description{
   Bootstraps hidden Markov model (HMM) data from multiple
@@ -37,20 +35,18 @@
 }
 \details{
   Simulates a new series of availability observations (0s
-  and 1s) using functions \code{\link{HiddenMarkov::dthmm}}
-  and \code{\link{HiddenMarkov::simulate}} from library
-  \code{\link{HiddenMarkov}}, then fits a HMM to these data
-  using function \code{\link{HiddenMarkov::BaumWelch}} from
+  and 1s) using functions \code{dthmm} and \code{simulate}
+  from library \code{\link{HiddenMarkov}}, then fits a HMM
+  to these data using function \code{BaumWelch} from
   library \code{\link{HiddenMarkov}}. Constructs a new
   hmm.pars object from the fitted HMM parameters.
 
   Does the above \code{B} times, each time reformtting the
   hmm.pars object as a vector using
   \code{\link{vectorize.hmm}} and then entering this as the
-  next row in a matrix of dimension \code{B}xT, where T is
-  the length of the longest of the vectors in \code{adat}.
-  Rows of the matrix that have fewer than T observations
-  are padded with NAs.
+  next row in a matrix of dimension \code{B}xT, where
+  T=\code{3+length(animals)*(nstate^2+nstate*2)} and
+  \code{nstate} is the number of states in the HMM.
 }
 \examples{
 data(bowhead.hmm.pars)
