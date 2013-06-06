@@ -7,23 +7,36 @@
     survey.pars, hmm.pars, nx = 100, type = "link")
 }
 \arguments{
-  \item{stat.}{}
+  \item{stat}{name of statistic to calculate. Valid
+  statistics are "p0" for estimated probability at
+  perpendicular distance zero, "p" for mean estimated
+  detection probability over all perpendicular distances,
+  "invp" for the inverse of mean estimated detection
+  probability over all perpendicular distances, "esw" for
+  estimated effective strip width, and "invesw" for
+  estimated inverse of effective strip width.}
 
-  \item{b.}{}
+  \item{b}{detection hazard parameter vector.}
 
-  \item{hfun.}{}
+  \item{hfun}{detection hazard name (character).}
 
-  \item{models.}{}
+  \item{models}{covariate models (see
+  \code{\link{est.hmltm}} for details).}
 
-  \item{cov.}{}
+  \item{cov}{covariate values.}
 
-  \item{survey.pars.}{}
+  \item{survey.pars}{survey parameter specification (see
+  \code{\link{est.hmltm}} for details).}
 
-  \item{hmm.pars.}{}
+  \item{hmm.pars}{hidden Markov model parameter
+  specification (see \code{\link{est.hmltm}} for details).}
 
-  \item{nx.}{}
+  \item{nx}{number of points at which to evaluate detection
+  function in perpendicular distance dimension.}
 
-  \item{type.}{}
+  \item{type}{if "link", assumes that parameter vector
+  \code{b} is on link scale, else assumes it is on natural
+  scale.}
 }
 \description{
   Calculates various statistics from model.

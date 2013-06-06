@@ -20,7 +20,7 @@
   \item{models}{detection hazard covariate models, as for
   \code{\link{est.hmltm}}.}
 
-  \item{survey}{pars survey parameters, as for
+  \item{survey.pars}{survey parameters, as for
   \code{\link{est.hmltm}}.}
 
   \item{hmm.pars}{availability hmm parameters, as for
@@ -46,11 +46,12 @@
   row is the estimated detection probabilities for each of
   the n bootstrapped detections, (b) a Bxn matrix
   \code{$pars} in which each row is the estimated detection
-  hazard parameters, and (c) the following vectors of
-  length B with estimates from each bootstrap: \code{$Et}
-  (mean times available and unavailable), \code{$p0} (mean
-  estimated p(0) over all detections), \code{$p0} (mean
-  estimated p(0) over all detections).} }
+  hazard parameters, (c) the following vectors of length B
+  with estimates from each bootstrap: \code{$p0} (mean
+  estimated p(0) over all detections), \code{$phat} (mean
+  estimated detection probability over all detections), and
+  (d) a Bx2 matrix \code{$b.Et} in which each row is the
+  mean times unavailable and available. } }
 }
 \description{
   Nonparametric bootstrap of detection data with estimation

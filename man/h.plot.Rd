@@ -12,6 +12,8 @@
 \arguments{
   \item{hfun}{detection hazard function name}
 
+  \item{pars}{detection hazard function parameter vector}
+
   \item{dat}{data frame.}
 
   \item{models}{model list, as for \code{\link{est.hmltm}}
@@ -31,6 +33,9 @@
   image and contour).}
 
   \item{nlevels}{number of contour levels.}
+
+  \item{add}{if TRUE adds to existing plot, else creates
+  new plot.}
 
   \item{col}{colour of plot.}
 

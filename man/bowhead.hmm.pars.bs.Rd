@@ -9,8 +9,7 @@
   Bootstrapped Hidden Markov model (HMM) parameter
   estimates for bowhead whale availability, obtained using
   by passing \code{\link{bowhead.hmm.pars}} and
-  \code{\link{bowhead.hmm.adat}} to
-  \code{\link{hmmpars.boot}}.
+  \code{\link{bowhead.adat}} to \code{\link{hmmpars.boot}}.
 }
 \keyword{datasets}
 

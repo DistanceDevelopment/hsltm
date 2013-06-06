@@ -6,8 +6,7 @@
     report.by = 10, fixed.avail = FALSE)
 }
 \arguments{
-  \item{\code{hmltm.est}}{output from
-  \code{\link{est.hmltm}}.}
+  \item{hmltm.est}{output from \code{\link{est.hmltm}}.}
 
   \item{B}{number of bootstrap replicates to do.}
 
@@ -45,7 +44,7 @@
   and standard deviation
   \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Sigma.Et} and
   converting this to Markov Model transition probability
-  matrix parameters using \code{\link{MakePi}}, ELSE IF
+  matrix parameters using \code{\link{makePi}}, ELSE IF
   \code{hmm.pars.bs} is not \code{NULL}, random samples
   with replacement, of HMM parameter sets are taken from
   \code{hmm.pars.bs}.
@@ -55,6 +54,6 @@
   function.
 
   \code{\link{hmmpars.boot}}, which is is used to generate
-  \code{\link{hmm.pars.bs}}.
+  \code{hmm.pars.bs}.
 }
 

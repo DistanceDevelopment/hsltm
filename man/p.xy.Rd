@@ -20,6 +20,13 @@
 
   \item{delta}{Markov model stationary distribution.}
 
+  \item{ymax}{forward distance at or beyond which things
+  are undetectable.}
+
+  \item{dy}{distance step in forward distance direction
+  corresponding to the time step size of the Markov model
+  governed by \code{Pi}.}
+
   \item{theta.f}{REDUNDANT must = 0.}
 
   \item{theta.b}{REDUNDANT must = 90.}

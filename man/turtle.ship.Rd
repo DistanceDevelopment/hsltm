@@ -19,6 +19,7 @@
    value - just there to have something in this compulsory variable.}
    \item{\code{object}:}{ unique identifier for each detection (a numeric vector; NA if no detection).}
    \item{\code{size}:}{ size of each detected group (NA if no detection).}
+   \item{\code{seen}:}{ REDUNDANT: 1 for all detections (NAA if no detection).}
  }}
 \source{
   Virginia Aquarium.

@@ -5,7 +5,8 @@
   hmmlt.gof.x(hmmlt, ks.plot = TRUE)
 }
 \arguments{
-  \item{hmmlt.}{}
+  \item{hmmlt}{fitted model, as output by
+  \code{\link{est.hmltm}}}
 
   \item{ks.plot}{If TRUE, does Q-Q plot.}
 }

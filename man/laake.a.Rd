@@ -12,6 +12,10 @@
 
   \item{ymax}{is maximum forward distance to consider (`w'
   in Laake et al. (1997), Eqn (4)).}
+
+  \item{spd}{speed of observer. Needed to convert time
+  (units of \code{hmm.pars}) to distance (units of
+  \code{ymax}).}
 }
 \description{
   Calculates the probability that an animal is available at
@@ -28,8 +32,7 @@
 \examples{
 Ea=c(10,12);Eu=c(20,22);seEa=c(2,3);seEu=c(4,6);covEt=c(2,3)
 hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt)
-laake.a(hmm.pars,ymax=200,spd=4) # NB hmm.pars has TIME units, w here is DISTANCE,
-so need speed too
+laake.a(hmm.pars,ymax=200,spd=4) # because hmm.pars is in units of time, not distance, you need to specify spd.
 }
 \references{
   Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P.,

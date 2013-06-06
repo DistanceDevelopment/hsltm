@@ -4,7 +4,7 @@
 \usage{
   bootstrap.p.with.hmm(dat, pars, hfun, models,
     survey.pars, hmm.pars.bs, control.fit, control.opt,
-    fixed.avail = FALSE, nboot = 999, silent = FALSE)
+    fixed.avail = FALSE, B = 999, silent = FALSE)
 }
 \arguments{
   \item{dat}{detection data frame constructed by removing
@@ -20,7 +20,7 @@
   \item{models}{detection hazard covariate models, as for
   \code{\link{est.hmltm}}.}
 
-  \item{survey}{pars survey parameters, as for
+  \item{survey.pars}{survey parameters, as for
   \code{\link{est.hmltm}}.}
 
   \item{hmm.pars.bs}{multiple sets of availability hmm
@@ -51,8 +51,10 @@
   hazard parameters, and (c) the following vectors of
   length B with estimates from each bootstrap: \code{$Et}
   (mean times available and unavailable), \code{$p0} (mean
-  estimated p(0) over all detections), \code{$p0} (mean
-  estimated p(0) over all detections).} }
+  estimated p(0) over all detections), \code{$phat} (mean
+  estimated detection probability over all detections),
+  \code{$convergence} convergence diagnostic from
+  \code{optim}.} }
 }
 \description{
   Nonparametric bootstrap of detection data with

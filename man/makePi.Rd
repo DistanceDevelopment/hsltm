@@ -16,7 +16,7 @@
   available (Ea) and unavailable (Eu). If Ea and Eu are
   vectors of length m (they must be the same length),
   returns a 2x2xm array in which element [,,i] is the ith
-  Markov transition matrix; else returns a sinvle 2x2
+  Markov transition matrix; else returns a single 2x2
   matrix.
 }
 \examples{

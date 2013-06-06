@@ -10,7 +10,7 @@
   element $Pi (where m is number of availability parameter
   sets).}
 
-  \item{y}{vector of forward distances.}
+  \item{w}{vector of forward distances.}
 
   \item{spd}{observer speed: must be entered if y is not
   time, since hmm.pars always time.}

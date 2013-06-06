@@ -6,38 +6,45 @@
     nx = 100, type = "response", to.x = FALSE)
 }
 \arguments{
-  \item{pars.}{}
+  \item{pars}{starting parameter values, as for
+  \code{\link{est.hmltm}}.}
 
-  \item{hfun.}{}
+  \item{hfun}{detection hazard function name; same as
+  argument \code{FUN} of \code{\link{est.hmltm}}.}
 
-  \item{models.}{}
+  \item{models}{detection hazard covariate models, as for
+  \code{\link{est.hmltm}}.}
 
-  \item{cov.}{}
+  \item{cov}{covariate matrix with each row corresponding
+  to an observation. Must contain columns with variables
+  appearing in \code{models}, and named accordingly, as
+  well as column of perpendicular distance, named "x".
+  (Perpendicular distances only used if \code{to.x} is
+  TRUE.)}
 
-  \item{survey.pars.}{}
+  \item{survey.pars}{survey parameters, as for
+  \code{\link{est.hmltm}}.}
 
-  \item{hmm.pars.}{}
+  \item{hmm.pars}{availability hmm parameters, as for
+  \code{\link{est.hmltm}}. Must have elements \code{$Et}
+  and \code{$Sigma.Et}}
 
-  \item{nx.}{}
+  \item{nx}{number of x-values (perpendicular distances) to
+  use in evaluating esw.}
 
-  \item{type.}{}
+  \item{type}{if "link", parameter vector \code{pars} is
+  assumed to be on the link scale, else on the natural
+  scale}
 
-  \item{to.x.}{}
+  \item{to.x}{if TRUE integrates only out to
+  \code{cov$x[i]} for observation i (else integrates to
+  \code{survey.pars$W}).}
 }
 \description{
-  Calculates esw from model.
+  Calculates effective strip half-width from model.
 }
 \details{
-  Returns effective stript width (esw) for fitted object
-  hmmlt, integrating using Simpson's rule.
-
-  Input: hmmlt: output from fit.hmltm obs : observatoins
-  (row numbers of hmmlt$xy) for which to calculate esw b :
-  parameters (on link scale) at which to evaluate mu. If
-  NULL, uses parameter estimates in hmmlt nx : number of x
-  values to use to implement Simpson's rule; to.x : If TRUE
-  integrates only to observed x, else integrates to W type
-  : If "link", interprets pars as being on link scale, else
-  natural scale
+  Returns effective strip half-width (esw) for fitted
+  object hmmlt, integrating using Simpson's rule.
 }
 

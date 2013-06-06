@@ -43,8 +43,8 @@
 
   Does the above \code{B} times, each time reformtting the
   hmm.pars object as a vector using
-  \code{\link{vectorize.hmm}} and then entering this as the
-  next row in a matrix of dimension \code{B}xT, where
+  \code{\link{vectorize.hmmpars}} and then entering this as
+  the next row in a matrix of dimension \code{B}xT, where
   T=\code{3+length(animals)*(nstate^2+nstate*2)} and
   \code{nstate} is the number of states in the HMM.
 }

@@ -1,29 +1,37 @@
 \name{hmltm.p}
 \alias{hmltm.p}
-\title{Calculates E[p] from model.}
+\title{Calculates E[p(x)] from model.}
 \usage{
   hmltm.p(pars, hfun, models = list(y = NULL, x = NULL),
     cov = NULL, survey.pars, hmm.pars, nx = 100,
     type = "response")
 }
 \arguments{
-  \item{pars.}{}
+  \item{pars}{parameters (e.g. \code{$fit$par} output from
+  \code{\link{fit.hmltm}})}
 
-  \item{hfun.}{}
+  \item{hfun}{detection hazard type (character)}
 
-  \item{models.}{}
+  \item{models}{list with elements \code{$y} and \code{$x}
+  speficying covariate model (as for
+  \code{\link{est.hmltm}}).}
 
-  \item{cov.}{}
+  \item{cov}{data frame with covariates for detections.}
 
-  \item{survey.pars.}{}
+  \item{survey.pars}{survey pars list (as for
+  \code{\link{est.hmltm}}).}
 
-  \item{hmm.pars.}{}
+  \item{hmm.pars}{hmm pars list (as for
+  \code{\link{est.hmltm}})}
 
-  \item{nx.}{}
+  \item{nx}{number of x values for Simpson's rule
+  integration}
 
-  \item{type.}{}
+  \item{type}{"response" (default) or "link". If "link",
+  interprets pars as being on link scale, else natural
+  scale}
 }
 \description{
-  Calculates E[p] from model.
+  Calculates expected p(x) from model.
 }
 

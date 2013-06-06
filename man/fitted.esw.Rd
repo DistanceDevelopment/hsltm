@@ -11,9 +11,6 @@
   \item{obs}{observations (row numbers of \code{hmmlt$xy})
   for which to calculate esw}
 
-  \item{b}{parameters (on link scale) at which to evaluate
-  mu. If NULL, uses parameter estimates in hmmlt}
-
   \item{nx}{number of x values to use to implement
   Simpson's rule in perp dist dimension;}
 
@@ -26,7 +23,8 @@
   observation if there are covariates.}
 }
 \description{
-  Calculates esw from model.
+  Calculates effective strip half-width, W*E[p(x)], where W
+  is actual half-width, from model.
 }
 \details{
   Calls \code{\link{hmltm.esw}} to calclate effective

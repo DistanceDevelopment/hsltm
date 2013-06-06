@@ -33,7 +33,7 @@ Langrock, R., Borchers, D.L. and Skaug, H. Markov-modulated nonhomogeneous Poiss
 
 \keyword{Line transect, availability bias, Hidden markov model}
 \seealso{
-Some packages for fitting HMMs to availability data: \code{\link{HiddenMarkov}},  \code{\link{msm}}
+Some packages for fitting HMMs to availability data: \code{\link{HiddenMarkov}},  \code{msm}
 }
 \examples{
 library(hsltm)

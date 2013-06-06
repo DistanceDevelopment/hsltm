@@ -6,16 +6,21 @@
     W = NULL)
 }
 \arguments{
-  \item{hmmlt.}{}
+  \item{hmmlt}{output from \code{\link{fit.hmltm}}}
 
-  \item{obs.}{}
+  \item{obs}{observations (row numbers of \code{hmmlt$xy})
+  for which to calculate esw}
 
-  \item{nx.}{}
+  \item{nx}{number of x-values (perpendicular distance
+  values) to use in calculation.}
 
-  \item{W.}{}
+  \item{W}{actual half-width over which to integrate
+  (overrides W in \code{hmmlt}).}
 }
 \description{
-  Calculates E[1/p(x)] from model.
+  Calculates mean over perpendicular distance (x) of
+  inverse of fitted values, 1/p(x) for given observations,
+  from model.
 }
 \details{
   Identical to fitted.invp but returns data frame instead

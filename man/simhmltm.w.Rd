@@ -15,6 +15,8 @@
   at or beyond point that detection hazard function is
   effectively zero).}
 
+  \item{spd}{speed observer is moving.}
+
   \item{animals}{a vector of up to m integers specifying
   which members of the list \code{adat} are to be used to
   simulate availability. (e.g. \code{animals=c(1,3,5)} says
@@ -23,7 +25,7 @@
 
   \item{hfun}{detection hazard function name.}
 
-  \item{hfun}{detection hazard function parameters.}
+  \item{pars}{detection hazard function parameters.}
 
   \item{N}{number of animals within distance \code{xmax} of
   the transect line and hence subject to being detected (or

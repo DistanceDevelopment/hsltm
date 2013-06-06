@@ -5,7 +5,7 @@
   tfm(b, fun)
 }
 \arguments{
-  \item{par}{parameters on original scale.}
+  \item{b}{parameters on original scale.}
 
   \item{fun}{detection hazard function name (character) -
   see details below.}

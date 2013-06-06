@@ -2,8 +2,7 @@
 \alias{fitted.px}
 \title{Calculates fitted values for p(x) from model.}
 \usage{
-  fitted.px(hmmlt, obs = 1:dim(hmmlt$xy)[1], at.x = NULL,
-    ny = 100)
+  fitted.px(hmmlt, obs = 1:dim(hmmlt$xy)[1], at.x = NULL)
 }
 \arguments{
   \item{hmmlt}{output from \code{\link{fit.hmltm}}}
@@ -13,9 +12,6 @@
 
   \item{at.x}{values at which to evaluate p(x) - see
   below.}
-
-  \item{ny}{number of y-values (forward distance values) to
-  use in calculation.}
 }
 \description{
   Calculates fitted values, p(x) for given observations,

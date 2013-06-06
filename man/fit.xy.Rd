@@ -53,11 +53,8 @@
   \item{hessian}{Logical; if TRUE Hessian matrix is
   returned}
 
-  \item{control:}{list controlling \code{\link{optim}}
+  \item{control}{list controlling \code{\link{optim}}
   optimisation.}
-
-  \item{control.opt}{as required by \code{\link{optim}}
-  (and hence by \code{\link{fit.hmltm}}).}
 }
 \value{
   A list comprising \code{\link{optim}} ouptut plus element

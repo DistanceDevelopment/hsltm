@@ -5,7 +5,7 @@
   vectorize.hmmpars(hmmpars)
 }
 \arguments{
-  \item{hmm.pars}{list with availability HMM paramters, as
+  \item{hmmpars}{list with availability HMM paramters, as
   for the \code{hmm.pars} parameter of
   \code{\link{est.hmltm}}.}
 }

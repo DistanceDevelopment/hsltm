@@ -28,8 +28,6 @@
   for pdf.}
 
   \item{text.cex}{relative text size.}
-
-  \item{.}{}
 }
 \description{
   Plots detection function on top of forward detection

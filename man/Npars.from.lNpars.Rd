@@ -7,7 +7,7 @@
 \arguments{
   \item{mu}{multivariate logNormal distribution mean.}
 
-  \item{mu}{multivariate logNormal distribution
+  \item{Sigma}{multivariate logNormal distribution
   variace-covarice matrix.}
 }
 \description{

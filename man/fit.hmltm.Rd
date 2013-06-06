@@ -26,14 +26,14 @@
   \item{hmm.pars}{HMM parameters of animals' availability
   data.}
 
-  \item{control.fit:}{list with elements: \code{$hessian
+  \item{control.fit}{list with elements: \code{$hessian
   (logical)} - if TRUE Hessian is estimated and returned,
   else not; \code{$nx (scalar)} - determines the number of
   intervals to use with Simpson's rule integration over y.
   \code{nx=64} seems safe; smaller number makes computing
   faster.}
 
-  \item{control.opt}{as required by \code{\link{optim}}.}
+  \item{control.optim}{as required by \code{\link{optim}}.}
 }
 \value{
   A list comprising: \itemize{ \item{xy} {dat used in

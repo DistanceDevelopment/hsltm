@@ -14,15 +14,15 @@
 
   \item{models}{list with elements \code{$y} and \code{$x}
   speficying covariate model (as for
-  \code{\link{est.hstltm}}).}
+  \code{\link{est.hmltm}}).}
 
   \item{cov}{data frame with covariates for detections.}
 
   \item{survey.pars}{survey pars list (as for
-  \code{\link{est.hstltm}}).}
+  \code{\link{est.hmltm}}).}
 
-  \item{hmm.pars:}{hmm pars list (as for
-  \code{\link{est.hstltm}})}
+  \item{hmm.pars}{hmm pars list (as for
+  \code{\link{est.hmltm}})}
 
   \item{ID}{list with elements \code{$stratum},
   \code{$transect}, \code{$object} - to uniquely identify
@@ -47,10 +47,12 @@
 \details{
   Designed to be called by \code{\link{fitted.esw1}}.
   Identical to hmltm.esw but returns list instead of
-  numerical scalar or vector. This is to allow it to be
-  used in \code{\link{NDest}} for estimating density and
-  abundance. Returns effective stript width (esw) for 1
-  observer for fitted object \code{hmmlt}, integrating
-  using Simpson's rule.
+  numerical scalar or vector, and allows limit of
+  integration (W) to be specified explicitly, which
+  overrides limit \code{survey.pars$W}. This is to allow it
+  to be used in \code{\link{NDest}} for estimating density
+  and abundance. Returns effective stript half-width (esw)
+  for 1 observer for fitted object \code{hmmlt},
+  integrating using Simpson's rule.
 }
 

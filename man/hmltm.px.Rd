@@ -4,25 +4,41 @@
 \usage{
   hmltm.px(x, pars, hfun,
     models = list(y = NULL, x = NULL), cov = NULL,
-    survey.pars, hmm.pars, ny = 100, type = "response",
-    ally = TRUE)
+    survey.pars, hmm.pars, type = "response", ally = TRUE)
 }
 \arguments{
-  \item{x.}{}
+  \item{x}{perpendicular distances at which to evaluate
+  function.}
 
-  \item{pars.}{}
+  \item{pars}{starting parameter values, as for
+  \code{\link{est.hmltm}}.}
 
-  \item{hfun.}{}
+  \item{hfun}{detection hazard function name; same as
+  argument \code{FUN} of \code{\link{est.hmltm}}.}
 
-  \item{models.}{}
+  \item{models}{detection hazard covariate models, as for
+  \code{\link{est.hmltm}}.}
 
-  \item{cov.}{}
+  \item{cov}{covariate matrix with each row corresponding
+  to an observation. Must contain columns with variables
+  appearing in \code{models}, and named accordingly, as
+  well as column of perpendicular distance, named "x".
+  (Perpendicular distances only used if \code{to.x} is
+  TRUE.)}
 
-  \item{survey.pars.}{}
+  \item{survey.pars}{survey parameters, as for
+  \code{\link{est.hmltm}}.}
 
-  \item{hmm.pars.}{}
+  \item{hmm.pars}{availability hmm parameters, as for
+  \code{\link{est.hmltm}}. Must have elements \code{$Et}
+  and \code{$Sigma.Et}}
 
-  \item{ny.}{}
+  \item{type}{if "link", parameter vector \code{pars} is
+  assumed to be on the link scale, else on the natural
+  scale}
+
+  \item{ally}{If TRUE calculates detection probability at
+  all forward distances, else at zero.}
 }
 \description{
   Calculates perp dist detection probability p(x).

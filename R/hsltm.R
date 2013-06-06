@@ -48,7 +48,7 @@ p.xy1 <- function(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, It
 #' @description
 #'  Parameter transformation for all models
 #'  
-#' @param par parameters on original scale.
+#' @param b parameters on original scale.
 #' @param fun detection hazard function name (character) - see details below.
 #' 
 #' @details
@@ -173,9 +173,9 @@ histline=function(height,breaks,lineonly=FALSE,outline=FALSE,fill=FALSE,ylim=ran
 #' @param x Values at which function fx has been evaluated.
 #' @param n.pts The number of points to be used in integration. If \code{x} contains more than
 #'\code{n.pts} then \code{n.pts} will be set to \code{length(x)}.
-#' @param If `\code{cdf}' a list comprising x-values and cdf values at each x-value is returned, 
-#' else the integral over the range of \code{x} is returned.
-sintegral=function (fx, x, n.pts=16, ret=FALSE, type="int") 
+#' @param type if equal to `\code{cdf}' a list comprising x-values and cdf values at each x-value 
+#' is returned, else the integral over the range of \code{x} is returned.
+sintegral=function (fx, x, n.pts=16, type="int") 
 {
 #  if (class(fx) == "function") 
 #    fx = fx(x)
@@ -204,6 +204,8 @@ sintegral=function (fx, x, n.pts=16, ret=FALSE, type="int")
 #' @param hmm.pars is a list with 2x2xm Markov model transition matrices (in which state 1 is UNavailable) 
 #' in element $Pi (where m is number of availability parameter sets).
 #' @param ymax is maximum forward distance to consider (`w' in Laake et al. (1997), Eqn (4)).
+#' @param spd speed of observer. Needed to convert time (units of \code{hmm.pars}) to distance (units
+#'  of \code{ymax}).
 #'
 #' @details See Laake et al. (1997), Eqn (4), or Borchers et al. (2013) for details of Laake's method.
 #' 
@@ -219,8 +221,7 @@ sintegral=function (fx, x, n.pts=16, ret=FALSE, type="int")
 #' @examples
 #' Ea=c(10,12);Eu=c(20,22);seEa=c(2,3);seEu=c(4,6);covEt=c(2,3)
 #' hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt)
-#' laake.a(hmm.pars,ymax=200,spd=4) # NB hmm.pars has TIME units, w here is DISTANCE, 
-#' so need speed too
+#' laake.a(hmm.pars,ymax=200,spd=4) # because hmm.pars is in units of time, not distance, you need to specify spd.
 laake.a=function(hmm.pars,ymax,spd=NULL){
   if(length(dim(hmm.pars$Pi))==2) hmm.pars$Pi=array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
   nav=dim(hmm.pars$Pi)[3] # number of HMM parameter sets
@@ -328,7 +329,7 @@ simplea=function(Pi,E=NULL)
 #' availability parameters passed to it and returns these and their mean.
 #'
 #' @param hmm.pars is a list with 2x2xm Markov model transition matrices (in which state 1 is UNavailable) 
-#' in element $Pi (where m is number of availability parameter sets).
+#' in element \code{$Pi} (where m is number of availability parameter sets).
 #' @param w is max forward distance things can be seen at (or max forward time). Must be scalar.
 #' @param spd is observer speed; omit if w is max forward TIME.
 #'
@@ -364,7 +365,7 @@ mclaren.a=function(hmm.pars,w,spd=1){
 #'
 #' @param hmm.pars is a list with 2x2xm Markov model transition matrices (in which state 1 is UNavailable) 
 #' in element $Pi (where m is number of availability parameter sets).
-#' @param y vector of forward distances.
+#' @param w vector of forward distances.
 #' @param spd observer speed: must be entered if y is not time, since hmm.pars always time.
 #'
 #' @details See Richard et al. (2010), equation on botto mof page 91 for details of method.
@@ -401,7 +402,7 @@ richard.a=function(hmm.pars,w,spd=1){
 #' @description
 #' Makes Markov transition matrices from mean times available (Ea) and unavailable (Eu). 
 #' If Ea and Eu are vectors of length m (they must be the same length), returns a 2x2xm array 
-#' in which element [,,i] is the ith Markov transition matrix; else returns a sinvle 2x2 matrix.
+#' in which element [,,i] is the ith Markov transition matrix; else returns a single 2x2 matrix.
 #'
 #' @param Eu is the mean time UNavailable in one available-unavailable cycle.
 #' @param Ea is the mean time available in one available-unavailable cycle.
@@ -505,7 +506,7 @@ makeE=function(Pi){
 #'  make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt) # two animals
 #'  
 #'  # Here's how the data porpoise.hmm.pars was created from numbers in Westgate et al. (1995):
-#'  pn=c(40,52,36,34,49,60,33)/100 # proportion of time available
+#'  ppn=c(40,52,36,34,49,60,33)/100 # proportion of time available
 #'  ET=c(76,44,52,64,70,46,103) # mean dive cycle duration
 #'  seET=c(48,37,52,65,59,32,67) # SE of mean dive cycle duration
 #'  cvET=seET/ET # CV of mean dive cycle duration
@@ -892,6 +893,7 @@ inv.logit=function(x) return(1/(1+exp(-x))) # returns p from x=(logit of p)
 #'  Plots detection hazard contours.
 #'  
 #' @param hfun detection hazard function name
+#' @param pars detection hazard function parameter vector
 #' @param dat data frame.
 #' @param models model list, as for \code{\link{est.hmltm}} for example.
 #' @param xrange range of x-axis.
@@ -900,6 +902,7 @@ inv.logit=function(x) return(1/(1+exp(-x))) # returns p from x=(logit of p)
 #' @param ny number of points on y-axis at which to evaluate detection hazard function.
 #' @param type "contour", "persp", "image" or "both" (for image and contour).
 #' @param nlevels number of contour levels.
+#' @param add if TRUE adds to existing plot, else creates new plot.
 #' @param col colour of plot.
 #' @param logscale If TRUE, plots hazard values on log scale.
 #' @param xlab x label.
@@ -1145,7 +1148,7 @@ fyfit.plot=function(hmmlt,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
 #' @param ylab y-axis label.
 #' @param type "prob" for probability function, "density" for pdf.
 #' @param text.cex relative text size.
-#' @param .
+#' 
 fxfit.plot=function(hmmlt,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL,ylab=NULL,
                     type="prob",text.cex=0.66)
 {
@@ -1237,8 +1240,7 @@ fxfit.plot=function(hmmlt,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL
 #' @param dy resolution of forward distances for Markov model (typically observer speed times time step size).
 #' @param nx NOT SURE - I think it is redundant - CHECK
 #' @param hessian Logical; if TRUE Hessian matrix is returned
-#' @param control: list controlling \code{\link{optim}} optimisation. 
-#' @param control.opt as required by \code{\link{optim}} (and hence by \code{\link{fit.hmltm}}).
+#' @param control list controlling \code{\link{optim}} optimisation. 
 #'
 #' @return A list comprising \code{\link{optim}} ouptut plus element $par containing the estimated parameters 
 #'  on the same scale as input parameters pars (which are transformed before calling \code{\link{optim}}).
@@ -1269,11 +1271,11 @@ fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
 #' x-covariate models. Either \code{NULL} or regression model format (without response on left).
 #' @param survey.pars list.
 #' @param hmm.pars HMM parameters of animals' availability data.
-#' @param control.fit: list with elements:
+#' @param control.fit list with elements:
 #'              \code{$hessian (logical)} - if TRUE Hessian is estimated and returned, else not;
 #'              \code{$nx (scalar)} - determines the number of intervals to use with Simpson's rule 
 #'              integration over y. \code{nx=64} seems safe; smaller number makes computing faster.
-#' @param control.opt as required by \code{\link{optim}}.
+#' @param control.optim as required by \code{\link{optim}}.
 #'
 #' @return A list comprising:
 #' \itemize{
@@ -1423,6 +1425,9 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,thet
 #' @param pm state-dependent Bernoulli parameters.
 #' @param Pi Markov model transition probability matrix.
 #' @param delta Markov model stationary distribution.
+#' @param ymax forward distance at or beyond which things are undetectable.
+#' @param dy distance step in forward distance direction corresponding to the time step size of the 
+#' Markov model governed by \code{Pi}.
 #' @param theta.f REDUNDANT must = 0.
 #' @param theta.b REDUNDANT must = 90.
 #' @param ally If TRUE calculates detection probability at all forward distances, else at zero.
@@ -1466,16 +1471,22 @@ p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=FALS
 #'
 #' @description
 #' Calculates perp dist detection probability p(x).
-# 
-#' @param x.
-#' @param pars.
-#' @param hfun.
-#' @param models.
-#' @param cov.
-#' @param survey.pars.
-#' @param hmm.pars.
-#' @param ny.
-hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,ny=100,
+#'
+#' @param x perpendicular distances at which to evaluate function.
+#' @param pars starting parameter values, as for \code{\link{est.hmltm}}.
+#' @param hfun detection hazard function name; same as argument \code{FUN} of \code{\link{est.hmltm}}.
+#' @param models detection hazard covariate models, as for \code{\link{est.hmltm}}.
+#' @param cov covariate matrix with each row corresponding to an observation. Must contain columns 
+#' with variables appearing in \code{models}, and named accordingly, as well as column of perpendicular
+#' distance, named "x". (Perpendicular distances only used if \code{to.x} is TRUE.)
+#' @param survey.pars survey parameters, as for \code{\link{est.hmltm}}.
+#' @param hmm.pars availability hmm parameters, as for \code{\link{est.hmltm}}. Must have elements
+#' \code{$Et} and \code{$Sigma.Et}
+#' @param type if "link", parameter vector \code{pars} is assumed to be on the link scale, else on 
+#' the natural scale
+#' @param ally If TRUE calculates detection probability at all forward distances, else at zero.
+#' 
+hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,
                   type="response",ally=TRUE){
   theta.f=survey.pars$theta.f
   theta.b=survey.pars$theta.b
@@ -1539,11 +1550,11 @@ calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
 #'
 #' @description
 #' Calculates fitted values, p(x) for given observations, from model (optionally at given x-value).
-# 
+#'  
 #' @param hmmlt output from \code{\link{fit.hmltm}}
 #' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
 #' @param at.x values at which to evaluate p(x) - see below.
-#' @param ny number of y-values (forward distance values) to use in calculation.
+#' 
 #' @details 
 #' If \code{hmmlt$models} is NULL and
 #' \describe{
@@ -1557,7 +1568,7 @@ calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
 #'   vector of values of p_i(x=hmmlt$xy$x[j]) for all i if obs not given;}
 #'   \item{at.x is specified}{as when at.x is NULL, but with x=at.x instead of hmmlt$xy$x.}
 #'}
-fitted.px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL,ny=100){
+fitted.px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL){
   cov=hmmlt$xy
   if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
   if(min(obs)<1) stop("obs < 1")
@@ -1578,7 +1589,7 @@ fitted.px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL,ny=100){
   models=hmmlt$models
   survey.pars=hmmlt$fitpars$survey.pars
   hmm.pars=hmmlt$fitpars$hmm.pars
-  px=hmltm.px(at.x,pars,hfun,models,cov,survey.pars,hmm.pars,ny,ally=TRUE)
+  px=hmltm.px(at.x,pars,hfun,models,cov,survey.pars,hmm.pars,ally=TRUE)
   if(!is.nullmodel(hmmlt$models)){
     #    rownames(px)=paste("obs",obs,sep="")
     #    colnames(px)=paste("x=",at.x,sep="")
@@ -1590,11 +1601,12 @@ fitted.px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL,ny=100){
 #' @title Calculates E[p(x)] from model.
 #'
 #' @description
-#' Calculates E[p(x)] from model.
-# 
-#' @param hmmlt.
-#' @param obs.
-#' @param nx.
+#' Calculates mean over perpendicular distance (x) of fitted values, p(x) for given observations, 
+#' from model.
+#'  
+#' @param hmmlt output from \code{\link{fit.hmltm}}
+#' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#' @param nx number of x-values (perpendicular distance values) to use in calculation.
 fitted.p=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
   W=hmmlt$fitpars$survey.pars$W
   esw=fitted.esw(hmmlt,obs,nx)
@@ -1604,25 +1616,27 @@ fitted.p=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @title Calculates E[1/p(x)] from model.
 #'
 #' @description
-#' Calculates E[1/p(x)] from model.
-# 
-#' @param hmmlt.
-#' @param obs.
-#' @param nx.
+#' Calculates mean over perpendicular distance (x) of inverse of fitted values, 1/p(x) for given 
+#' observations, from model.
+#'  
+#' @param hmmlt output from \code{\link{fit.hmltm}}
+#' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#' @param nx number of x-values (perpendicular distance values) to use in calculation.
 fitted.invp=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
   W=hmmlt$fitpars$survey.pars$W
   esw=fitted.esw(hmmlt,obs,nx)
   return(W/esw)
 }
 
-#' @title Calculates E[1/esw] from model.
+#' @title Calculates 1/esw from model.
 #'
 #' @description
-#' Calculates E[1/esw] from model.
-# 
-#'  @param hmmlt output from fit.hmltm()
-#'  @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
-#'  @param nx number of x values to use to implement Simpson's rule in perp dist dimension;
+#' Calculates inverse of effective strip half-width, 1/(W*E[p(x)]) (where W is actual half-width) for 
+#' given observations, from model.
+#'  
+#' @param hmmlt output from \code{\link{fit.hmltm}}
+#' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#' @param nx number of x-values (perpendicular distance values) to use in calculation.
 fitted.invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
   return(1/fitted.esw(hmmlt,obs,nx))
 }
@@ -1630,12 +1644,10 @@ fitted.invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @title Calculates esw from model.
 #'
 #' @description
-#' Calculates esw from model.
+#' Calculates effective strip half-width, W*E[p(x)], where W is actual half-width, from model.
 # 
 #'  @param hmmlt output from \code{\link{fit.hmltm}}
 #'  @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
-#'  @param b parameters (on link scale) at which to evaluate mu. If NULL, uses parameter estimates 
-#'  in hmmlt
 #'  @param nx number of x values to use to implement Simpson's rule in perp dist dimension;
 #'  @param to.x If TRUE integrates only to observed x, else integrates to W
 #'  @param all If TRUE then returns esw for every observation, else returns only that for first obs 
@@ -1660,7 +1672,7 @@ fitted.esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
   models=hmmlt$models
   survey.pars=hmmlt$fitpars$survey.pars
   hmm.pars=hmmlt$fitpars$hmm.pars
-  esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,to.x,type="response")
+  esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type="response",to.x)
   return(esw)
 }
 
@@ -1670,19 +1682,26 @@ fitted.esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
 #' @description
 #' Calculates various statistics from model.
 # 
-#' @param stat.
-#' @param b.
-#' @param hfun.
-#' @param models.
-#' @param cov.
-#' @param survey.pars.
-#' @param hmm.pars.
-#' @param nx.
-#' @param type.
+#' @param stat name of statistic to calculate. Valid statistics are "p0" for estimated probability 
+#' at perpendicular distance zero, "p" for mean estimated detection probability over all perpendicular
+#' distances, "invp" for the inverse of mean estimated detection probability over all perpendicular
+#' distances, "esw" for estimated effective strip width, and "invesw" for estimated inverse of effective 
+#' strip width.
+#' @param b detection hazard parameter vector.
+#' @param hfun detection hazard name (character).
+#' @param models covariate models (see \code{\link{est.hmltm}} for details).
+#' @param cov covariate values.
+#' @param survey.pars survey parameter specification  (see \code{\link{est.hmltm}} for details).
+#' @param hmm.pars hidden Markov model parameter specification  (see \code{\link{est.hmltm}} for 
+#' details).
+#' @param nx number of points at which to evaluate detection function in perpendicular distance
+#' dimension.
+#' @param type if "link", assumes that parameter vector \code{b} is on link scale, else assumes 
+#' it is on natural scale.
 hmltm.stat=function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
                     type="link"){
   if(type!="link") b=tfm(b,hfun)
-  if(stat=="p0") {return(hmltm.px(x=0,b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}  
+  if(stat=="p0") {return(hmltm.px(x=0,b,hfun,models,cov,survey.pars,hmm.pars,type))}  
   else if(stat=="p") {return(hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}  
   else if(stat=="invp") {return(1/hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}
   else if(stat=="esw") {return(hmltm.esw(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}
@@ -1691,19 +1710,22 @@ hmltm.stat=function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,
 }
 
 
-#' @title Calculates E[p] from model.
+#' @title Calculates E[p(x)] from model.
 #'
 #' @description
-#' Calculates E[p] from model.
+#' Calculates expected p(x) from model.
 # 
-#' @param pars.
-#' @param hfun.
-#' @param models.
-#' @param cov.
-#' @param survey.pars.
-#' @param hmm.pars.
-#' @param nx.
-#' @param type.
+#' @param pars parameters (e.g. \code{$fit$par} output from \code{\link{fit.hmltm}})
+#' @param hfun detection hazard type (character) 
+#' @param models list with elements \code{$y} and \code{$x} speficying covariate model (as for 
+#' \code{\link{est.hmltm}}).
+#' @param cov data frame with covariates for detections.
+#' @param survey.pars survey pars list (as for \code{\link{est.hmltm}}).
+#' @param hmm.pars hmm pars list (as for \code{\link{est.hmltm}})
+#' @param nx number of x values for Simpson's rule integration
+#' @param type "response" (default) or "link". If "link", interprets pars as being on link scale, 
+#' else natural scale
+#' 
 hmltm.p=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
                  type="response"){
   esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
@@ -1714,16 +1736,19 @@ hmltm.p=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.p
 #' @title Calculates 1/esw from model.
 #'
 #' @description
-#' Calculates 1/esw from model.
+#' Calculates inverse of effective strip half-width from model.
 # 
-#' @param pars.
-#' @param hfun.
-#' @param models.
-#' @param cov.
-#' @param survey.pars.
-#' @param hmm.pars.
-#' @param nx.
-#' @param type.
+#' @param pars parameters (e.g. \code{$fit$par} output from \code{\link{fit.hmltm}})
+#' @param hfun detection hazard type (character) 
+#' @param models list with elements \code{$y} and \code{$x} speficying covariate model (as for 
+#' \code{\link{est.hmltm}}).
+#' @param cov data frame with covariates for detections.
+#' @param survey.pars survey pars list (as for \code{\link{est.hmltm}}).
+#' @param hmm.pars hmm pars list (as for \code{\link{est.hmltm}})
+#' @param nx number of x values for Simpson's rule integration
+#' @param type "response" (default) or "link". If "link", interprets pars as being on link scale, 
+#' else natural scale
+#' 
 hmltm.invp=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
                     type="response"){
   esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
@@ -1733,45 +1758,28 @@ hmltm.invp=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
 #' @title Calculates esw from model.
 #'
 #' @description
-#' Calculates esw from model.
-# 
-#' @param pars.
-#' @param hfun.
-#' @param models.
-#' @param cov.
-#' @param survey.pars.
-#' @param hmm.pars.
-#' @param nx.
-#' @param type.
-#' @param to.x.
+#' Calculates effective strip half-width from model.
+#'
+#' @param pars starting parameter values, as for \code{\link{est.hmltm}}.
+#' @param hfun detection hazard function name; same as argument \code{FUN} of \code{\link{est.hmltm}}.
+#' @param models detection hazard covariate models, as for \code{\link{est.hmltm}}.
+#' @param cov covariate matrix with each row corresponding to an observation. Must contain columns 
+#' with variables appearing in \code{models}, and named accordingly, as well as column of perpendicular
+#' distance, named "x". (Perpendicular distances only used if \code{to.x} is TRUE.)
+#' @param survey.pars survey parameters, as for \code{\link{est.hmltm}}.
+#' @param hmm.pars availability hmm parameters, as for \code{\link{est.hmltm}}. Must have elements
+#' \code{$Et} and \code{$Sigma.Et}
+#' @param nx number of x-values (perpendicular distances) to use in evaluating esw.
+#' @param type if "link", parameter vector \code{pars} is assumed to be on the link scale, else on 
+#' the natural scale
+#' @param to.x if TRUE integrates only out to \code{cov$x[i]} for observation i (else integrates to 
+#' \code{survey.pars$W}).
 #' 
 #' @details
-#' Returns effective stript width (esw) for fitted object hmmlt, integrating 
+#' Returns effective strip half-width (esw) for fitted object hmmlt, integrating 
 #' using Simpson's rule.
 #'
-#' Input: 
-#'  hmmlt: output from fit.hmltm
-#'  obs  : observatoins (row numbers of hmmlt$xy) for which to calculate esw 
-#'  b    : parameters (on link scale) at which to evaluate mu. If NULL, uses parameter
-#'         estimates in hmmlt
-#'  nx   : number of x values to use to implement Simpson's rule;
-#'  to.x : If TRUE integrates only to observed x, else integrates to W
-#'  type : If "link", interprets pars as being on link scale, else natural scale
 hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="response",to.x=FALSE){
-  #--------------------------------------------------------------------------------
-  # Returns effective stript width (esw) for fitted object hmmlt, integrating 
-  # using Simpson's rule.
-  #
-  # Input: 
-  #  hmmlt: output from fit.hmltm
-  #  obs  : observatoins (row numbers of hmmlt$xy) for which to calculate esw 
-  #  b    : parameters (on link scale) at which to evaluate mu. If NULL, uses parameter
-  #         estimates in hmmlt
-  #  nx   : number of x values to use to implement Simpson's rule;
-  #  to.x : If TRUE integrates only to observed x, else integrates to W
-  #  type : If "link", interprets pars as being on link scale, else natural scale
-  #
-  #--------------------------------------------------------------------------------
   n=dim(cov)[1]
   if(to.x) {maxx=cov$x}
   else maxx=rep(survey.pars$W,n)
@@ -1779,7 +1787,7 @@ hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="respon
   for(i in 1:n) {
     if(maxx[i]>0){
       xs=seq(0,maxx[i],length=nx) # set of poiints on which to evaluate p(see|x)
-      px=hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,ny=100,type)
+      px=hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,type)
       p[i]=sintegral(px,xs)
     }
   }
@@ -1800,9 +1808,9 @@ hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="respon
 #' @description
 #' Calculates goodness-of-fit in forward dimension, plots fit, and returns p-value and other stuff.
 # 
-#' @param hmmlt.
+#' @param hmmlt fitted model, as output by \code{\link{est.hmltm}}
 #' @param ks.plot If TRUE, does Q-Q plot.
-#' @param seplots.
+#' @param seplots if TRUE does additional diagnostic plots
 #' @param smult multiplier to size circles in third plot.
 hmmlt.gof.y=function(hmmlt,ks.plot=TRUE,seplots=FALSE,smult=5)
 {
@@ -1856,9 +1864,9 @@ hmmlt.gof.y=function(hmmlt,ks.plot=TRUE,seplots=FALSE,smult=5)
 #' @description
 #' Kolmogarov-Smirnov goodness-of-fit p-value calculation.
 # 
-#' @param x.
-#' @param inf.
-#' @param dp.
+#' @param x value of Kolmogarov-distributed random variable at which to evaluate.
+#' @param inf approximation to infinity (a large number).
+#' @param dp approximation convergence criterion.
 #' 
 #' @details
 #' Calculates p-value for Kolmogarov distribution at x, approximating infite sum
@@ -1866,12 +1874,6 @@ hmmlt.gof.y=function(hmmlt,ks.plot=TRUE,seplots=FALSE,smult=5)
 #' by a finite sum to inf (default 1000) if sum to inf and inf+1 differ by less
 #' than dp (default 1e-4), else sum until difference is less than dp.
 p.kolomogarov=function(x,inf=1000,dp=1e-4)
-  #-------------------------------------------------------------------------------
-  # Calculates p-value for Kolmogarov distribution at x, approximating infite sum
-  # \sqrt(2\pi)/x\sum{i=1}^infty\exp(-(2i-1)^2\pi^2/(8x^2)))
-  # by a finite sum to inf (default 1000) if sum to inf and inf+1 differ by less
-  # than dp (default 1e-4), else sum until difference is less than dp.
-  #-------------------------------------------------------------------------------
 {
   infsum=rep(0,inf)
   i=1:inf
@@ -1892,7 +1894,7 @@ p.kolomogarov=function(x,inf=1000,dp=1e-4)
 #' @description
 #' Calculates goodness-of-fit in perpendicular dimension, plots fit, and returns p-value and other stuff.
 # 
-#' @param hmmlt.
+#' @param hmmlt fitted model, as output by \code{\link{est.hmltm}}
 #' @param ks.plot If TRUE, does Q-Q plot.
 hmmlt.gof.x=function(hmmlt,ks.plot=TRUE){
   n=length(hmmlt$xy$x)
@@ -1936,20 +1938,19 @@ hmmlt.gof.x=function(hmmlt,ks.plot=TRUE){
 #' @title Calculates E[1/p(x)] from model.
 #'
 #' @description
-#' Calculates E[1/p(x)] from model.
-# 
-#' @param hmmlt.
-#' @param obs.
-#' @param nx.
-#' @param W.
+#' Calculates mean over perpendicular distance (x) of inverse of fitted values, 1/p(x) for given 
+#' observations, from model.
+#'  
+#' @param hmmlt output from \code{\link{fit.hmltm}}
+#' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#' @param nx number of x-values (perpendicular distance values) to use in calculation.
+#' @param W actual half-width over which to integrate (overrides W in \code{hmmlt}).
 #' 
 #' @details
 #' Identical to fitted.invp but returns data frame instead of numerical scalar or vector.
 #' This is to allow it to be used in NDest for estimating density and abundance. (Also has extra 
 #' parameter: W)
 fitted.invp1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
-  #------------------------------------------------------------------------------------
-  #------------------------------------------------------------------------------------
   if(is.null(W)) W=hmmlt$fitpars$survey.pars$W
   esw=fitted.esw1(hmmlt,obs,nx,W=W)
   return(data.frame(stratum=esw$stratum,transect=esw$transect,object=esw$object,invp=W/esw$esw))
@@ -2007,10 +2008,10 @@ fitted.esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=
 #' @param pars parameters (e.g. \code{$fit$par} output from \code{\link{fit.hmltm}})
 #' @param hfun detection hazard type (character) 
 #' @param models list with elements \code{$y} and \code{$x} speficying covariate model (as for 
-#' \code{\link{est.hstltm}}).
+#' \code{\link{est.hmltm}}).
 #' @param cov data frame with covariates for detections.
-#' @param survey.pars survey pars list (as for \code{\link{est.hstltm}}).
-#' @param hmm.pars: hmm pars list (as for \code{\link{est.hstltm}})
+#' @param survey.pars survey pars list (as for \code{\link{est.hmltm}}).
+#' @param hmm.pars hmm pars list (as for \code{\link{est.hmltm}})
 #' @param ID list with elements \code{$stratum}, \code{$transect}, \code{$object} - to uniquely 
 #' identify detections.
 #' @param nx number of x values for Simpson's rule integration
@@ -2021,11 +2022,13 @@ fitted.esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=
 #' 
 #' @details
 #' Designed to be called by \code{\link{fitted.esw1}}.
-#' Identical to hmltm.esw but returns list instead of numerical scalar or vector.
+#' Identical to hmltm.esw but returns list instead of numerical scalar or vector, and allows limit 
+#' of integration (W) to be specified explicitly, which overrides limit \code{survey.pars$W}.
 #' This is to allow it to be used in \code{\link{NDest}} for estimating density and abundance.
 #
-#' Returns effective stript width (esw) for 1 observer for fitted object \code{hmmlt}, integrating 
-#' using Simpson's rule.
+#' Returns effective stript half-width (esw) for 1 observer for fitted object \code{hmmlt}, 
+#' integrating using Simpson's rule.
+#' 
 hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="response",to.x=FALSE,
                     W=NULL){
   nmax=dim(cov)[1]
@@ -2039,7 +2042,7 @@ hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="re
   for(i in 1:nmax) {
     if(maxx[i]>0){
       xs=seq(0,maxx[i],length=nx) # set of poiints on which to evaluate p(see|x)
-      px=hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,ny=100,type)
+      px=hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,type)
       ustrat[i]=ID$stratum[i];utrans[i]=ID$transect[i];uobject[i]=ID$object[i] # record sighting ID
       esw[i]=sintegral(px,xs)
     }
@@ -2265,7 +2268,7 @@ NDest=function(dat,hmltm.fit,W){
 #'  \item {Sigma.Et} {a 2x2xm matrix, in which Sigma.Et[,,i] is the variance-covariance matrix of 
 #'  Et[,i.] (i.e. the variance-covariance matrix of Et for the ith availability model).}
 #' }
-#' @param control.fit: list with elements
+#' @param control.fit list with elements
 #' \itemize{
 #'  \item{$hessian} {logical) - if TRUE Hessian is estimated and returned, else not,}
 #'  \item{$nx} {(scalar) - the number of intervals to use with Simpson's rule integration over y. 
@@ -2373,7 +2376,7 @@ bootsum=function(bests,cilevel=0.95){
 #' Stratified nonparameteric bootstrap of hidden Markov line transect model (hmltm) with transects 
 #' as the sampling units. 
 #'
-#' @param \code{hmltm.est} output from \code{\link{est.hmltm}}. 
+#' @param hmltm.est output from \code{\link{est.hmltm}}. 
 #' @param B number of bootstrap replicates to do.
 #' @param hmm.pars.bs output \code{\link{hmmpars.boot}}, containing sets of refitted HMM parameter values.
 #' @param bs.trace amount of reporting that \code{\link{optim}} should do while fitting models to
@@ -2392,11 +2395,11 @@ bootsum=function(bests,cilevel=0.95){
 #' (Ea) and unavailable (Eu) from a bivariate lognormal distribution with mean 
 #' \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Et} and standard deviation 
 #' \code{hmltm.est$hmltm.fit$fitpars$hmm.pars$Sigma.Et} and converting this to Markov Model transition
-#' probability matrix parameters using \code{\link{MakePi}}, ELSE IF \code{hmm.pars.bs} is not 
+#' probability matrix parameters using \code{\link{makePi}}, ELSE IF \code{hmm.pars.bs} is not 
 #' \code{NULL}, random samples with replacement, of HMM parameter sets are taken from 
 #' \code{hmm.pars.bs}.
 #' 
-#' @seealso \code{\link{hmmpars.boot}}, which is is used to generate \code{\link{hmm.pars.bs}}.
+#' @seealso \code{\link{hmmpars.boot}}, which is is used to generate \code{hmm.pars.bs}.
 #' 
 bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.avail=FALSE){
   #------------------------------------------------------------------------------------------
@@ -2508,7 +2511,7 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
 #' covariance matrix Sigma.
 #' 
 #' @param mu multivariate logNormal distribution mean.
-#' @param mu multivariate logNormal distribution variace-covarice matrix.
+#' @param Sigma multivariate logNormal distribution variace-covarice matrix.
 #' 
 Npars.from.lNpars=function(mu,Sigma){
   cv2=diag(Sigma)/mu^2 # Sigma is variance matrix
@@ -2593,7 +2596,7 @@ resample.hmmpars=function(availhmm,adat,animals,seed=NULL,nperow=10,printprog=TR
 #' @description
 #' Reformats hmm.pars object as a vector - so that it can easily be written to file.
 #' 
-#' @param hmm.pars list with availability HMM paramters, as for the \code{hmm.pars} parameter of 
+#' @param hmmpars list with availability HMM paramters, as for the \code{hmm.pars} parameter of 
 #' \code{\link{est.hmltm}}.
 #' 
 #' @return A numeric vector.
@@ -2652,7 +2655,7 @@ unvectorize.hmmpars=function(hv) {
 #' hmm.pars object from the fitted HMM parameters. 
 #' 
 #' Does the above \code{B} times, each time reformtting the hmm.pars object as a vector using 
-#' \code{\link{vectorize.hmm}} and then entering this as the next row in a matrix of dimension 
+#' \code{\link{vectorize.hmmpars}} and then entering this as the next row in a matrix of dimension 
 #' \code{B}xT, where T=\code{3+length(animals)*(nstate^2+nstate*2)} and \code{nstate} is the 
 #' number of states in the HMM.
 #' 
@@ -2669,7 +2672,7 @@ hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
   na=length(adat)
 #  ncol=1
 #  for(i in 1:na) if(length(adat[[i]])>ncol) ncol=length(adat[[i]])
-  onlength=length(vectorize.hmmpars(list(Pi=availhmm$Pi[,,1,drop=FALSE],
+  onelength=length(vectorize.hmmpars(list(Pi=availhmm$Pi[,,1,drop=FALSE],
               pm=availhmm$pm[,1,drop=FALSE],delta=availhmm$delta[,1,drop=FALSE])))
   ncol=3+(onelength-3)*length(animals) # 3 numbers specify vectorized length parameters
   hmmat=matrix(rep(NA,ncol*B),ncol=ncol)
@@ -2699,7 +2702,7 @@ hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
 #' @param pars starting parameter values, as for \code{\link{est.hmltm}}.
 #' @param hfun detection hazard function name; same as argument \code{FUN} of \code{\link{est.hmltm}}.
 #' @param models detection hazard covariate models, as for \code{\link{est.hmltm}}.
-#' @param survey pars survey parameters, as for \code{\link{est.hmltm}}.
+#' @param survey.pars survey parameters, as for \code{\link{est.hmltm}}.
 #' @param hmm.pars availability hmm parameters, as for \code{\link{est.hmltm}}. Must have elements
 #' \code{$Et} and \code{$Sigma.Et}
 #' @param control.fit list controlling fit, as for \code{\link{est.hmltm}}.
@@ -2724,10 +2727,11 @@ hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
 #' \item{callist:}{ input reflection: everything passed to the function, bundled into a list}
 #' \item{bs:}{ a list containing (a) a Bxn matrix \code{$phats} in which each row is the estimated 
 #' detection probabilities for each of the n bootstrapped detections, (b) a Bxn matrix \code{$pars} 
-#' in which each row is the estimated detection hazard parameters, and (c) the following vectors 
-#' of length B with estimates from each bootstrap: \code{$Et} (mean times available and unavailable), 
-#' \code{$p0} (mean estimated p(0) over all detections), \code{$p0} (mean estimated p(0) over all 
-#' detections).}
+#' in which each row is the estimated detection hazard parameters, (c) the following vectors 
+#' of length B with estimates from each bootstrap: \code{$p0} (mean estimated p(0) over all 
+#' detections), \code{$phat} (mean estimated detection probability over all detections), and (d) 
+#' a Bx2 matrix \code{$b.Et} in which each row is the mean times unavailable and available.
+#' }
 #' }
 #' 
 bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
@@ -2755,7 +2759,7 @@ bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
       Pi=matrix(c((1-pi12),pi12,pi21,(1-pi21)),nrow=2,byrow=TRUE)
       delta=compdelta(Pi)
       pm=c(0.0,1.0)
-      b.hmm.pars=list(pm=pm,Pi=Pi,delta=delta,Et,Sigma.Et)
+      b.hmm.pars=list(pm=pm,Pi=Pi,delta=delta,b.Et[nb],hmm.pars$Sigma.Et)
     }else {
       b.hmm.pars=hmm.pars
     }
@@ -2772,7 +2776,7 @@ bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
   # package results and return
   callist=list(dat=dat,pars=pars,hmm.pars=hmm.pars,hfun=hfun,models=models,
                survey.pars=survey.pars,control.fit=control.fit,control.optim=control.opt)
-  bs=list(b.Et=b.Et,p0=b.p0,phat=b.phat,phats=b.phats,pars=b.pars)
+  bs=list(phats=b.phats,pars=b.pars,p0=b.p0,phat=b.phat,b.Et=b.Et)
   return(list(callist=callist,bs=bs))
 }
 
@@ -2790,7 +2794,7 @@ bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
 #' @param pars starting parameter values, as for \code{\link{est.hmltm}}.
 #' @param hfun detection hazard function name; same as argument \code{FUN} of \code{\link{est.hmltm}}.
 #' @param models detection hazard covariate models, as for \code{\link{est.hmltm}}.
-#' @param survey pars survey parameters, as for \code{\link{est.hmltm}}.
+#' @param survey.pars survey parameters, as for \code{\link{est.hmltm}}.
 #' @param hmm.pars.bs multiple sets of availability hmm parameters, as output by 
 #' \code{\link{hmmpars.boot}}. 
 #' @param control.fit list controlling fit, as for \code{\link{est.hmltm}}.
@@ -2816,24 +2820,24 @@ bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
 #' detection probabilities for each of the n bootstrapped detections, (b) a Bxn matrix \code{$pars} 
 #' in which each row is the estimated detection hazard parameters, and (c) the following vectors 
 #' of length B with estimates from each bootstrap: \code{$Et} (mean times available and unavailable), 
-#' \code{$p0} (mean estimated p(0) over all detections), \code{$p0} (mean estimated p(0) over all 
-#' detections).}
+#' \code{$p0} (mean estimated p(0) over all detections), \code{$phat} (mean estimated detection
+#' probability over all detections), \code{$convergence} convergence diagnostic from \code{optim}.}
 #' }
 #' 
 bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
-                            control.fit,control.opt,fixed.avail=FALSE,nboot=999,silent=FALSE){
+                            control.fit,control.opt,fixed.avail=FALSE,B=999,silent=FALSE){
   n=length(dat$x)
   npar=length(pars)
-  conv=b.p0=b.phat=rep(NA,nboot)
-  b.pars=matrix(rep(NA,nboot*npar),ncol=npar)
-  b.phats=matrix(rep(NA,B*n),ncol=n)# matrix for detection probs of each individual.
+  conv=b.p0=b.phat=rep(NA,B)
+  b.pars=matrix(rep(NA,B*npar),ncol=npar)
+  b.phats=matrix(rep(NA,B*n),ncol=n) # matrix for detection probs of each individual.
   # bootstrap availability parameters
   if(!fixed.avail) { # resample availability parameters
     nhmm=dim(hmm.pars.bs)[1]
     if(nhmm==1) stop("Only one set of hmm pars. need multiple sets of pars if not fixed avail.")
-    reps=sample(1:nhmm,nboot,replace=TRUE)
+    reps=sample(1:nhmm,B,replace=TRUE)
   }
-  for(nb in 1:nboot) {
+  for(nb in 1:B) {
     if(!fixed.avail)  {
       b.hmm.pars=unvectorize.hmmpars(hmm.pars.bs[reps[nb],])
     }else {
@@ -2865,8 +2869,10 @@ bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
     flush.console()
   }
   # package results and return
-  callist=list(dat=dat,pars=pars,hmm.pars=hmm.pars,hfun=hfun,survey.pars=survey.pars,control.fit=control.fit,control.optim=control.opt)
-  bs=list(hmm.pars=hmm.pars,p0=b.p0,phat=b.phat,phats=b.phats,pars=b.pars,convergence=conv)
+  callist=list(dat=dat,pars=pars,hmm.pars=hmm.pars.bs,hfun=hfun,survey.pars=survey.pars,
+               control.fit=control.fit,control.optim=control.opt)
+#  bs=list(hmm.pars=hmm.pars,p0=b.p0,phat=b.phat,phats=b.phats,pars=b.pars,convergence=conv)
+  bs=list(phats=b.phats,pars=b.pars,p0=b.p0,phat=b.phat,convergence=conv)
   return(list(callist=callist,bs=bs))
 }
 
@@ -2992,7 +2998,7 @@ cdfy.u=function(y,x,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,u)
 #' @param hfun detection hazard function name.
 #' @param pars detection hazard function parameters.
 #' @param hmm.pars availability hidden Markov model parameters (as per \code{\link{est.hmltm}}). 
-#' @param survey pars survey parameters, as for \code{\link{est.hmltm}}.
+#' @param survey.pars survey parameters, as for \code{\link{est.hmltm}}.
 #' @param print.progress if TRUE prints progress through simulations.
 #'
 #' @details
@@ -3079,11 +3085,12 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
 #' @param xmax maximum perpendicular distance to simulate.
 #' @param ymax maximum forward distance to simulate (must be at or beyond point that detection hazard
 #' function is effectively zero).
+#' @param spd speed observer is moving.
 #' @param animals a vector of up to m integers specifying which members of the list \code{adat} are to 
 #' be used to simulate availability. (e.g. \code{animals=c(1,3,5)} says the first, third and fifth time
 #' series in \code{adat} are to be used).
 #' @param hfun detection hazard function name. 
-#' @param hfun detection hazard function parameters. 
+#' @param pars detection hazard function parameters. 
 #' @param N number of animals within distance \code{xmax} of the transect line and hence subject to 
 #' being detected (or possibly not).
 #' @param dmax if not NULL, then it is the depth above which animals are considered to be available, and
@@ -3105,29 +3112,26 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
 #' of detected animals, respectively.
 #' 
 simhmltm.w=function(adat,xmax,ymax,spd,animals,hfun,pars,N,dmax=NULL,seed=NULL,poiss=FALSE)
-  #----------------------------------------------------------------------------
-# Simulates (x,y) observations from a population of N animals using detection
-# hazard specified by hfun & pars, and resampling from animal availability data
-# specified by adat (time series of animal depths) and dmax (max depth at 
-# which animals are available.
-#----------------------------------------------------------------------------
 {
   h=match.fun(hfun)
   b=tfm(pars,hfun) # this is inefficient ('cause just back-transform in h()) but makes for uniform handling outside this function
   if(!is.null(seed)) set.seed(seed)
   ytmax=ceiling(ymax/spd) # needs to be integer cause is number of time units
   wst=wa=adata=adat[animals] # select which time series to use
-  if(is.null(dmax)) # in this case adat is binary availability data
-  for(i in 1:length(aniamls)) {
-    # Determine the times when the animals are available and store in a list
-    wa[[i]]=adata[[i]]>=0.5 # TRUE for 1s, FALSE for 0s
-    # Determine the last possible starting times of sequences of length (2*ymax+1) for animal 
-    wst[i]=length(adata[[i]])-ytmax
+  if(is.null(dmax)) {# in this case adat is binary availability data
+    for(i in 1:length(animals)) {
+      # Determine the times when the animals are available and store in a list
+      wa[[i]]=adata[[i]]>=0.5 # TRUE for 1s, FALSE for 0s
+      # Determine the last possible starting times of sequences of length (2*ymax+1) for animal 
+      wst[i]=length(adata[[i]])-ytmax
+    }
   } else {
-    # Determine the times when the animals are available and store in a list
-    wa[[i]]=adata[[i]]<=dmax # TRUE for shallower than dmax, FALSE for deeper
-    # Determine the last possible starting times of sequences of length (2*ymax+1) for animal 
-    wst[i]=length(adata[[i]])-ytmax    
+    for(i in 1:length(animals)) {
+      # Determine the times when the animals are available and store in a list
+      wa[[i]]=adata[[i]]<=dmax # TRUE for shallower than dmax, FALSE for deeper
+      # Determine the last possible starting times of sequences of length (2*ymax+1) for animal 
+      wst[i]=length(adata[[i]])-ytmax
+    }
   }
 #  # Determine the times when the animals are available and store in a list
 #  wa<-list(adat$w1<=dmax, adat$w2<=dmax, adat$w3<=dmax, adat$w4<=dmax, adat$w5<=dmax, adat$w6<=dmax, adat$w7<=dmax,adat$w8<=dmax)    
@@ -3203,7 +3207,7 @@ simhmltm.w=function(adat,xmax,ymax,spd,animals,hfun,pars,N,dmax=NULL,seed=NULL,p
 #' and equal to ehmm.pars.
 #' @param print.n if TRUE, prints sample size for each simulation.
 #' @param silent parameter of \code{\link{try}}, controlling error reporting.
-#' @param nx=100 number of perpendicular distances intervals to use in evaluating detection 
+#' @param nx number of perpendicular distances intervals to use in evaluating detection 
 #' probability, p(x).
 #'
 #' @return
@@ -3249,7 +3253,8 @@ simest=function(simethod="hmm",shfun,spars,ehfun=shfun,parstart=spars,survey.par
   #    esw=p.*W
   xs=seq(0,W,length=nx)
   # non-Chris change:
-  p=hmltm.px(x=xs,pars=spars,hfun=shfun,models=NULL,cov=NULL,survey.pars=survey.pars,hmm.pars=shmm.pars)
+  p=hmltm.px(x=xs,pars=spars,hfun=shfun,models=NULL,cov=NULL,survey.pars=survey.pars,
+             hmm.pars=shmm.pars)
 #  p=hmltm.px(x=xs,pars=spars,hfun=shfun,survey.pars=survey.pars,hmm.pars=shmm.pars)
   p0=p[1]
   esw=sintegral(p,xs)
@@ -3304,20 +3309,15 @@ simest=function(simethod="hmm",shfun,spars,ehfun=shfun,parstart=spars,survey.par
       eswhat[i]=phat[i]*W
       Nhat[i]=n[i]/phat[i]
       if(varest) {
-        invpse[i]=invHessvar("invp",simestw)$se
-        p0se[i]=invHessvar("p0",simestw)$se
+        if(is.null(simestw$fit$hessian)) {
+          if(i==1) warning("No Hessian so can't get analytic variance estimate.")
+          invpse[i]=NA
+          p0se[i]=NA
+        } else {
+          invpse[i]=invHessvar("invp",simestw)$se
+          p0se[i]=invHessvar("p0",simestw)$se
+        }
       }
-      #        if(dox) {
-      #          parest.x[i,]=simestw.x$fit$par
-      #          p0hat.x[i]=simestw.x$p[1]
-      #          phat.x[i]=simestw.x$phat
-      #          eswhat.x[i]=phat.x[i]*W
-      #          Nhat.x[i]=n[i]/phat.x[i]
-      #          if(varest) {
-      #            invpse.x[i]=invpvar(simestw.x)$se
-      #            p0se.x[i]=p0var(simestw.x)$se
-      #          }
-      #        }
     }
     
     if(report.progress) print(paste("done",i))
@@ -3492,7 +3492,100 @@ sumsim=function(simout,brief=FALSE){
 
 #---------------------- End Simulation functions ----------------------
 #                       ------------------------
-  
+
+#                          -----------------------------------------------
+#------------------------- Start Analytic Variance Estimation functions -----------------------
+
+#' @title Calculates asymptotic variance using Hessian.
+#'
+#' @description
+#' Calculates asymptotic variance of a statistic derived from a hsltm fit, using the inverse of the 
+#' Hessian matrix and estimated derivative of the statististic with respect to the parameter vector.
+#' The derivative is approximated using function \code{\link{splinefun}}.
+# 
+#' @param stat name of statistic to calculate. Valid statistics are "p0" for estimated probability 
+#' at perpendicular distance zero, "p" for mean estimated detection probability over all perpendicular
+#' distances, "invp" for the inverse of mean estimated detection probability over all perpendicular
+#' distances, "esw" for estimated effective strip width, and "invesw" for estimated inverse of effective 
+#' strip width.
+#' @param hmmlt object output by \code{\link{fit.hmltm}}.
+#' @param nx4spline is number of points at which to evaluate function for spline interpolation.
+#' @param doplot if TRUE, plots the spline approximation to the statistic as a function of each 
+#' parameter.
+#' 
+#' @seealso \code{\link{hmltm.stat}} for calculation of derived statistics, and 
+#' \code{\link{splinefun}} for approximation of function derivatives.
+#' 
+invHessvar=function(stat,hmmlt,nx4spline=50,doplot=FALSE){
+  # extract things we need:
+  models=hmmlt$models
+  if(!is.nullmodel(models)) stop("This function only coded for models without covariates.")
+  cov=hmmlt$xy[1,] # extract only 1 obs 'cause assuming no covars, so stats same for all obs
+  hfun=hmmlt$h.fun
+  b=hmmlt$fit$b
+  hmm.pars=hmmlt$fitpars$hmm.pars
+  survey.pars=hmmlt$fitpars$survey.pars
+  vcv=solve(hmmlt$fit$hessian)
+  vlen=dim(vcv)[1]
+  # calculate derivative vector
+  dstat.db=rep(0,vlen)
+  no.se=FALSE
+  for(i in 1:vlen){
+    se=sqrt(vcv[i,i])
+    if(is.nan(se)) {
+      no.se=TRUE
+      x=seq(b[i]-b[i]/10,b[i]+b[i]/10,length=nx4spline)
+    } else {x=seq(b[i]-se/2,b[i]+se/2,length=nx4spline)}
+    y=x*0
+    for(j in 1:nx4spline) {
+      bi=b
+      bi[i]=x[j]
+      y[j]=hmltm.stat(stat,bi,hfun,models,cov,survey.pars,hmm.pars)
+    }
+    sf=splinefun(x,y)
+    if(doplot) {
+      plot(x,y,type="l")
+      lines(x,sf(x),col="red",lty=2)
+    }
+    dstat.db[i]=sf(b[i],deriv=1)
+  }
+  # use inverse Hessian to calculate variance of statistic:
+  if(no.se) return(list(invHess=vcv,dstat.db=dstat.db,stat=stat,se=-999,cv=-999))
+  else {
+    VAR=t(dstat.db%*%vcv%*%dstat.db)
+    SE=sqrt(VAR)
+    stat=hmltm.stat(stat,b,hfun,models,cov,survey.pars,hmm.pars) # called with original b parameters
+    CV=SE/stat
+    return(list(invHess=vcv,dstat.db=dstat.db,stat=stat,se=SE,cv=CV))
+  }
+}
+
+
+
+#natparvar=function(hmmlt){
+#  #-------------------------------------------------------------------------------------
+#  # NOTE: Does not work with covariates - 'cause with the way covariates are implemened,
+#  #      have more natural pars than fitting pars.
+#  #-------------------------------------------------------------------------------------
+#  if(!is.nullmodel(hmmlt$models)) stop("This function only implemented for models without covariates.")
+#  # extract things we need:
+#  hfun=hmmlt$h.fun
+#  par=hmmlt$fit$par
+#  b=tfm(hmmlt$fit$par,hfun) 
+#  d.dpar=dinvt.dpar(b,hfun) # derivative of natural with respect to fitting pars
+#  # use inverse Hessian to calculate variance
+#  invHess=solve(hmmlt$fit$hessian)
+#  VAR=t(diag(d.dpar))%*%invHess%*%diag(d.dpar)
+#  SE=sqrt(diag(VAR))
+#  CV=SE/par
+#  
+#  return(list(invHess=invHess,d.dpar=d.dpar,par=par,se=SE,cv=CV))
+#}
+
+
+#------------------------- End Analytic Variance Estimation functions -----------------------
+#                          ------------------------------------------
+
 
 ########################################### End of Functions ################################################
 
@@ -3520,6 +3613,7 @@ sumsim=function(simout,brief=FALSE){
 #'    value - just there to have something in this compulsory variable.}
 #'    \item{\code{object}:}{ unique identifier for each detection (a numeric vector; NA if no detection).}
 #'    \item{\code{size}:}{ size of each detected group (NA if no detection).}
+#'    \item{\code{seen}:}{ REDUNDANT: 1 for all detections (NAA if no detection).}
 #'  }
 #' @details Temporary dataset with which to test package.
 #' @source Virginia Aquarium.
@@ -3606,7 +3700,7 @@ NULL
 #' accordingly converted into binary availability time series and HMMs were fitted to these. This 
 #' dataset was used in the analyses of Borchers et al. (2013) - albeit with survey data that had no
 #' forward distances. It was also used together with the dataset \code{\link{bowhead.plane}} in the 
-#' analyses of (** reference to Mads Peter's paper **).
+#' analyses of [Insert reference to Mads Peter's paper].
 #' @usage bowhead.hmm.pars
 #' @format A list with the following three elements.
 #'  \describe{
@@ -3614,12 +3708,13 @@ NULL
 #'    tagged whale). States can be interpreted as behavioural states, one of which being a state in 
 #'    which the animal is more likely to be available than when in the other state.}
 #'    \item{\code{pm}:}{ a 2x8 matrix containing the 8 vectors of state-dependent Bernoulli availability 
-#'    parameters. pm[1,i] is the probability of whale i being available given state 1 (the less 
-#'    available behavoural state), and pm[1,i] is the probability of whale i being available given 
+#'    parameters. \code{pm[1,i]} is the probability of whale i being available given state 1 (the less 
+#'    available behavoural state), and \code{pm[1,i]} is the probability of whale i being available given 
 #'    state 1 (the more available behavoural state).}
-#'    \item{\code{delta}:}{ a 2x8 matrix containing the stationary distribution of Pi for each whale. 
-#'    So delta[1,i] is the probability that whale i is in behavioural state 1 when observation starts, 
-#'    and delta[2,i] is the probability that it is in behavioural state 2 when observation starts.}
+#'    \item{\code{delta}:}{ a 2x8 matrix containing the stationary distribution of \code{Pi} for each 
+#'    whale. So \code{delta[1,i]} is the probability that whale i is in behavioural state 1 when 
+#'    observation starts, and \code{delta[2,i]} is the probability that it is in behavioural state 2 when 
+#'    observation starts.}
 #'  }
 #'  
 #'  @seealso The depth time series data are in object \code{\link{bowhead.depths}} and the binary 
@@ -3647,7 +3742,7 @@ NULL
 #' @docType data
 #' @description Bootstrapped Hidden Markov model (HMM) parameter estimates for bowhead whale 
 #' availability, obtained using by passing \code{\link{bowhead.hmm.pars}} and 
-#' \code{\link{bowhead.hmm.adat}} to \code{\link{hmmpars.boot}}.
+#' \code{\link{bowhead.adat}} to \code{\link{hmmpars.boot}}.
 #' @format A matrix in which each row is a set of HMM parameters converted to vector format by 
 #' \code{\link{vectorize.hmmpars}}. Each row can be converted back to the format required by
 #' \code{\link{est.hmltm}} using \code{\link{unvectorize.hmmpars}}

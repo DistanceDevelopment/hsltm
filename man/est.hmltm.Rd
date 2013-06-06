@@ -67,7 +67,7 @@
   Et[,i.] (i.e. the variance-covariance matrix of Et for
   the ith availability model).} }}
 
-  \item{control.fit:}{list with elements \itemize{
+  \item{control.fit}{list with elements \itemize{
   \item{$hessian} {logical) - if TRUE Hessian is estimated
   and returned, else not,} \item{$nx} {(scalar) - the
   number of intervals to use with Simpson's rule

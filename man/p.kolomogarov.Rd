@@ -5,11 +5,12 @@
   p.kolomogarov(x, inf = 1000, dp = 1e-04)
 }
 \arguments{
-  \item{x.}{}
+  \item{x}{value of Kolmogarov-distributed random variable
+  at which to evaluate.}
 
-  \item{inf.}{}
+  \item{inf}{approximation to infinity (a large number).}
 
-  \item{dp.}{}
+  \item{dp}{approximation convergence criterion.}
 }
 \description{
   Kolmogarov-Smirnov goodness-of-fit p-value calculation.

@@ -5,13 +5,17 @@
   fitted.invp(hmmlt, obs = 1:dim(hmmlt$xy)[1], nx = 100)
 }
 \arguments{
-  \item{hmmlt.}{}
+  \item{hmmlt}{output from \code{\link{fit.hmltm}}}
 
-  \item{obs.}{}
+  \item{obs}{observations (row numbers of \code{hmmlt$xy})
+  for which to calculate esw}
 
-  \item{nx.}{}
+  \item{nx}{number of x-values (perpendicular distance
+  values) to use in calculation.}
 }
 \description{
-  Calculates E[1/p(x)] from model.
+  Calculates mean over perpendicular distance (x) of
+  inverse of fitted values, 1/p(x) for given observations,
+  from model.
 }
 

@@ -6,11 +6,12 @@
     smult = 5)
 }
 \arguments{
-  \item{hmmlt.}{}
+  \item{hmmlt}{fitted model, as output by
+  \code{\link{est.hmltm}}}
 
   \item{ks.plot}{If TRUE, does Q-Q plot.}
 
-  \item{seplots.}{}
+  \item{seplots}{if TRUE does additional diagnostic plots}
 
   \item{smult}{multiplier to size circles in third plot.}
 }

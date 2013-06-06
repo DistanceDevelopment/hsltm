@@ -76,8 +76,8 @@
   \item{silent}{parameter of \code{\link{try}}, controlling
   error reporting.}
 
-  \item{nx=100}{number of perpendicular distances intervals
-  to use in evaluating detection probability, p(x).}
+  \item{nx}{number of perpendicular distances intervals to
+  use in evaluating detection probability, p(x).}
 }
 \value{
   list with these elements: \itemize{ \item{N:}{ population

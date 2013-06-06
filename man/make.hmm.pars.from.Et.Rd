@@ -52,7 +52,7 @@
  make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt) # two animals
 
  # Here's how the data porpoise.hmm.pars was created from numbers in Westgate et al. (1995):
- pn=c(40,52,36,34,49,60,33)/100 # proportion of time available
+ ppn=c(40,52,36,34,49,60,33)/100 # proportion of time available
  ET=c(76,44,52,64,70,46,103) # mean dive cycle duration
  seET=c(48,37,52,65,59,32,67) # SE of mean dive cycle duration
  cvET=seET/ET # CV of mean dive cycle duration

@@ -15,7 +15,7 @@
   \item{hmm.pars}{availability hidden Markov model
   parameters (as per \code{\link{est.hmltm}}).}
 
-  \item{survey}{pars survey parameters, as for
+  \item{survey.pars}{survey parameters, as for
   \code{\link{est.hmltm}}.}
 
   \item{print.progress}{if TRUE prints progress through

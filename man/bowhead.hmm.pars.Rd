@@ -8,12 +8,13 @@
    tagged whale). States can be interpreted as behavioural states, one of which being a state in
    which the animal is more likely to be available than when in the other state.}
    \item{\code{pm}:}{ a 2x8 matrix containing the 8 vectors of state-dependent Bernoulli availability
-   parameters. pm[1,i] is the probability of whale i being available given state 1 (the less
-   available behavoural state), and pm[1,i] is the probability of whale i being available given
+   parameters. \code{pm[1,i]} is the probability of whale i being available given state 1 (the less
+   available behavoural state), and \code{pm[1,i]} is the probability of whale i being available given
    state 1 (the more available behavoural state).}
-   \item{\code{delta}:}{ a 2x8 matrix containing the stationary distribution of Pi for each whale.
-   So delta[1,i] is the probability that whale i is in behavioural state 1 when observation starts,
-   and delta[2,i] is the probability that it is in behavioural state 2 when observation starts.}
+   \item{\code{delta}:}{ a 2x8 matrix containing the stationary distribution of \code{Pi} for each
+   whale. So \code{delta[1,i]} is the probability that whale i is in behavioural state 1 when
+   observation starts, and \code{delta[2,i]} is the probability that it is in behavioural state 2 when
+   observation starts.}
  }}
 \source{
   Laidre et al. (2007).
@@ -35,7 +36,7 @@
   et al. (2013) - albeit with survey data that had no
   forward distances. It was also used together with the
   dataset \code{\link{bowhead.plane}} in the analyses of
-  (** reference to Mads Peter's paper **).
+  [Insert reference to Mads Peter's paper].
 }
 \examples{
 data(bowhead.hmm.pars)
