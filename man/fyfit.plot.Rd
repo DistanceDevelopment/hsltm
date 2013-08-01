@@ -2,12 +2,12 @@
 \alias{fyfit.plot}
 \title{Plotting pdf of forward detection distances.}
 \usage{
-  fyfit.plot(hmmlt, values = TRUE, breaks = NULL,
+  fyfit.plot(hmltm, values = TRUE, breaks = NULL,
     allx = FALSE, nys = 250, xlab = "Forward distance (y)",
     ylab = "pdf(y)", main = "", ylim = NULL, theta.b = 90)
 }
 \arguments{
-  \item{hmmlt}{object produced by \code{\link{est.hmltm}}.}
+  \item{hmltm}{object produced by \code{\link{est.hmltm}}.}
 
   \item{values}{If TRUE, returns function values used in
   plot.}

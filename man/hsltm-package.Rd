@@ -43,7 +43,7 @@ data(bowhead.plane) # get bowhead aerial survey line transect data
 data(bowhead.hmm.pars) # get bowhead availability HMM parameters (8 sets of parameters)
 
 # set survey and fitting parameters
-survey.pars=make.survey.pars(spd=23.55,Wl=100,W=3000,ymax=2200) # specify survey parameters
+survey.pars=make.survey.pars(spd=43.6,Wl=100,W=3000,ymax=2200) # specify survey parameters
 control.fit=list(hessian=FALSE,nx=64) # fitting parameters
 control.opt=list(trace=5,maxit=1000) # optimisation parameters
 
@@ -51,7 +51,8 @@ control.opt=list(trace=5,maxit=1000) # optimisation parameters
 hfun="h.EP2x.0";models=list(y=NULL,x=NULL) # specify detection hazard model (no covariates)
 pars=c(1.98, 0.47, 28, 1215) # detection hazard parameter starting values
 # Point estimation:
-bwEP2x.null=est.hmltm(bowhead.plane,pars,hfun,models,survey.pars,bowhead.hmm.pars,control.fit,control.opt,W.est=2500)
+W.est=2500 # set perpendicular truncation distance for Horvitz-Thompson-like estimator
+bwEP2x.null=est.hmltm(bowhead.plane,pars,hfun,models,survey.pars,bowhead.hmm.pars,control.fit,control.opt,W.est=W.est)
 
 # display point estimates of density and abundance:
 bwEP2x.null$point$ests

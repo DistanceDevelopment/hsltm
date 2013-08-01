@@ -2,7 +2,7 @@
 \alias{fxfit.plot}
 \title{Detection function fit plotting.}
 \usage{
-  fxfit.plot(hmmlt, allx = FALSE, values = TRUE,
+  fxfit.plot(hmltm, allx = FALSE, values = TRUE,
     breaks = NULL, ylim = NULL, xlab = NULL, ylab = NULL,
     type = "prob", text.cex = 0.66)
 }

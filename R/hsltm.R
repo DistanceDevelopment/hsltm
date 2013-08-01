@@ -1037,7 +1037,7 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
 #' Plots pdf of forward detection distances (f(y)) averaged over detectoins on top of forward detection 
 #' distance distribution. 
 #'  
-#' @param hmmlt object produced by \code{\link{est.hmltm}}.
+#' @param hmltm object produced by \code{\link{est.hmltm}}.
 #' @param values If TRUE, returns function values used in plot.
 #' @param breaks histogram break points.
 #' @param allx If TRUE, returns matrix with p(see at y, given x) for each x in data in hmmlt (dashed gray lines).
@@ -1048,9 +1048,10 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
 #' @param main title.
 #' @param ylim y-value limits.
 #' @param theta.b REDUNDANT must = 90.
-fyfit.plot=function(hmmlt,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
+fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
                     xlab="Forward distance (y)",ylab="pdf(y)",main="",ylim=NULL,theta.b=90)
 {
+  hmmlt=hmltm$hmltm.fit
   if(theta.b !=90) stop("This function only allows theta.b=90 degrees at present.")
   # unpack things from hmmlt object:
   pm=hmmlt$fitpars$hmm.pars$pm
@@ -1149,9 +1150,10 @@ fyfit.plot=function(hmmlt,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
 #' @param type "prob" for probability function, "density" for pdf.
 #' @param text.cex relative text size.
 #' 
-fxfit.plot=function(hmmlt,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL,ylab=NULL,
+fxfit.plot=function(hmltm,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL,ylab=NULL,
                     type="prob",text.cex=0.66)
 {
+  hmmlt=hmltm$hmltm.fit
   if(type!="density" & type!="prob") stop("Invalid type: must be `density' or `prob'.")
   nx=length(hmmlt$x)
   if(is.null(breaks)) h=hist(hmmlt$xy$x,plot=FALSE)
@@ -1808,12 +1810,13 @@ hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="respon
 #' @description
 #' Calculates goodness-of-fit in forward dimension, plots fit, and returns p-value and other stuff.
 # 
-#' @param hmmlt fitted model, as output by \code{\link{est.hmltm}}
+#' @param hmltm fitted model, as output by \code{\link{est.hmltm}}
 #' @param ks.plot If TRUE, does Q-Q plot.
 #' @param seplots if TRUE does additional diagnostic plots
 #' @param smult multiplier to size circles in third plot.
-hmmlt.gof.y=function(hmmlt,ks.plot=TRUE,seplots=FALSE,smult=5)
+hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5)
 {
+  hmmlt=hmltm$hmltm.fit
   dat=hmmlt$xy
   hfun=hmmlt$h.fun
   b=hmmlt$fit$b
@@ -1894,9 +1897,10 @@ p.kolomogarov=function(x,inf=1000,dp=1e-4)
 #' @description
 #' Calculates goodness-of-fit in perpendicular dimension, plots fit, and returns p-value and other stuff.
 # 
-#' @param hmmlt fitted model, as output by \code{\link{est.hmltm}}
+#' @param hmltm fitted model, as output by \code{\link{est.hmltm}}
 #' @param ks.plot If TRUE, does Q-Q plot.
-hmmlt.gof.x=function(hmmlt,ks.plot=TRUE){
+hmmlt.gof.x=function(hmltm,ks.plot=TRUE){
+  hmmlt=hmltm$hmltm.fit
   n=length(hmmlt$xy$x)
   edf=(1:n)/n
   cdf=fitted.esw(hmmlt,to.x=TRUE,all=TRUE)/fitted.esw(hmmlt,all=TRUE)

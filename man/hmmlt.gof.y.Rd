@@ -2,11 +2,11 @@
 \alias{hmmlt.gof.y}
 \title{Goodness-of-fit in forward dimension.}
 \usage{
-  hmmlt.gof.y(hmmlt, ks.plot = TRUE, seplots = FALSE,
+  hmmlt.gof.y(hmltm, ks.plot = TRUE, seplots = FALSE,
     smult = 5)
 }
 \arguments{
-  \item{hmmlt}{fitted model, as output by
+  \item{hmltm}{fitted model, as output by
   \code{\link{est.hmltm}}}
 
   \item{ks.plot}{If TRUE, does Q-Q plot.}
