@@ -415,27 +415,26 @@ makePi=function(Eu,Ea)
 {
   nav=length(Eu)
   if(length(Ea)!=nav) stop("Lengths of Eu and Ea must be the same")
-  if(nav==1) {
-    Pi=matrix(rep(0,4),nrow=2,
-              dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available")))
-    Pi[1,2]=1/Eu
-    Pi[2,1]=1/Ea
-    Pi[1,1]=1-Pi[1,2]
-    Pi[2,2]=1-Pi[2,1]
-  } else {
-    Pi=array(rep(0,2*2*nav),dim=c(2,2,nav),
-             dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
-                           Animal=as.character(1:nav)))
-    for(i in 1:nav) {
-      Pi[1,2,i]=1/Eu[i]
-      Pi[2,1,i]=1/Ea[i]
-      Pi[1,1,i]=1-Pi[1,2,i]
-      Pi[2,2,i]=1-Pi[2,1,i]    
-    }
+  #  if(nav==1) {
+  #    Pi=matrix(rep(0,4),nrow=2,
+  #              dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available")))
+  #    Pi[1,2]=1/Eu
+  #    Pi[2,1]=1/Ea
+  #    Pi[1,1]=1-Pi[1,2]
+  #    Pi[2,2]=1-Pi[2,1]
+  #  } else {
+  Pi=array(rep(0,2*2*nav),dim=c(2,2,nav),
+           dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
+                         Animal=as.character(1:nav)))
+  for(i in 1:nav) {
+    Pi[1,2,i]=1/Eu[i]
+    Pi[2,1,i]=1/Ea[i]
+    Pi[1,1,i]=1-Pi[1,2,i]
+    Pi[2,2,i]=1-Pi[2,1,i]    
   }
+  #  }
   return(Pi)
 }
-
 
 #' @title Returns expected time in state for 2-state Markov transition matrices.
 #'
@@ -520,6 +519,14 @@ makeE=function(Pi){
 #'  seEu=Eu*cv
 #'  covEt=seET*0 # assume independence
 #'  porpoise.hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt)
+#'  
+#'  # Here's how the dataset beaked.hmm.pars were created:
+#'  Ea=121.824
+#'  Eu=1580.256
+#'  seEa=9.618659
+#'  seEu=134.9212
+#'  beaked.hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu)
+#'  
 #' @references 
 #' Westgate, A. J., Read, A. J., Berggren, P., Koopman, H. N., and Gaskin, D. E. 1995. Diving behaviour 
 #' of harbour porpoises, Phocoena phocoena. Canadian Journal of Fisheries and Aquatic Sciences 52, 
@@ -541,8 +548,9 @@ make.hmm.pars.from.Et=function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
                                                           Animal=as.character(1:nav)))
   for(i in 1:nav) {
     Et[,i]=c(Eu[i],Ea[i])
-    cvEt=c(seEu[i]/Et[1],seEa[i]/Et[2])
-    Sigma.Et[,,i]=diag((cvEt*Et)^2)
+    Sigma.Et[,,i]=diag(c(seEu[i],seEa[i])^2)
+#    cvEt=c(seEu[i]/Et[1,i],seEa[i]/Et[2,i])
+#    Sigma.Et[,,i]=diag((cvEt*Et)^2)
     Sigma.Et[1,2,i]=Sigma.Et[2,1,i]=covEt[i]
     Pi[,,i]=makePi(Et[1,i],Et[2,i])
     delta[,i]=compdelta(Pi[,,i])
@@ -2426,8 +2434,13 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
     if(!is.null(hmm.pars$Et)){
       cat("Bootstrap with parametric resampling of mean times available and unavailable.\n")
       flush.console()
-      lN=Npars.from.lNpars(hmm.pars$Et,hmm.pars$Sigma.Et) # get normal parameters corresponding to lognormal(mu,Sigma)
-      b.Et=exp(mvrnorm(B,lN$mu,lN$Sigma)) # resample availability parameters on lognormal scale
+      n=dim(hmm.pars$Et)[2]
+      sample(1:n,n,replace=TRUE) # sample animals to use
+      b.Et=array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
+      for(i in 1:n){
+        lN=Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i]) # get normal parameters corresponding to lognormal(mu,Sigma)
+        b.Et[,,i]=exp(mvrnorm(B,lN$mu,lN$Sigma)) # resample availability parameters on lognormal scale
+      }
     } else if(!is.null(hmm.pars.bs)) { # resample availability parameters
       cat("Bootstrap with parametric resampling of HMM parameters.\n")
       flush.console()
@@ -2462,13 +2475,14 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
     # get hmm pars
     if(!fixed.avail) {
       if(!is.null(hmm.pars$Et)) {
-        Pi=makePi(b.Et[b,1],b.Et[b,2]) # make Pi from resampled times
-        delta=compdelta(Pi)
+        Pi=makePi(b.Et[b,1,],b.Et[b,2,]) # make Pi from resampled times
+        delta=matrix(rep(NA,2*n),nrow=2)
+        for(i in 1:n) delta[,i]=compdelta(Pi[,,i])
         b.hmm.pars=hmm.pars
         b.hmm.pars$pm=hmm.pars$pm
         b.hmm.pars$Pi=Pi
         b.hmm.pars$delta=delta
-        b.hmm.pars$Et=b.Et[b,]
+        b.hmm.pars$Et=b.Et[b,,]
       } else {
         b.hmm.pars=unvectorize.hmmpars(hmm.pars.bs[reps[b],]) # resampled HMM pars
       }
@@ -3595,46 +3609,13 @@ invHessvar=function(stat,hmmlt,nx4spline=50,doplot=FALSE){
 
 ########################################### Start of Data ################################################
 
-#' @name turtle.ship
-#' @title Shipboard turtle survey dataset from US east coast.
+#' @name aerial.survey
+#' @title Simulated bowhead whale aerial survey dataset.
 #' @docType data
-#' @description Subset of a shipboard survey dataset from the US east coast.
-#' @usage turtle.ship
-#' @format A data frame with 48 observations on the following 12 variables.
-#'  \describe{
-#'    \item{\code{x}:}{ perpendicular distances to detections (NA if no detection).}
-#'    \item{\code{y}:}{ perpendicular distances to detections (NA if no detection).}
-#'    \item{\code{bf}:}{ Beaufort sea state at the time of each detection (NA if no detection).}
-#'    \item{\code{we}:}{ weather code at the time of each detection (NA if no detection).}
-#'    \item{\code{cu}:}{ cue tpe of each detection (NA if no detection).}
-#'    \item{\code{transect}:}{ transect number (a numeric vector). In this dataset this is a dummy 
-#'    value - just there to have something in this compulsory variable.}
-#'    \item{\code{stratum}:}{ stratum number (a numeric vector). In this dataset this is a dummy 
-#'    value - just there to have something in this compulsory variable.}
-#'    \item{\code{area}:}{ stratum surface area (a numeric vector). In this dataset this is a dummy 
-#'    value - just there to have something in this compulsory variable.}
-#'    \item{\code{L}:}{ transect length (a numeric vector). In this dataset this is a dummy 
-#'    value - just there to have something in this compulsory variable.}
-#'    \item{\code{object}:}{ unique identifier for each detection (a numeric vector; NA if no detection).}
-#'    \item{\code{size}:}{ size of each detected group (NA if no detection).}
-#'    \item{\code{seen}:}{ REDUNDANT: 1 for all detections (NAA if no detection).}
-#'  }
-#' @details Temporary dataset with which to test package.
-#' @source Virginia Aquarium.
-#' @references None as yet
-#' @examples
-#'  data(turtle.ship)
-NULL
-
-
-
-#' @name bowhead.plane
-#' @title Bowhead whale aerial survey dataset from Greenland.
-#' @docType data
-#' @description Data from the 2012/13 aerial survey of bowhead whales off Greenland. These data were 
-#' used together with the dataset \code{\link{bowhead.hmm.pars}} in the analyses of (** reference to 
-#' Mads Peter's paper **).
-#' @usage bowhead.plane
+#' @description Simulated data representing an aerial survey of bowhead whales from an aircraft 
+#' flying at 46.3 m/s. These data can used together with the dataset \code{\link{bowhead.hmm.pars}} 
+#' to estimate bowhead whale abundance.
+#' @usage aerial.survey
 #' @format An mrds data frame (with 2 rows per detection) with 86 observations on the following 11 
 #' variables.
 #'  \describe{
@@ -3650,36 +3631,33 @@ NULL
 #'    \item{\code{x}:}{ perpendicular distances to detections (NA if no detection).}
 #'    \item{\code{y}:}{ perpendicular distances to detections (NA if no detection).}
 #'  }
-#' @source Mads Peter Heide-Jorgessen.
-#' @references None as yet
+#' @source Simulated
 #' @examples
-#'  data(bowhead.plane)
+#'  data(aerial.survey)
 NULL
 
 
 #' @name beaked.ship
 #' @title Beaked whale shipboard survey dataset from Alboran sea.
 #' @docType data
-#' @description Data from the 2008 & 2009 shipboard survey of bowhead whales in the Alboran sea.
+#' @description Data from the 2008 & 2009 shipboard survey of bowhead whales in the Alboran sea. Sightings
+#' are real, strata and transects are made up for illustration.
 #' @usage beaked.ship
 #' @format A data frame with 81 observations on the following 12 variables.
 #'  \describe{
-#'    \item{\code{x}:}{ perpendicular distances to detections (NA if no detection).}
-#'    \item{\code{y}:}{ perpendicular distances to detections (NA if no detection).}
-#'    \item{\code{bf}:}{ Beaufort sea state at the time of each detection (NA if no detection).}
-#'    \item{\code{ship}:}{ the name of the ship. (NA if no detection).}
-#'    \item{\code{spd}:}{ the speed of the ship at the time each detection was made (NA if no detection).}
-#'    \item{\code{ht}:}{ height of the platform from which the detection was made (NA if no detection).}
-#'    \item{\code{transect}:}{ transect number (a numeric vector). In this dataset this is a dummy 
-#'    value - just there to have something in this compulsory variable.}
 #'    \item{\code{stratum}:}{ stratum number (a numeric vector). In this dataset this is a dummy 
 #'    value - just there to have something in this compulsory variable.}
 #'    \item{\code{area}:}{ stratum surface area (a numeric vector). In this dataset this is a dummy 
 #'    value - just there to have something in this compulsory variable.}
+#'    \item{\code{transect}:}{ transect number (a numeric vector). In this dataset this is a dummy 
+#'    value - just there to have something in this compulsory variable.}
 #'    \item{\code{L}:}{ transect length (a numeric vector). In this dataset this is a dummy 
 #'    value - just there to have something in this compulsory variable.}
-#'    \item{\code{object}:}{ unique identifier for each detection (a numeric vector; NA if no detection).}
+#'    \item{\code{x}:}{ perpendicular distances to detections (NA if no detection).}
+#'    \item{\code{y}:}{ perpendicular distances to detections (NA if no detection).}
 #'    \item{\code{size}:}{ size of each detected group (NA if no detection).}
+#'    \item{\code{bf}:}{ Beaufort sea state at the time of each detection (NA if no detection).}
+#'    \item{\code{object}:}{ unique identifier for each detection (a numeric vector; NA if no detection).}
 #'  }
 #' @details Test dataset that contains only detections (transects without detections have been omitted). 
 #' It is one of the datasets analysed in Borchers et al. (2013).
@@ -3689,6 +3667,39 @@ NULL
 #' Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
 #' @examples
 #'  data(beaked.ship)
+NULL
+
+
+#' @name beaked.hmm.pars
+#' @title Alboran sea beaked whale availability HMM parameters.
+#' @docType data
+#' @description Hidden Markov model (HMM) parameter estimates for beaked whale availability obtained 
+#' from mean times available and unavailable observed by Ana Canadas (pers commn.) in thge Alboran sea. 
+#' This dataset was used in the analyses of Borchers et al. (2013). 
+#' @usage beaked.hmm.pars
+#' @format A list with the following three elements.
+#'  \describe{
+#'    \item{\code{Pi}:}{ a 2x2x1 array containg the transition probability matrix. States can be 
+#'    interpreted as behavioural states, one of which being a state in which the animal is more 
+#'    likely to be available than when in the other state.}
+#'    \item{\code{pm}:}{ a 2x1 matrix containing the vector of state-dependent Bernoulli availability 
+#'    parameters. \code{pm[1,i]} is the probability of whale i being available given state 1 (the less 
+#'    available behavoural state), and \code{pm[1,i]} is the probability of whale i being available given 
+#'    state 1 (the more available behavoural state).}
+#'    \item{\code{delta}:}{ a 2x1 matrix containing the stationary distribution of \code{Pi} for each 
+#'    whale. So \code{delta[1,i]} is the probability that whale i is in behavioural state 1 when 
+#'    observation starts, and \code{delta[2,i]} is the probability that it is in behavioural state 2 when 
+#'    observation starts.}
+#'  }
+#'  
+#' @source Canadas (pers commn.).
+#' 
+#' @references 
+#' Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 2013. 
+#' Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
+#' 
+#' @examples
+#'  data(beaked.hmm.pars)
 NULL
 
 
@@ -3703,8 +3714,7 @@ NULL
 #' considered to be available for detection only when within 2 m of the surface. The time series were 
 #' accordingly converted into binary availability time series and HMMs were fitted to these. This 
 #' dataset was used in the analyses of Borchers et al. (2013) - albeit with survey data that had no
-#' forward distances. It was also used together with the dataset \code{\link{bowhead.plane}} in the 
-#' analyses of [Insert reference to Mads Peter's paper].
+#' forward distances. 
 #' @usage bowhead.hmm.pars
 #' @format A list with the following three elements.
 #'  \describe{

@@ -39,7 +39,7 @@ Some packages for fitting HMMs to availability data: \code{\link{HiddenMarkov}},
 library(hsltm)
 
 # get data and availability model parameters
-data(bowhead.plane) # get bowhead aerial survey line transect data
+data(aerial.survey) # get bowhead aerial survey line transect data
 data(bowhead.hmm.pars) # get bowhead availability HMM parameters (8 sets of parameters)
 
 # set survey and fitting parameters
@@ -52,7 +52,7 @@ hfun="h.EP2x.0";models=list(y=NULL,x=NULL) # specify detection hazard model (no 
 pars=c(1.98, 0.47, 28, 1215) # detection hazard parameter starting values
 # Point estimation:
 W.est=2500 # set perpendicular truncation distance for Horvitz-Thompson-like estimator
-bwEP2x.null=est.hmltm(bowhead.plane,pars,hfun,models,survey.pars,bowhead.hmm.pars,control.fit,control.opt,W.est=W.est)
+bwEP2x.null=est.hmltm(aerial.survey,pars,hfun,models,survey.pars,bowhead.hmm.pars,control.fit,control.opt,W.est=W.est)
 
 # display point estimates of density and abundance:
 bwEP2x.null$point$ests

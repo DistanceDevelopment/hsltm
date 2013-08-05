@@ -34,9 +34,7 @@
   binary availability time series and HMMs were fitted to
   these. This dataset was used in the analyses of Borchers
   et al. (2013) - albeit with survey data that had no
-  forward distances. It was also used together with the
-  dataset \code{\link{bowhead.plane}} in the analyses of
-  [Insert reference to Mads Peter's paper].
+  forward distances.
 }
 \examples{
 data(bowhead.hmm.pars)

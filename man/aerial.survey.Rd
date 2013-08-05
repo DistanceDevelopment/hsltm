@@ -1,7 +1,7 @@
 \docType{data}
-\name{bowhead.plane}
-\alias{bowhead.plane}
-\title{Bowhead whale aerial survey dataset from Greenland.}
+\name{aerial.survey}
+\alias{aerial.survey}
+\title{Simulated bowhead whale aerial survey dataset.}
 \format{An mrds data frame (with 2 rows per detection) with 86 observations on the following 11
 variables.
  \describe{
@@ -18,19 +18,17 @@ variables.
    \item{\code{y}:}{ perpendicular distances to detections (NA if no detection).}
  }}
 \source{
-  Mads Peter Heide-Jorgessen.
+  Simulated
 }
 \description{
-  Data from the 2012/13 aerial survey of bowhead whales off
-  Greenland. These data were used together with the dataset
-  \code{\link{bowhead.hmm.pars}} in the analyses of (**
-  reference to Mads Peter's paper **).
+  Simulated data representing an aerial survey of bowhead
+  whales from an aircraft flying at 46.3 m/s. These data
+  can used together with the dataset
+  \code{\link{bowhead.hmm.pars}} to estimate bowhead whale
+  abundance.
 }
 \examples{
-data(bowhead.plane)
-}
-\references{
-  None as yet
+data(aerial.survey)
 }
 \keyword{datasets}
 

@@ -1,0 +1,39 @@
+\docType{data}
+\name{beaked.hmm.pars}
+\alias{beaked.hmm.pars}
+\title{Alboran sea beaked whale availability HMM parameters.}
+\format{A list with the following three elements.
+ \describe{
+   \item{\code{Pi}:}{ a 2x2x1 array containg the transition probability matrix. States can be
+   interpreted as behavioural states, one of which being a state in which the animal is more
+   likely to be available than when in the other state.}
+   \item{\code{pm}:}{ a 2x1 matrix containing the vector of state-dependent Bernoulli availability
+   parameters. \code{pm[1,i]} is the probability of whale i being available given state 1 (the less
+   available behavoural state), and \code{pm[1,i]} is the probability of whale i being available given
+   state 1 (the more available behavoural state).}
+   \item{\code{delta}:}{ a 2x1 matrix containing the stationary distribution of \code{Pi} for each
+   whale. So \code{delta[1,i]} is the probability that whale i is in behavioural state 1 when
+   observation starts, and \code{delta[2,i]} is the probability that it is in behavioural state 2 when
+   observation starts.}
+ }}
+\source{
+  Canadas (pers commn.).
+}
+\description{
+  Hidden Markov model (HMM) parameter estimates for beaked
+  whale availability obtained from mean times available and
+  unavailable observed by Ana Canadas (pers commn.) in thge
+  Alboran sea. This dataset was used in the analyses of
+  Borchers et al. (2013).
+}
+\examples{
+data(beaked.hmm.pars)
+}
+\references{
+  Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P.,
+  Canadas, A. and Langrock, R. 2013. Using hidden Markov
+  models to deal with availability bias on line transect
+  surveys. Biometrics.
+}
+\keyword{datasets}
+

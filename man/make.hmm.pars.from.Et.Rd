@@ -66,6 +66,13 @@
  seEu=Eu*cv
  covEt=seET*0 # assume independence
  porpoise.hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt)
+
+ # Here's how the dataset beaked.hmm.pars were created:
+ Ea=121.824
+ Eu=1580.256
+ seEa=9.618659
+ seEu=134.9212
+ beaked.hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu)
 }
 \references{
   Westgate, A. J., Read, A. J., Berggren, P., Koopman, H.

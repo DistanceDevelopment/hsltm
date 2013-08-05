@@ -4,29 +4,27 @@
 \title{Beaked whale shipboard survey dataset from Alboran sea.}
 \format{A data frame with 81 observations on the following 12 variables.
  \describe{
-   \item{\code{x}:}{ perpendicular distances to detections (NA if no detection).}
-   \item{\code{y}:}{ perpendicular distances to detections (NA if no detection).}
-   \item{\code{bf}:}{ Beaufort sea state at the time of each detection (NA if no detection).}
-   \item{\code{ship}:}{ the name of the ship. (NA if no detection).}
-   \item{\code{spd}:}{ the speed of the ship at the time each detection was made (NA if no detection).}
-   \item{\code{ht}:}{ height of the platform from which the detection was made (NA if no detection).}
-   \item{\code{transect}:}{ transect number (a numeric vector). In this dataset this is a dummy
-   value - just there to have something in this compulsory variable.}
    \item{\code{stratum}:}{ stratum number (a numeric vector). In this dataset this is a dummy
    value - just there to have something in this compulsory variable.}
    \item{\code{area}:}{ stratum surface area (a numeric vector). In this dataset this is a dummy
    value - just there to have something in this compulsory variable.}
+   \item{\code{transect}:}{ transect number (a numeric vector). In this dataset this is a dummy
+   value - just there to have something in this compulsory variable.}
    \item{\code{L}:}{ transect length (a numeric vector). In this dataset this is a dummy
    value - just there to have something in this compulsory variable.}
-   \item{\code{object}:}{ unique identifier for each detection (a numeric vector; NA if no detection).}
+   \item{\code{x}:}{ perpendicular distances to detections (NA if no detection).}
+   \item{\code{y}:}{ perpendicular distances to detections (NA if no detection).}
    \item{\code{size}:}{ size of each detected group (NA if no detection).}
+   \item{\code{bf}:}{ Beaufort sea state at the time of each detection (NA if no detection).}
+   \item{\code{object}:}{ unique identifier for each detection (a numeric vector; NA if no detection).}
  }}
 \source{
   Ana Canadas.
 }
 \description{
   Data from the 2008 & 2009 shipboard survey of bowhead
-  whales in the Alboran sea.
+  whales in the Alboran sea. Sightings are real, strata and
+  transects are made up for illustration.
 }
 \details{
   Test dataset that contains only detections (transects
