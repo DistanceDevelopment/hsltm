@@ -133,8 +133,12 @@ struct EP1
   {
     vector<double> ret;
     ret.push_back(logitCache(par[1-1]));
-    ret.push_back(logCache(par[2-1]));
-    ret.push_back(logCache(par[3-1]));
+    for(int i = 1; i < (int)par.size(); ++i)
+      ret.push_back(log(par[i]));
+//    vector<double> ret;
+//    ret.push_back(logitCache(par[1-1]));
+//    ret.push_back(logCache(par[2-1]));
+//    ret.push_back(logCache(par[3-1]));
     return ret;
   }
 
@@ -142,8 +146,11 @@ struct EP1
   {
     vector<double> ret;
     ret.push_back(inv_logitCache(b[1-1]));
-    ret.push_back(expCache(b[2-1]));
-    ret.push_back(expCache(b[3-1]));
+    for(int i = 1; i < (int)b.size(); ++i)
+      ret.push_back(expCache(b[i]));
+//    ret.push_back(inv_logitCache(b[1-1]));
+//    ret.push_back(expCache(b[2-1]));
+//    ret.push_back(expCache(b[3-1]));
     return ret;
   }
 };
@@ -217,21 +224,29 @@ struct EP2
 
   static vector<double> tfm(const vector<double>& par)
   {
-    vector<double> ret(4);
-    ret[0] = logitCache(par[0]);
-    ret[1] = logCache(par[1]);
-    ret[2] = logCache(par[2]);
-    ret[3] = logCache(par[3]);
+    vector<double> ret(par.size());
+    ret.push_back(logitCache(par[1-1]));
+    for(int i = 1; i < (int)par.size(); ++i)
+      ret.push_back(log(par[i]));
+//    vector<double> ret(4);
+//    ret[0] = logitCache(par[0]);
+//    ret[1] = logCache(par[1]);
+//    ret[2] = logCache(par[2]);
+//    ret[3] = logCache(par[3]);
     return ret;
   }
 
   static vector<double> invtfm(const vector<double>& par)
   {
-    vector<double> ret(4);
-    ret[0] = inv_logitCache(par[0]);
-    ret[1] = expCache(par[1]);
-    ret[2] = expCache(par[2]);
-    ret[3] = expCache(par[3]);
+    vector<double> ret(par.size());
+    ret.push_back(inv_logitCache(par[1-1]));
+    for(int i = 1; i < (int)par.size(); ++i)
+      ret.push_back(expCache(par[i]));
+//    vector<double> ret(4);
+//    ret[0] = inv_logitCache(par[0]);
+//    ret[1] = expCache(par[1]);
+//    ret[2] = expCache(par[2]);
+//    ret[3] = expCache(par[3]);
     return ret;
   }
 };
@@ -301,19 +316,27 @@ struct IP
 
   static vector<double> tfm(const vector<double>& par)
   {
-    vector<double> ret(3);
-    ret[0] = logitCache(par[0]);
-    ret[1] = logCache(par[1]);
-    ret[2] = logCache(par[2]);
+    vector<double> ret;
+    ret.push_back(logCache(par[0]));
+    for(int i = 1; i < (int)par.size(); ++i)
+      ret.push_back(log(par[i]));
+//    vector<double> ret(3);
+//    ret[0] = logitCache(par[0]);
+//    ret[1] = logCache(par[1]);
+//   ret[2] = logCache(par[2]);
     return ret;
   }
 
   static vector<double> invtfm(const vector<double>& par)
   {
-    vector<double> ret(3);
-    ret[0] = inv_logitCache(par[0]);
-    ret[1] = expCache(par[1]);
-    ret[2] = expCache(par[2]);
+    vector<double> ret;
+    ret.push_back(inv_logitCache(par[0]));
+    for(int i = 1; i < (int)par.size(); ++i)
+      ret.push_back(expCache(par[i]));
+//    vector<double> ret(3);
+//    ret[0] = inv_logitCache(par[0]);
+//    ret[1] = expCache(par[1]);
+//    ret[2] = expCache(par[2]);
     return ret;
   }
 };
@@ -330,17 +353,23 @@ struct IP_0
 
   static vector<double> tfm(const vector<double>& par)
   {
-    vector<double> ret(2);
-    ret[0] = logCache(par[0]);
-    ret[1] = logCache(par[1]);
+    vector<double> ret;
+    for(int i = 0; i < (int)par.size(); ++i)
+      ret.push_back(log(par[i]));
+//    vector<double> ret(2);
+//    ret[0] = logCache(par[0]);
+//    ret[1] = logCache(par[1]);
     return ret;
   }
 
   static vector<double> invtfm(const vector<double>& par)
   {
-    vector<double> ret(2);
-    ret[0] = expCache(par[0]);
-    ret[1] = expCache(par[1]);
+    vector<double> ret;
+    for(int i = 0; i < (int)par.size(); ++i)
+      ret.push_back(expCache(par[i]));
+//    vector<double> ret(2);
+//    ret[0] = expCache(par[0]);
+//    ret[1] = expCache(par[1]);
     return ret;
   }
 };
@@ -433,14 +462,14 @@ void do_pxy(vector<double>& x, vector<double>& y, vector<double>& b, vector<doub
     if(ally) 
       yi=gety_obs(x[i],true,0,theta_f,theta_b,ymax,dy); // # get ys from min y in view to ymax
     else
-      yi=gety_obs(x[i],false,y[i],theta_f,theta_b,ymax,dy);
+      yi=gety_obs(x[i],false,y[i],theta_f,theta_b,ymax,dy); // # get y's from y[i] to ymax
     
     int nT = yi.size();
 
     if(nT > 1)
     {
 
-      for(int u = nT - 1; u >= 1; --u)
+      for(int u = nT - 1; u >= 1; --u) // # do calculation for nT-1 non-detection events
       {
         double hval = h::h(x[i], yi[u], bb);
         
@@ -459,12 +488,12 @@ void do_pxy(vector<double>& x, vector<double>& y, vector<double>& b, vector<doub
       }
     }
 
-    if(cdf || ally)
+    if(cdf || ally) // # if not seen, calculation for last non-detection event
     {
       for(int j = 0; j < m; ++j)
       { lambda.at(j,j) = 1 - pcu[j] * h::h(x[i], yi[0], bb); }
     }
-    else
+    else // # if seen, calculation for last detection event
     {
       for(int j = 0; j < m; ++j)
       { lambda.at(j,j) = pcu[j] * h::h(x[i], yi[0], bb); }
@@ -477,9 +506,9 @@ void do_pxy(vector<double>& x, vector<double>& y, vector<double>& b, vector<doub
         pi_mult.at(t,j) = Pi.at(t,j) * lambda(j);
       }
     }
-    prodB = (pi_mult * prodB);
+    prodB = (pi_mult * prodB); // # do last update
 
-    p[i] = as_scalar(arma::rowvec(&*delta.begin(), delta.size(), false)*prodB);
+    p[i] = as_scalar(arma::rowvec(&*delta.begin(), delta.size(), false)*prodB); // # calculate final prob
 
     if(abs(p[i]-1) < 1e-10) p[i]=1; //# very clunky way of dealing with numerical underflow
   }
@@ -487,7 +516,7 @@ void do_pxy(vector<double>& x, vector<double>& y, vector<double>& b, vector<doub
   if(cdf || ally)
   {
     for(int i = 0; i < p.size(); ++i)
-      p[i] = 1 - p[i];
+      p[i] = 1 - p[i]; // # since in this case p calculated so far is prob(NOT seen)
 
   }
 }
