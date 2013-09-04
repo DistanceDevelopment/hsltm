@@ -1441,7 +1441,7 @@ negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,t
 #' @param dy Markov model distance step size.
 #' @param nx number of x-values to use in evaluating detection function.
 #' 
-negllik.x=function(b,xdat,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
+negllik.x=function(b,xy,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
 {
   covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
   x=xy$x;y=xy$y
