@@ -30,7 +30,11 @@ Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, 
 
 Langrock, R., Borchers, D.L. and Skaug, H. Markov-modulated nonhomogeneous Poisson processes for unbiased estimation of marine mammal abundance. 2013. Journal of the American Statistical Association.
 }
-
+\note{
+  The datasets bowhead.adat and bowhead.depths are not to be used for research
+   or publication without prior consent from Mads Peter Heide-Jorgensen, email:
+  mhj<``at'' symbol>ghsdk.dk.
+}
 \keyword{Line transect, availability bias, Hidden markov model}
 \seealso{
 Some packages for fitting HMMs to availability data: \code{\link{HiddenMarkov}},  \code{msm}
@@ -49,10 +53,11 @@ control.opt=list(trace=5,maxit=1000) # optimisation parameters
 
 # specify model and starting parameter values and fit model
 hfun="h.EP2x.0";models=list(y=NULL,x=NULL) # specify detection hazard model (no covariates)
-pars=c(1.98, 0.47, 28, 1215) # detection hazard parameter starting values
+pars=c(1.66, 0.63, 64, 877) # detection hazard parameter starting values
 # Point estimation:
 W.est=2500 # set perpendicular truncation distance for Horvitz-Thompson-like estimator
-bwEP2x.null=est.hmltm(aerial.survey,pars,hfun,models,survey.pars,bowhead.hmm.pars,control.fit,control.opt,W.est=W.est)
+bwEP2x.null=est.hmltm(aerial.survey,pars,hfun,models,survey.pars,bowhead.hmm.pars,
+                      control.fit,control.opt,W.est=W.est)
 
 # display point estimates of density and abundance:
 bwEP2x.null$point$ests

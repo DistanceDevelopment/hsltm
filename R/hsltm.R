@@ -1073,7 +1073,7 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
   hfun=hmmlt$h.fun
   b=tfm(hmmlt$fit$par,hfun)
   models=hmmlt$models
-  xy=hmmlt$xy
+  xy=hmmlt$xy[!is.na(hmmlt$xy$y),]
   if(is.null(breaks)) {
     breaks=seq(0,max(xy$y),nclass=10)
   } 
@@ -1362,10 +1362,10 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,c
 }
 
 
-#' @title HMM line transect model likelihood.
+#' @title HMM line transect model likelihood with perpendicular and forward distances.
 #'
 #' @description
-#' Evaluates HMM line transect model likelihood.
+#' Evaluates HMM line transect model likelihood with both perp. and forward distance data.
 #'  
 #' @param b likelihood function parameters.
 #' @param xy detections data, including x and y values for each detection, plus any covariates 
@@ -1382,7 +1382,7 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,c
 #' @param dy Markov model distance step size.
 #' @param nx number of x-values to use in evaluating detection function.
 #' 
-negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
+negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
 {
   covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
   x=xy$x;y=xy$y
@@ -1421,12 +1421,103 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,thet
   return(-llik)
 }
 
+#' @title HMM line transect model likelihood with only perpendicular distances.
+#'
+#' @description
+#' Evaluates HMM line transect model likelihood with both perpendicular distance but no forward distance data.
+#'  
+#' @param b likelihood function parameters.
+#' @param xy detections data, including x values for each detection, plus any covariates 
+#' in \code{model}).
+#' @param FUN detection hazard function name.
+#' @param models model specification, as in \code{\link{est.hmltm}}.
+#' @param pm state-dependent Bernoulli parameters.
+#' @param Pi Markov model transition probability matrix.
+#' @param delta Markov model stationary distribution.
+#' @param theta.f REDUNDANT must = 0.
+#' @param theta.b REDUNDANT must = 90.
+#' @param W perpendicular truncation distance for fitting.
+#' @param ymax forward distance by which detection hazard has fallen to zero.
+#' @param dy Markov model distance step size.
+#' @param nx number of x-values to use in evaluating detection function.
+#' 
+negllik.x=function(b,xdat,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
+{
+  covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
+  x=xy$x;y=xy$y
+  n=length(x)
+  if(length(y)!=n) stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
+  llik=0
+  # calculate p(see BY y=0 |x) at each x:
+  li=p.xy(x,y=rep(0,n),hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+  # calculate p(see by min y in window|x) over all x:
+  #*# xs=seq(0,W,length=nx)
+  #*# px=p.xy(x=xs,y=xy$y,hfun=FUN,b=b,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+  #*# wt=c(0.5,rep(1,(nx-2)),0.5)*W/nx
+  #*# p=sum(px*wt) # effective strip width
+  # cat("pars=",invtfm(b,FUN),"\n")
+  xs=seq(0,W,length=nx)
+  nb=length(covb)/n # number of parameters for each observation
+  if(is.nullmodel(models)) {
+    bi=c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
+    ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+    p=sintegral(ps,xs)/W
+  } else {
+    ps=matrix(rep(0,n*nx),nrow=n)
+    for(i in 1:n) {
+      start=(i-1)*nb+1
+      bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
+      ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+    }
+    p=apply(ps,1,sintegral,xs)/W
+  }
+  
+  if(any(li<.Machine$double.xmin)) return(.Machine$double.xmax)
+  else{
+    llik=sum(log(li)-log(p))
+    return(-llik)
+  }
+  return(-llik)
+}
+
+
+#' @title HMM line transect model likelihood with at least some forward distances.
+#'
+#' @description
+#' Evaluates HMM line transect model likelihood with perpendicular and forward distance data.
+#'  
+#' @param b likelihood function parameters.
+#' @param xy detections data, including x values for each detection and y values for some, 
+#' plus any covariates in \code{model}).
+#' @param FUN detection hazard function name.
+#' @param models model specification, as in \code{\link{est.hmltm}}.
+#' @param pm state-dependent Bernoulli parameters.
+#' @param Pi Markov model transition probability matrix.
+#' @param delta Markov model stationary distribution.
+#' @param theta.f REDUNDANT must = 0.
+#' @param theta.b REDUNDANT must = 90.
+#' @param W perpendicular truncation distance for fitting.
+#' @param ymax forward distance by which detection hazard has fallen to zero.
+#' @param dy Markov model distance step size.
+#' @param nx number of x-values to use in evaluating detection function.
+#' 
+negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
+{
+  xydat=xy[!is.na(xy$y),] # detections with x (perp) and y (forward) data
+  xdat=xy[is.na(xy$y),]   # detections with x (perp) data only (no y data)
+  xy.negllik=negllik.xandy(b,xydat,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx)
+  x.negllik=0
+  if(length(xdat$x)>0) negllik.x(b,xdat,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx)
+  negllik=xy.negllik+x.negllik
+  return(negllik)
+}
+
 
 
 #' @title Calculates probability of first observing animal at (x,y).
 #'
 #' @description
-#' Just calls p.xy1 >= once, cycling through 3rd index of Pi and 2nd indices of pm and delta.
+#' Just calls \code{\link{p.xy1}} >= once, cycling through 3rd index of Pi and 2nd indices of pm and delta.
 # 
 #' @param x perpendicular distance.
 #' @param y forward distance.
@@ -1440,8 +1531,12 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,thet
 #' Markov model governed by \code{Pi}.
 #' @param theta.f REDUNDANT must = 0.
 #' @param theta.b REDUNDANT must = 90.
-#' @param ally If TRUE calculates detection probability at all forward distances, else at zero.
-#' @param cdf If TRUE returns cdf, not detection probability.
+#' @param ally If TRUE calculates probability of detection at all - at some y. (Argument
+#' \code{cdf} is redundant in this case).
+#' @param cdf If TRUE returns 1 -(the cdf at y), which is equal to the probability of detection BY y.
+#' 
+#' @seealso \code{\link{p.xy1}}
+#' 
 p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=FALSE)
 {
   if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) stop("Single animal: pm is not a vector or Pi is not a matrix")
@@ -1822,10 +1917,11 @@ hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="respon
 #' @param ks.plot If TRUE, does Q-Q plot.
 #' @param seplots if TRUE does additional diagnostic plots
 #' @param smult multiplier to size circles in third plot.
-hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5)
+#' @param ymax forward distance at which detection probability is assumed to be zero. 
+hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars$survey.pars$ymax)
 {
   hmmlt=hmltm$hmltm.fit
-  dat=hmmlt$xy
+  dat=hmmlt$xy[!is.na(hmmlt$xy$y),]
   hfun=hmmlt$h.fun
   b=hmmlt$fit$b
   theta.b=hmmlt$fitpars$survey.pars$theta.b
@@ -1833,7 +1929,7 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5)
   
   if(is.null(dat$y)) stop("Can't do goodness-of-fit in y-dimension when don't have y observations!")
   models=hmmlt$models
-  ymax=hmmlt$fitpars$survey.pars$ymax
+###  ymax=hmmlt$fitpars$survey.pars$ymax
   dy=hmmlt$fitpars$survey.pars$dy
   Pi=hmmlt$fitpars$hmm.pars$Pi
   pm=hmmlt$fitpars$hmm.pars$pm

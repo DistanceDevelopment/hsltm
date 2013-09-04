@@ -3,7 +3,7 @@
 \title{Goodness-of-fit in forward dimension.}
 \usage{
   hmmlt.gof.y(hmltm, ks.plot = TRUE, seplots = FALSE,
-    smult = 5)
+    smult = 5, ymax = hmmlt$fitpars$survey.pars$ymax)
 }
 \arguments{
   \item{hmltm}{fitted model, as output by
@@ -14,6 +14,9 @@
   \item{seplots}{if TRUE does additional diagnostic plots}
 
   \item{smult}{multiplier to size circles in third plot.}
+
+  \item{ymax}{forward distance at which detection
+  probability is assumed to be zero.}
 }
 \description{
   Calculates goodness-of-fit in forward dimension, plots

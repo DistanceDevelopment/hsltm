@@ -1,16 +1,15 @@
-\name{negllik.xy}
-\alias{negllik.xy}
-\title{HMM line transect model likelihood with at least some forward distances.}
+\name{negllik.x}
+\alias{negllik.x}
+\title{HMM line transect model likelihood with only perpendicular distances.}
 \usage{
-  negllik.xy(b, xy, FUN, models = list(y = NULL, x = NULL),
-    pm, Pi, delta, theta.f, theta.b, W, ymax, dy, nx = 100)
+  negllik.x(b, xdat, FUN, models, pm, Pi, delta, theta.f,
+    theta.b, W, ymax, dy, nx = 100)
 }
 \arguments{
   \item{b}{likelihood function parameters.}
 
   \item{xy}{detections data, including x values for each
-  detection and y values for some, plus any covariates in
-  \code{model}).}
+  detection, plus any covariates in \code{model}).}
 
   \item{FUN}{detection hazard function name.}
 
@@ -38,7 +37,7 @@
   detection function.}
 }
 \description{
-  Evaluates HMM line transect model likelihood with
-  perpendicular and forward distance data.
+  Evaluates HMM line transect model likelihood with both
+  perpendicular distance but no forward distance data.
 }
 

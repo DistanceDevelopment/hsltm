@@ -31,14 +31,18 @@
 
   \item{theta.b}{REDUNDANT must = 90.}
 
-  \item{ally}{If TRUE calculates detection probability at
-  all forward distances, else at zero.}
+  \item{ally}{If TRUE calculates probability of detection
+  at all - at some y. (Argument \code{cdf} is redundant in
+  this case).}
 
-  \item{cdf}{If TRUE returns cdf, not detection
-  probability.}
+  \item{cdf}{If TRUE returns 1 -(the cdf at y), which is
+  equal to the probability of detection BY y.}
 }
 \description{
-  Just calls p.xy1 >= once, cycling through 3rd index of Pi
-  and 2nd indices of pm and delta.
+  Just calls \code{\link{p.xy1}} >= once, cycling through
+  3rd index of Pi and 2nd indices of pm and delta.
+}
+\seealso{
+  \code{\link{p.xy1}}
 }
 
