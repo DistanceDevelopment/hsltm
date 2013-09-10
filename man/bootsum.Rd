@@ -2,13 +2,20 @@
 \alias{bootsum}
 \title{Summarise bootstrap results.}
 \usage{
-  bootsum(bests, cilevel = 0.95)
+  bootsum(bests, cilevel = 0.95, write.csvs = FALSE,
+    dir = getwd())
 }
 \arguments{
   \item{bests}{output from \code{\link{bs.hmltm}}.}
 
   \item{cilevel}{confidence level for confidence intervals
   by percentile method.}
+
+  \item{write.csvs}{if TRUE, writes each output (see Value
+  below) to separate .csv file.}
+
+  \item{dir}{directory to which to write outputs if
+  \code{write.csvs} is TRUE.}
 }
 \value{
   Returns a list with elements as follows for each

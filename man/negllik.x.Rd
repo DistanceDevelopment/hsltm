@@ -2,7 +2,7 @@
 \alias{negllik.x}
 \title{HMM line transect model likelihood with only perpendicular distances.}
 \usage{
-  negllik.x(b, xdat, FUN, models, pm, Pi, delta, theta.f,
+  negllik.x(b, xy, FUN, models, pm, Pi, delta, theta.f,
     theta.b, W, ymax, dy, nx = 100)
 }
 \arguments{

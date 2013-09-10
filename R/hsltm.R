@@ -2429,6 +2429,8 @@ est.hmltm=function(dat,
 #' 
 #' @param bests output from \code{\link{bs.hmltm}}.
 #' @param cilevel confidence level for confidence intervals by percentile method. 
+#' @param write.csvs if TRUE, writes each output (see Value below) to separate .csv file.
+#' @param dir directory to which to write outputs if \code{write.csvs} is TRUE. 
 #'
 #' @return Returns a list with elements as follows for each statistic in \code{bests}:
 #' \itemize{
@@ -2441,7 +2443,7 @@ est.hmltm=function(dat,
 #'  \item{lower} {Lower \code{cilevel} percentiles of the statistic in question.}
 #'  \item{upper} {Upper \code{cilevel} percentiles of the statistic in question.}
 #'}
-bootsum=function(bests,cilevel=0.95){
+bootsum=function(bests,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
   if(cilevel<=0 | cilevel>=1) stop("cilevel must be greater than 0 and less than 1.")
   bdim=dim(bests)
   nstrat=bdim[1]
@@ -2450,7 +2452,7 @@ bootsum=function(bests,cilevel=0.95){
   rownames=dimnames(bests)[[1]]
   rownames[length(rownames)]="Total"
   colnames=dimnames(bests)[[2]]
-  dimnames(cv)=list(rownames,colnames)
+  dimnames(cv)=list(rep("",length(rownames)),colnames)
   nbad=se=means=lower=upper=cv
   B=bdim[3]
   cat("Reulsts from ",B," bootstrap replicates:\n",sep="")
@@ -2467,13 +2469,28 @@ bootsum=function(bests,cilevel=0.95){
       upper[i,j]=perc[2]
     }
   }
-  #  d.nbad=as.data.frame(nbad)
-  #  d.mean=as.data.frame(means)
-  #  d.se=as.data.frame(se)
-  #  d.cv=as.data.frame(cv)
-  #  d.lower=as.data.frame(lower)
-  #  d.upper=as.data.frame(upper)
+  # remove stats of stratum name, and make stratum a characte
+  nbad=as.data.frame(nbad,row.names=1:dim(nbad)[1])
+  means=as.data.frame(means,row.names=1:dim(nbad)[1])
+  se=as.data.frame(se,row.names=1:dim(nbad)[1])
+  cv=as.data.frame(cv,row.names=1:dim(nbad)[1])
+  lower=as.data.frame(lower,row.names=1:dim(nbad)[1])
+  upper=as.data.frame(upper,row.names=1:dim(nbad)[1])
+  nbad[,1]=rownames
+  means[,1]=rownames
+  se[,1]=rownames
+  cv[,1]=rownames
+  lower[,1]=rownames
+  upper[,1]=rownames
   
+  if(write.csvs){
+    write.csv(nbad,file=paste(dir,"nbad.csv",sep=""),row.names=FALSE)
+    write.csv(means,file=paste(dir,"means.csv",sep=""),row.names=FALSE)
+    write.csv(se,file=paste(dir,"se.csv",sep=""),row.names=FALSE)
+    write.csv(cv,file=paste(dir,"cv.csv",sep=""),row.names=FALSE)
+    write.csv(lower,file=paste(dir,"lower.csv",sep=""),row.names=FALSE)
+    write.csv(upper,file=paste(dir,"upper.csv",sep=""),row.names=FALSE)
+  }
   return(list(nbad=nbad,mean=means,se=se,cv=cv,lower=lower,upper=upper))
 }
 
