@@ -26,9 +26,9 @@ David Borchers and Chris Jefferson
 Maintainer: David Borchers <dlb@st-andrews.ac.uk>
 }
 \references{
-Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 2013. Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
+Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 2013. Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics. DOI: 10.1111/biom.12049
 
-Langrock, R., Borchers, D.L. and Skaug, H. Markov-modulated nonhomogeneous Poisson processes for unbiased estimation of marine mammal abundance. 2013. Journal of the American Statistical Association.
+Langrock, R., Borchers, D.L. and Skaug, H. Markov-modulated nonhomogeneous Poisson processes for unbiased estimation of marine mammal abundance. 2013. Journal of the American Statistical Association. DOI: 10.1080/01621459.2013.797356
 }
 \note{
   The datasets bowhead.adat and bowhead.depths are not to be used for research

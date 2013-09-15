@@ -2391,6 +2391,42 @@ NDest=function(dat,hmltm.fit,W){
 #' perpendicular distance (x) in the line transect data frame \code{dat}, but can be less than 
 #' the max perpendicular distance used for fitting (\code{survey.pars$W}).
 #'
+#' @return A list with four elements: \code{hmltm.fit}, \code{point}, \code{dat}, \code{W.est}. 
+#' Their contents are as follows:
+#' 
+#' \code{hmltm.fit} is the output from \code{fit.hmltm}, i.e. a list containing the following elements:
+#' \itemize{
+#'  \item{xy} {dat used in fitting (input reflection).}
+#'  \item{phats} {estimated detection probabilities of all detections.}
+#'  \item{phat} {1/mean(1/phat).}
+#'  \item{pzero} {estimated detection probabilities at perpendicular distance.}
+#'  \item{h.fun} {=FUN (input reflection).}
+#'  \item{models} {=models (input reflection).}
+#'  \item{fit} {output from \code{\link{fit.xy}}.}
+#'  \item{Loglik} {log-likelihood function at MLE.}
+#'  \item{AIC} {AIC.}
+#'  \item{x} {vector of x-values for plotting perpendicular distance fit.}
+#'  \item{p} {vector of detection function values for plotting perpendicular distance fit.}
+#'  \item{fitpars} {a list containing all the given parameters controlling the fit (survey.pars,hmm.pars,
+#'  control.fit,control.optim).}
+#' }
+#' \code{point} is a list containing two elements:
+#' \itemize{
+#'  \item{invp} {is a data frame containing one row for every observation, with the first three columns
+#'   giving the stratum, transect and object identifier for the observation, and the final column 
+#'   (invp) giving the estimate of the inverse of the probability of detection for the observation.}
+#'  \item{ests} {is a data frame with one row per stratum and a final row for all strata combined,
+#'  and columns giving the number of detections in the stratum (n), the line lingth in the stratum 
+#'  (L), the covered area in the stratum (covered.area=2WL), the stratum area (stratum.Area), the 
+#'  estimated group density in the stratum (Dgroups), the estimated group abunance in the stratum 
+#'  (Ngroups), the estimated mean group size in the stratum (mean.size), the individual denstiy
+#'  in the stratum (D), and the abundance in the stratum (N).}
+#' }
+#' \code{dat} is the data frame passed to \code{est.hmltm}.
+#' 
+#' \code{W.est} is the right perpendicular distance used for estimation (and passed to 
+#' \code{est.hmltm}.)
+#' 
 #' @references Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 
 #' 2013. Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
 est.hmltm=function(dat,
