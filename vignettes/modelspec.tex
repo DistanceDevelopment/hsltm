@@ -76,7 +76,7 @@ pars=c(1,10)
 Model h.IP.0 with covariates \verb|bf| and \verb|cu| affecting $\sigma$, and starting values $\gamma=3.4$, $\sigma=54$, $e^{\beta_{bf}}=0.7$, $e^{\beta_{cu}}=0.9$ (Note that when there is no $\sigma_x$ parameter, the dependence of $\sigma$ is specified in the \verb|model| via element \verb|y=...|.):
 \begin{verbatim}
 hfun="h.IP.0"
-models=list(y="~bf+cu",x=NULL)
+models=list(y="bf+cu",x=NULL)
 pars=c(3.4, 54, 0.7, 0.9)
 \end{verbatim}
 
