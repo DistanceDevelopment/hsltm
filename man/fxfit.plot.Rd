@@ -7,7 +7,7 @@
     type = "prob", text.cex = 0.66)
 }
 \arguments{
-  \item{hmmlt}{object produced by \code{\link{est.hmltm}}.}
+  \item{hmltm}{object produced by \code{\link{est.hmltm}}.}
 
   \item{allx}{If TRUE, returns matrix with p(see at x,
   given covars) for each x in data in hmmlt (dashed gray

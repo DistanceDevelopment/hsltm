@@ -1055,9 +1055,11 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
 #' @param ylab y-axis label.
 #' @param main title.
 #' @param ylim y-value limits.
+#' @param text.cex relative text size.
 #' @param theta.b REDUNDANT must = 90.
 fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
-                    xlab="Forward distance (y)",ylab="pdf(y)",main="",ylim=NULL,theta.b=90)
+                    xlab="Forward distance (y)",ylab="pdf(y)",main="",ylim=NULL,theta.b=90,
+                    text.cex=0.66)
 {
   hmmlt=hmltm$hmltm.fit
   if(theta.b !=90) stop("This function only allows theta.b=90 degrees at present.")
@@ -1137,6 +1139,8 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
   histline(barheight,breaks=breaks,ylim=ylim,xlab=xlab,ylab=ylab,main=main)
   if(allx) for(i in 1:dim(fyx)[2]) lines(ys,fyx[,i],col="gray",lty=2)
   lines(ys,f,lwd=2)
+  nb=length(hst$breaks)
+  text(hst$breaks[1:(nb-1)]+diff(hst$breaks)/2,0,hst$count,cex=text.cex)    
   
   if(values) return(list(xy=xy,y=ys,fyx=fyx,f=f,breaks=breaks,barheight=barheight))
 }
@@ -1147,7 +1151,7 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
 #' @description
 #' Plots detection function on top of forward detection distance distribution. Returns a bunch of stuff.
 #'  
-#' @param hmmlt object produced by \code{\link{est.hmltm}}.
+#' @param hmltm object produced by \code{\link{est.hmltm}}.
 #' @param allx If TRUE, returns matrix with p(see at x, given covars) for each x in data in hmmlt (dashed gray 
 #' lines).
 #' @param values If TRUE, returns function values used in plot.
