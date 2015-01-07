@@ -96,6 +96,25 @@ invtfm <- function(b, fun) {
 
 #                      -----------------------------
 #--------------------- Start DLB's utility functions --------------------
+#' @title Clone of \code{sample} without weird behaviour for length(x)==1.
+#'
+#' @usage bsample(x, size, replace = FALSE, prob = NULL)
+#' 
+#' @description
+#'  Identical to \code{sample} but when x is an integer it just returns x rather than an
+#'  integer in 1:x (which is what \code{sample} does).
+#'  
+#' @param x Either a vector of one or more elements from which to choose, or a positive integer. 
+#' See \link{sample} for details.
+#' @param size a positive number, the number of items to choose from.
+#' @param replace Should sampling be with replacement?
+#' @param prob A vector of probability weights for obtaining the elements of the vector being sampled.
+#' 
+bsample=function(x,size,replace=FALSE,prob=NULL) {
+  if(length(x)==1) return(x)
+  else return(sample(x,size,replace,prob))
+}
+
 
 #' @title Caclulates coefficient of variation.
 #'
@@ -1295,8 +1314,9 @@ fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
 #' \itemize{
 #'  \item{xy} {dat used in fitting (input reflection).}
 #'  \item{phats} {estimated detection probabilities of all detections.}
-#'  \item{phat} {1/mean(1/phat).}
-#'  \item{pzero} {estimated detection probabilities at perpendicular distance.}
+#'  \item{phat} {1/mean(1/phats).}
+#'  \item{pzero} {estimated detection probabilities at perpendicular distance zero for 
+#'  detected population.}
 #'  \item{h.fun} {=FUN (input reflection).}
 #'  \item{models} {=models (input reflection).}
 #'  \item{fit} {output from \code{\link{fit.xy}}.}
@@ -2326,7 +2346,8 @@ NDest=function(dat,hmltm.fit,W){
   sbar[nstrat+1]=D[nstrat+1]/Dg[nstrat+1]
   
   return(list(invp=invp,ests=data.frame(stratum=stratname,n=n,L=L,covered.area=a,stratum.Area=A,Dgroups=signif(Dg,3),Ngroups=signif(Ng,3),
-                                        mean.size=signif(sbar,3),D=signif(D,3),N=signif(N,3))))
+                                        mean.size=round(sbar,1),D=signif(D,5),N=round(N,1))))
+  #                                        mean.size=signif(sbar,3),D=signif(D,3),N=signif(N,3))))
 }
 
 
@@ -2588,7 +2609,7 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
       cat("Bootstrap with parametric resampling of mean times available and unavailable.\n")
       flush.console()
       n=dim(hmm.pars$Et)[2]
-      sample(1:n,n,replace=TRUE) # sample animals to use
+      bsample(1:n,n,replace=TRUE) # sample animals to use
       b.Et=array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
       for(i in 1:n){
         lN=Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i]) # get normal parameters corresponding to lognormal(mu,Sigma)
@@ -2599,7 +2620,7 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
       flush.console()
       nhmm=dim(hmm.pars.bs)[1]
       if(nhmm==1) stop("Only one set of hmm pars. need multiple sets of pars if not fixed avail. (i.e. if hmm.pars.bs!=NULL)")
-      reps=sample(1:nhmm,B,replace=TRUE)
+      reps=bsample(1:nhmm,B,replace=TRUE)
     } else {
       warning("No availability parameters to resample from. Treating availability parameters as constant.")
       flush.console()
@@ -2645,7 +2666,7 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
     if(is.element("pm",names(b.hmm.pars))) names(b.hmm.pars)[which(names(b.hmm.pars)=="pm")]="pm" # to fix naming cock-up when creating hmmpars.bs
     # resample transects with replacement
     newtransind=matrix(rep(NA,nstrat*max(ntrans)),nrow=nstrat) # matrix of indices for resampled transects
-    for(st in 1:nstrat) newtransind[st,1:ntrans[st]]=sample(which(nrows[st,]>0),ntrans[st],replace=TRUE) # indices of matrix nrows for resampled transects
+    for(st in 1:nstrat) newtransind[st,1:ntrans[st]]=bsample(which(nrows[st,]>0),ntrans[st],replace=TRUE) # indices of matrix nrows for resampled transects
     newnrows=0;for(st in 1:nstrat) newnrows=newnrows+sum(na.omit(nrows[st,newtransind[st,]])) # calc number rows for bootstrap data frame
     bdat1=data.frame(matrix(rep(NA,dim(dat1)[2]*newnrows),nrow=newnrows)) # set up empty bootstrap data frame
     names(bdat1)=names(dat1)
@@ -2921,7 +2942,7 @@ bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
   # resample sightings data and re-estimate, using a resample of availability paramters:
   for(nb in 1:B){
     # resample detection locations
-    samp.ind=sample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
+    samp.ind=bsample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
     b.dat=dat[samp.ind,]# get resampled data
     # create new hmm.pars object with resampled availability parameters
     if(!fixed.avail) {
@@ -3006,7 +3027,7 @@ bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
   if(!fixed.avail) { # resample availability parameters
     nhmm=dim(hmm.pars.bs)[1]
     if(nhmm==1) stop("Only one set of hmm pars. need multiple sets of pars if not fixed avail.")
-    reps=sample(1:nhmm,B,replace=TRUE)
+    reps=bsample(1:nhmm,B,replace=TRUE)
   }
   for(nb in 1:B) {
     if(!fixed.avail)  {
@@ -3016,7 +3037,7 @@ bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
     }
     if(is.element("pm",names(b.hmm.pars))) names(b.hmm.pars)[which(names(b.hmm.pars)=="pm")]="pm" # to fix naming cock-up when creating hmmpars.bs
     # resample detection locations
-    samp.ind=sample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
+    samp.ind=bsample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
     b.dat=dat[samp.ind,,drop=FALSE]# get resampled data
     names(b.dat)=names(dat)
     # refit model
@@ -3309,7 +3330,7 @@ simhmltm.w=function(adat,xmax,ymax,spd,animals,hfun,pars,N,dmax=NULL,seed=NULL,p
 #  # Determine the last possible starting times of sequences of length (2*ymax+1) for animal 
 #  wst<-c(length(adat$w1)-ytmax, length(adat$w2)-ytmax, length(adat$w3)-ytmax, length(adat$w4)-ytmax, length(adat$w5)-ytmax,length(adat$w6)-ytmax,length(adat$w7)-ytmax,length(adat$w8)-ytmax)
   # Determine the number of times available and the number of unavailable
-  if(length(animals)>1) iw=sample(animals,N,replace=TRUE) else iw=rep(animals,N)
+  if(length(animals)>1) iw=bsample(animals,N,replace=TRUE) else iw=rep(animals,N)
   xobs<-yobs<-rep(NULL,N) # initialise variables holding locations of detections
   y0=(0:ytmax)*spd # unadjusted y locations
   y1=runif(N,0,spd) # randomise closest location between 0 and 1/spd for all animals
@@ -3319,9 +3340,9 @@ simhmltm.w=function(adat,xmax,ymax,spd,animals,hfun,pars,N,dmax=NULL,seed=NULL,p
     y=y[y<=ymax]
     surf<-wa[[iw[i]]]
     # If poisson==TRUE shuffle the surfacings (for comparison)
-    if(poiss){surf<-sample(surf)}
+    if(poiss){surf<-bsample(surf)}
     # Select the starting indices for the run
-    runstart <-sample(1:wst[iw[i]],1)
+    runstart <-bsample(1:wst[iw[i]],1)
     # Generate the x-value
     x<-runif(1,0,xmax)
     # Fly over the runs record positions of the detections.
@@ -3439,7 +3460,7 @@ simest=function(simethod="hmm",shfun,spars,ehfun=shfun,parstart=spars,survey.par
   
   for(i in 1:nsim) {
     if(!is.null(hmmpars.bs) & simethod=="hmm") {
-      rep=sample(1:nhmm,1)
+      rep=bsample(1:nhmm,1)
       ehmm.pars=unvectorize.hmmpars(hmmpars.bs[1,])
       if(is.element("pm",names(ehmm.pars))) names(ehmm.pars)[which(names(ehmm.pars)=="pm")]="pm" # to fix naming cock-up when creating hmmpars.bs
     }      
