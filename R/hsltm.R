@@ -2473,7 +2473,9 @@ est.hmltm=function(dat,
   # estimate density, etc:
   if(is.null(W.est)) W.est=survey.pars$W
   point=NDest(dat1,hmltm.fit,W.est)
-  return(list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est))
+  hmltm.obj=list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
+  class(hmltm.obj)=c(class(hmltm.obj),"hmltm")
+  return(hmltm.obj)
 }
 
 #----------------------- End Density and Abundance Estimation Functions ----------------------
@@ -2691,7 +2693,7 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
     bhat=est.hmltm(bdat1,pars=pars,FUN=h.fun,models=models,survey.pars,b.hmm.pars,control.fit,control.opt,notrunc=TRUE,W.est=W.est) 
     for(st in 1:(nstrat+1)) best[st,,b]=as.numeric(bhat$point$ests[st,])
   }
-  
+  class(best)=c(class(best),"hmltm.bs")
   return(best)
 }
 
