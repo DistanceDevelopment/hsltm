@@ -2037,14 +2037,16 @@ hmmlt.gof.x=function(hmltm,ks.plot=TRUE){
   cdf.order=order(cdf)
   cdf=cdf[cdf.order]
   e.cdf=cdf.order/n
+  # K-S statistic
+  dF=cdf-edf
+  worst=which(abs(dF)==max(abs(dF)))
+  Dn=max(abs(dF))*sqrt(n)
+  p.ks=p.kolomogarov(Dn)
   if(ks.plot) {
     plot(edf,cdf,pch="+",xlim=c(0,1),ylim=c(0,1),xlab="Empirical Distribution Function",ylab="Cumulative Distribution Function",main="Perp. Dist. Q-Q Plot")
     lines(c(0,1),c(0,1))
+    points(edf[worst],cdf[worst],col="red")
   }
-  # K-S statistic
-  dF=cdf-edf
-  Dn=max(abs(dF))*sqrt(n)
-  p.ks=p.kolomogarov(Dn)
   
   return(list(p.ks=1-p.ks,qq.x=edf,qq.y=cdf,x=hmmlt$xy$x[cdf.order]))
 }
