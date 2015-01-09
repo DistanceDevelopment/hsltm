@@ -1972,12 +1972,14 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars
   e.cdf=order(cdf)/n
   # K-S statistic
   dF=cdf-e.cdf
+  worst=which(abs(dF)==max(abs(dF))) # mark point on which Kolmogarov test hinges
   Dn=max(abs(dF))*sqrt(n)
   p=p.kolomogarov(Dn)
   # plots
   if(ks.plot) {
     plot(1-e.cdf,cdf,xlab="Empirical Distribution Function",ylab="Cumulative Distribution Function",main="Forward Dist. Q-Q Plot",xlim=c(0,1),ylim=c(0,1),pch="+")
     lines(c(0,1),c(1,0))
+    points(1-e.cdf[worst],cdf[worst],col="red") # mark point on which Kolmogarov test hinges
     if(seplots){
       plot(xx,dF,xlab="Perpendicular distance",ylab="CDF-Empirical CDF")
       lines(c(0,max(xx)),c(0,0),lty=2)
