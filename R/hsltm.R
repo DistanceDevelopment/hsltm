@@ -1936,9 +1936,13 @@ hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="respon
 #'
 #' @description
 #' Calculates goodness-of-fit in forward dimension, plots fit, and returns p-value and other stuff.
+#' Returns two p-values: \code{p.ks} is the Kolmogarov-Smirnov p-value (which is
+#' based on only the largest difference between emprical and theoretical cdfs), and Cramer-von Mises
+#' p-value (which is based on all cdf values).
 # 
 #' @param hmltm fitted model, as output by \code{\link{est.hmltm}}
-#' @param ks.plot If TRUE, does Q-Q plot.
+#' @param ks.plot If TRUE, does Q-Q plot. Point corresponding to largest difference between
+#' empirical and theoretical cdf (on which the Kolmogarov-Smirnov test is based) is circled in red.
 #' @param seplots if TRUE does additional diagnostic plots
 #' @param smult multiplier to size circles in third plot.
 #' @param ymax forward distance at which detection probability is assumed to be zero. 
@@ -1975,6 +1979,7 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars
   worst=which(abs(dF)==max(abs(dF))) # mark point on which Kolmogarov test hinges
   Dn=max(abs(dF))*sqrt(n)
   p=p.kolomogarov(Dn)
+  p.cvm=cvm.test(Fy0)$p.value
   # plots
   if(ks.plot) {
     plot(1-e.cdf,cdf,xlab="Empirical Distribution Function",ylab="Cumulative Distribution Function",main="Forward Dist. Q-Q Plot",xlim=c(0,1),ylim=c(0,1),pch="+")
@@ -1988,7 +1993,7 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars
       plot(dat$x[Fy0.order],dat$y[Fy0.order],xlab="Perpendicular distance",ylab="Forward distance",cex=abs(size),col=dFcol[sign(dF)+2],main="CDF-Empirical CDF (red=negative)")
     }
   }
-  return(list(p.ks=1-p,qq.x=e.cdf,qq.y=cdf,y=yy))
+  return(list(p.ks=1-p,p.cvm=p.cvm,qq.x=e.cdf,qq.y=cdf,y=yy))
 }
 
 
@@ -2025,10 +2030,14 @@ p.kolomogarov=function(x,inf=1000,dp=1e-4)
 #' @title Goodness-of-fit in perpendicular dimension.
 #'
 #' @description
-#' Calculates goodness-of-fit in perpendicular dimension, plots fit, and returns p-value and other stuff.
+#' Calculates goodness-of-fit in perpendicular dimension, plots fit, and returns p-value and 
+#' other stuff. Returns two p-values: \code{p.ks} is the Kolmogarov-Smirnov p-value (which is
+#' based on only the largest difference between emprical and theoretical cdfs), and Cramer-von Mises
+#' p-value (which is based on all cdf values).
 # 
 #' @param hmltm fitted model, as output by \code{\link{est.hmltm}}
-#' @param ks.plot If TRUE, does Q-Q plot.
+#' @param ks.plot If TRUE, does Q-Q plot. Point corresponding to largest difference between
+#' empirical and theoretical cdf (on which the Kolmogarov-Smirnov test is based) is circled in red.
 hmmlt.gof.x=function(hmltm,ks.plot=TRUE){
   hmmlt=hmltm$hmltm.fit
   n=length(hmmlt$xy$x)
@@ -2042,13 +2051,14 @@ hmmlt.gof.x=function(hmltm,ks.plot=TRUE){
   worst=which(abs(dF)==max(abs(dF)))
   Dn=max(abs(dF))*sqrt(n)
   p.ks=p.kolomogarov(Dn)
+  p.cvm=cvm.test(cdf)$p.value # Under model, cdf values are from uniform; default for cvm.test is "punif"
   if(ks.plot) {
     plot(edf,cdf,pch="+",xlim=c(0,1),ylim=c(0,1),xlab="Empirical Distribution Function",ylab="Cumulative Distribution Function",main="Perp. Dist. Q-Q Plot")
     lines(c(0,1),c(0,1))
     points(edf[worst],cdf[worst],col="red")
   }
   
-  return(list(p.ks=1-p.ks,qq.x=edf,qq.y=cdf,x=hmmlt$xy$x[cdf.order]))
+  return(list(p.ks=1-p.ks,p.cvm=p.cvm,qq.x=edf,qq.y=cdf,x=hmmlt$xy$x[cdf.order]))
 }
 
 
