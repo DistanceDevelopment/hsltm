@@ -2502,14 +2502,16 @@ est.hmltm=function(dat,
 #' @title Summarise bootstrap results.
 #'
 #' @description
-#' Produces summarry of bootstrap results, in a list
+#' Produces summarry of bootstrap results
 #' 
 #' @param bests output from \code{\link{bs.hmltm}}.
+#' @param ests hmltm object with points estimates.
 #' @param cilevel confidence level for confidence intervals by percentile method. 
 #' @param write.csvs if TRUE, writes each output (see Value below) to separate .csv file.
 #' @param dir directory to which to write outputs if \code{write.csvs} is TRUE. 
 #'
-#' @return Returns a list with elements as follows for each statistic in \code{bests}:
+#' @return If \code{ests} is NULL:\cr
+#' Returns a list with elements as follows for each statistic in \code{bests}:
 #' \itemize{
 #'  \item{nbad} {number of bad estimates of the statistic in question that were excluded from the 
 #'  summary. (Bad estimates occur, for example, when a bootstrap sample involves no detections and
@@ -2519,24 +2521,53 @@ est.hmltm=function(dat,
 #'  \item{se} {SEs of the statistic in question.}
 #'  \item{lower} {Lower \code{cilevel} percentiles of the statistic in question.}
 #'  \item{upper} {Upper \code{cilevel} percentiles of the statistic in question.}
+#'} \cr
+#' If \code{ests} is an object of class 'hmltm':\cr
+#' Returns a data frame with rows only for every stratum with detections (and the total) and columns as follows: \cr
+#' \itemize{
+#' \item{Stratum} stratum number \cr
+#' \item{n} original number of detections \cr
+#' \item{n.L} original encounter rate \cr
+#' \item{CV.n.L} percentage coefficient of variation of encounter rate\cr
+#' \item{N.grp} original estimate of group abundance\cr
+#' \item{CV.N.grp} percentage coefficient of variation of group abundance\cr
+#' \item{N.grp.lo} lower bound of group abundance confidence interval\cr
+#' \item{N.grp.hi} upper bound of group abundance confidence interval\cr
+#' \item{Es} original mean group size estimate\cr
+#' \item{CV.Es} percentage coefficient of variation of mean group size\cr
+#' \item{Es.lo} lower bound of mean group size confidence interval\cr
+#' \item{Es.hi} upper bound of mean group size confidence interval\cr
+#' \item{N} original individual abundance estimate\cr
+#' \item{CV.N} percentage coefficient of individual abundance\cr
+#' \item{N.lo} lower bound of individual abundance confidence interval\cr
+#' \item{N.hi} upper bound of individual abundance confidence interval\cr
 #'}
-bootsum=function(bests,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
+bootsum=function(bests,ests=NULL,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
   if(cilevel<=0 | cilevel>=1) stop("cilevel must be greater than 0 and less than 1.")
-  bdim=dim(bests)
+  if(!is.null(ests) & !inherits(ests,"hmltm")) stop("ests must be of class 'hmltm'.")
+  ns=apply(bests[,2,],1,sum) # sum sample sizes by stratum
+  keepstrat=(ns>0) # only consider strata with some detections
+  if(!is.null(ests)) keepcols=c("stratum","n","L","Ngroups","mean.size","N")
+  else keepcols=colnames(bests)
+  if(!is.null(ests)) bsests=bests[keepstrat,keepcols,]
+  else bsests=bests[keepstrat,,]
+  bsests[,"L",]=bsests[,"n",]/bsests[,"L",] # replace L with encounter rate
+  colnames(bsests)[3]="n/L"
+  bdim=dim(bsests)
   nstrat=bdim[1]
   nests=bdim[2]
   cv=matrix(rep(NA,nstrat*nests),ncol=bdim[2])
-  rownames=dimnames(bests)[[1]]
+  rownames=dimnames(bsests)[[1]]
   rownames[length(rownames)]="Total"
-  colnames=dimnames(bests)[[2]]
+  colnames=dimnames(bsests)[[2]]
   dimnames(cv)=list(rep("",length(rownames)),colnames)
   nbad=se=means=lower=upper=cv
   B=bdim[3]
-  cat("Reulsts from ",B," bootstrap replicates:\n",sep="")
+  cat("Results from ",B," bootstrap replicates:\n",sep="")
   cat("----------------------------------------\n")
   for(i in 1:nstrat) {
     for(j in 1:nests){
-      goodests=na.omit(bests[i,j,])
+      goodests=na.omit(bsests[i,j,])
       nbad[i,j]=B-length(goodests)
       means[i,j]=mean(goodests)
       se[i,j]=sd(goodests)
@@ -2546,7 +2577,7 @@ bootsum=function(bests,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
       upper[i,j]=perc[2]
     }
   }
-  # remove stats of stratum name, and make stratum a characte
+  # remove stats of stratum name, and make stratum a character
   nbad=as.data.frame(nbad,row.names=1:dim(nbad)[1])
   means=as.data.frame(means,row.names=1:dim(nbad)[1])
   se=as.data.frame(se,row.names=1:dim(nbad)[1])
@@ -2560,16 +2591,78 @@ bootsum=function(bests,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
   lower[,1]=rownames
   upper[,1]=rownames
   
+  outsum=list(nbad=nbad,mean=means,se=se,cv=cv,lower=lower,upper=upper)
+  if(!is.null(ests)) outsum=strat.estable(ests$point$ests[keepstrat,],outsum$cv)
+  
   if(write.csvs){
-    write.csv(nbad,file=paste(dir,"nbad.csv",sep=""),row.names=FALSE)
-    write.csv(means,file=paste(dir,"means.csv",sep=""),row.names=FALSE)
-    write.csv(se,file=paste(dir,"se.csv",sep=""),row.names=FALSE)
-    write.csv(cv,file=paste(dir,"cv.csv",sep=""),row.names=FALSE)
-    write.csv(lower,file=paste(dir,"lower.csv",sep=""),row.names=FALSE)
-    write.csv(upper,file=paste(dir,"upper.csv",sep=""),row.names=FALSE)
+    if(is.null(ests)) {
+      write.csv(nbad,file=paste(dir,"nbad.csv",sep=""),row.names=FALSE)
+      write.csv(means,file=paste(dir,"means.csv",sep=""),row.names=FALSE)
+      write.csv(se,file=paste(dir,"se.csv",sep=""),row.names=FALSE)
+      write.csv(cv,file=paste(dir,"cv.csv",sep=""),row.names=FALSE)
+      write.csv(lower,file=paste(dir,"lower.csv",sep=""),row.names=FALSE)
+      write.csv(upper,file=paste(dir,"upper.csv",sep=""),row.names=FALSE)
+    } else write.csv(outsum,file=paste(dir,"bs-summary.csv",sep=""),row.names=FALSE)
   }
-  return(list(nbad=nbad,mean=means,se=se,cv=cv,lower=lower,upper=upper))
+  
+  return(outsum)
 }
+
+
+#' @title Tabulate bootstrap results.
+#'
+#' @description
+#' Produces brief summarry of bootstrap results
+#' 
+#' @param est output from \code{\link{est.hmltm}}.
+#' @param cv \code{$cv} element of output from \code{\link{bs.hmltm}}. 
+#' 
+#' @return Returns a data frame with columns as follows: \cr
+#' Stratum: stratum number \cr
+#' n: original number of detections \cr
+#' n.L: original encounter rate \cr
+#' CV.n.L: percentage coefficient of variation of encounter rate\cr
+#' N.grp original estimate of group abundance\cr
+#' CV.N.grp: percentage coefficient of variation of group abundance\cr
+#' N.grp.lo: lower bound of group abundance confidence interval\cr
+#' N.grp.hi: upper bound of group abundance confidence interval\cr
+#' E.s: original mean group size estimate\cr
+#' CV.E.s: percentage coefficient of variation of mean group size\cr
+#' N: original individual abundance estimate\cr
+#' CV.N: percentage coefficient of individual abundance\cr
+#' N.lo: lower bound of individual abundance confidence interval\cr
+#' N.hi: upper bound of individual abundance confidence interval\cr
+strat.estable=function(est,cv){
+  min=est[,"n"]
+  N=est[,"N"]
+  Ngrp=est[,"Ngroups"]
+  Es=est[,"mean.size"]
+  cv.N=cv[,"N"]
+  cv.Ngp=cv[,"Ngroups"]
+  cv.Es=cv[,"mean.size"]
+  N.ci=lnci.nmin(min,N,cv.N)
+  Ngrp.ci=lnci.nmin(min,Ngrp,cv.N)
+  Es.ci=lnci.nmin(0,Es,cv.Es)  
+  outp=data.frame(Stratum=est$stratum,
+                  n=est$n,
+                  n.L=signif(est$n/est$L,3),
+                  CV.n.L=round(cv[,3]*100),
+                  N.grp=round(est$Ngroups),
+                  CV.N.grp=round(cv$Ngroups*100),
+                  N.grp.lo=round(Ngrp.ci$lower),
+                  N.grp.hi=round(Ngrp.ci$upper),
+                  Es=round(est$mean.size,1),
+                  CV.Es=round(cv.Es*100),
+                  Es.lo=round(Es.ci$lower),
+                  Es.hi=round(Es.ci$upper),
+                  N=round(est$N),
+                  CV.N=round(cv$N*100),
+                  N.lo=round(N.ci$lower),
+                  N.hi=round(N.ci$upper)
+  )
+  return(outp)
+}
+
 
 
 #' @title Bootstrap for hmltm model.
