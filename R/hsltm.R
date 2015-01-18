@@ -2261,14 +2261,21 @@ truncdat=function(dat,minx=0,maxx=max(dat$x),twosit=FALSE){
 
 #' @title Reduces MRDS data frame to CDS data frame.
 #'
+#' @param dat distance data frame in mrds form.
+#' @param prefer which of the two observers' data to prefer when forward distances are 
+#'   missing/equal must be 1 or 2.
+#'   
 #' @description
-#' Reduces mark-recapture Distance sampling (MRDS) data frame dat, with two lines per detectoin, to a 
+#' Reduces mark-recapture Distance sampling (MRDS) data frame dat, with two lines per detection, to a 
 #' conventional distance sampling (CDS) data frame with a single line per detection. In the case of 
 #' duplicates ("recaptures"), takes the information from the detection made farthest ahead (i.e. that
-#' with larger \code{y}).
+#' with larger \code{y}) With duplicates that have the same \code{y} or neither of which have a 
+#' \code{y}, it chooses according to the parameter \code{prefer}. If only one of the duplicates 
+#' has a \code{y}, it chooses that one.
 #' 
 #' @param dat MRDS data frame.
-make.onesit=function(dat) {
+make.onesit=function(dat,prefer=1) {
+  if(prefer!=1 & prefer!=2) stop("Argument 'prefer' must be 1 or 2.")
   n=dim(dat)[1]
   out=rep(FALSE,n)
   i=1
@@ -2277,7 +2284,15 @@ make.onesit=function(dat) {
       if(dat$seen[i]==0) out[i]=TRUE
       if(dat$seen[i+1]==0) out[i+1]=TRUE
       if(dat$seen[i]==1 & dat$seen[i+1]==1) {
-        if(dat$y[i]<dat$y[i+1]){ # remove later (closer) detection
+        if(is.na(dat$y[i]) & is.na(dat$y[i+1])) { # no y's; remove not preferred detection
+          out[i+(3-prefer)-1]=TRUE
+        } else if(is.na(dat$y[i]) & !is.na(dat$y[i+1])) { # keep only non-NA y
+          out[i]=TRUE
+        } else if(!is.na(dat$y[i]) & is.na(dat$y[i+1])){ # keep only non-NA y
+          out[i+1]=TRUE
+        } else if(dat$y[i]==dat$y[i+1]){# remove not preferred detection
+          out[i+(3-prefer)-1]=TRUE
+        } else if(dat$y[i]<dat$y[i+1]){ # remove later (closer) detection
           out[i]=TRUE
         } else {
           out[i+1]=TRUE
