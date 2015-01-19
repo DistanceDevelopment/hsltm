@@ -2207,54 +2207,100 @@ hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="re
 #' @title Distance data truncation.
 #'
 #' @description
-#' Truncates perp dists in data frame dat, inserting effort-only record if truncation removes all 
-#' detections on a transect.
+#' Truncates perp dists in data frame dat, inserting effort-only record if truncation removes 
+#' all detections on a transect.
 #' Subtracts left-trunction point off all perp distances - after all truncation.
 
 #' 
-#' @param dat distance data frame.
+#' @param dat distance data frame. Must have columns for stratum stratum.area, transect, transect.length, 
+#' distance, and if \code{twosit}==TRUE then object as well. These can have any names, but the names
+#' must be specified, via argument \code{colnames}.
 #' @param minx perpendicular distance left-truncation point.
 #' @param maxx perpendicular distance right-truncation point.
 #' @param twosit If TRUE, assumes this is an mrds-type dataset with two lines per detection.
-truncdat=function(dat,minx=0,maxx=max(dat$x),twosit=FALSE){
+#' @param colnames name of columns containing stratum, stratum.area, transect, transect.length, 
+#' distance, and if \code{twosit}==TRUE then object as well, IN THIS ORDER in a character 
+#' vector. The default value is colnames=c("stratum","area","transect","L","x","obs").
+truncdat=function(dat,minx=0,maxx=NULL,twosit=FALSE,colnames=c("stratum","area","transect","L","x","obs")){
   tdat=dat
-  NAs=rep(NA,dim(dat)[2]) # row of NAs
-  keepcols=c("stratum","area","transect","L")
+  keepcols=rep(NA,4)
+  for(i in 1:4) {
+    keepcols[i]=which(names(dat)==colnames[i])
+    if(is.null(keepcols[i])) stop("No column in dat called ",colnames[i])
+  }
+  NAs=dat[1,,drop=FALSE]
+  NAs[,-keepcols]=NA
+  xcol=which(names(dat)==colnames[5])
+  if(is.null(xcol)) stop("No column in dat called ",colnames[5])
+  if(is.null(maxx)) maxx=max(na.omit(dat[,xcol]))
   if(twosit){
-    out1=which(dat$obs==1 & (dat$x<minx | dat$x>maxx))
-    out2=which(dat$obs==2 & (dat$x<minx | dat$x>maxx))
+    if(length(colnames)<6) stop("With double-observer data, need 6th colname for objerver; only 5 colnames:",colnames)
+    obscol=which(names(dat)==colnames[6])
+    if(is.null(obscol)) stop("No column in dat called ",colnames[6])
+    out1=which(dat[,obscol]==1 & (dat[,xcol]<minx | dat[,xcol]>maxx))
+    out2=which(dat[,obscol]==2 & (dat[,xcol]<minx | dat[,xcol]>maxx))
     if(length(out1) != length(out2)) stop("Different number of obs1 and obs2 detections for left-truncation")
     if(unique(out2-out1) != 1) stop("Looks like non-consecutive obs1 and obs2 detections for left-truncation")
     nout=length(out1)
-    outeff=data.frame(stratum=rep(NA,nout),area=rep(NA,nout),transect=rep(NA,nout),L=rep(NA,nout))
+    svalues=tvalues=rep(NA,nout)
+    if(is.factor(dat[,keepcols[1]])) {
+      svalues=rep(levels(dat[,keepcols[1]])[1],nout)
+      levels(svalues)=levels(dat[,keepcols[1]])
+      NAs[keepcols[1]]=svalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs)=levels(svalues)
+    }
+    if(is.factor(dat[,keepcols[3]])) {
+      tvalues=rep(levels(dat[,keepcols[3]])[3],nout)
+      levels(tvalues)=levels(dat[,keepcols[3]])
+      NAs[keepcols[3]]=tvalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs)=levels(tvalues)
+    }
+    outeff=data.frame(stratum=svalues,area=rep(NA,nout),transect=tvalues,L=rep(NA,nout))
+    if(is.factor(outeff$stratum)) levels(outeff$stratum)=levels(svalues)
+    if(is.factor(outeff$transect)) levels(outeff$stratum)=levels(tvalues)
     for(i in 1:nout) outeff[i,]=dat[out1[i],keepcols] # store effort info for truncated sightings
     tdat=dat[-c(out1,out2),] # remove all truncated sightings
     for(i in 1:nout) {
-      got=which(tdat$stratum==outeff$stratum[i] & tdat$area==outeff$area[i] & 
-                  tdat$transect==outeff$transect[i] & tdat$L==outeff$L[i])
+      got=which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
+                  tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
       if(length(got)==0) { # transect no longer in truncated dataset
         tdat=rbind(tdat,NAs) # add row of NAs
         tdat[dim(tdat)[1],keepcols]=outeff[i,] # add in missing transect info
       }
     }    
   } else {
-    out=which(dat$x<minx | dat$x>maxx)
+    out=which(dat[,xcol]<minx | dat[,xcol]>maxx)
     nout=length(out)
-    outeff=data.frame(stratum=rep(NA,nout),area=rep(NA,nout),transect=rep(NA,nout),L=rep(NA,nout))
-#    for(i in 1:nout) outeff[i,]=dat[out1[i],keepcols] # store effort info for truncated sightings
+    svalues=tvalues=rep(NA,nout)
+    if(is.factor(dat[,keepcols[1]])) {
+      svalues=rep(levels(dat[,keepcols[1]])[1],nout)
+      levels(svalues)=levels(dat[,keepcols[1]])
+      NAs[keepcols[1]]=svalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs)=levels(svalues)
+    }
+    if(is.factor(dat[,keepcols[3]])) {
+      tvalues=rep(levels(dat[,keepcols[3]])[3],nout)
+      levels(tvalues)=levels(dat[,keepcols[3]])
+      NAs[keepcols[3]]=tvalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs)=levels(tvalues)
+    }
+    outeff=data.frame(stratum=svalues,area=rep(NA,nout),transect=tvalues,L=rep(NA,nout))
+    if(is.factor(outeff$stratum)) levels(outeff$stratum)=levels(svalues)
+    if(is.factor(outeff$transect)) levels(outeff$stratum)=levels(tvalues)
+    #    for(i in 1:nout) outeff[i,]=dat[out1[i],keepcols] # store effort info for truncated sightings
     for(i in 1:nout) outeff[i,]=dat[out[i],keepcols] # store effort info for truncated sightings
     tdat=dat[-out,] # remove all truncated sightings
     for(i in 1:nout) {
-      got=which(tdat$stratum==outeff$stratum[i] & tdat$area==outeff$area[i] & 
-                  tdat$transect==outeff$transect[i] & tdat$L==outeff$L[i])
+      got=which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
+                  tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
       if(length(got)==0) { # transect no longer in truncated dataset
         tdat=rbind(tdat,NAs) # add row of NAs
         tdat[dim(tdat)[1],keepcols]=outeff[i,] # add in missing transect info
       }
     }
   }
-  tdat=tdat[order(tdat$stratum,tdat$transect),]
-  tdat$x=tdat$x-minx # shift all left
+  tdat=tdat[order(tdat[keepcols[1]],tdat[keepcols[3]]),]
+  tdat[!is.na(tdat[,xcol]),xcol]=tdat[!is.na(tdat[,xcol]),xcol]-minx # shift all left
   return(tdat)
 }
 
