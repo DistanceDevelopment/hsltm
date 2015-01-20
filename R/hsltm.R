@@ -2204,24 +2204,25 @@ hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="re
 
 
 
-#' @title Distance data truncation.
+#' @title Data truncation.
 #'
 #' @description
-#' Truncates perp dists in data frame dat, inserting effort-only record if truncation removes 
-#' all detections on a transect.
-#' Subtracts left-trunction point off all perp distances - after all truncation.
+#' Left- and/or right-truncates any variable in data frame dat, inserting effort-only record if 
+#' truncation removes all detections on a transect.
+#' Subtracts left-trunction point off all variable values - after all truncation.
 
 #' 
 #' @param dat distance data frame. Must have columns for stratum stratum.area, transect, transect.length, 
-#' distance, and if \code{twosit}==TRUE then object as well. These can have any names, but the names
-#' must be specified, via argument \code{colnames}.
-#' @param minx perpendicular distance left-truncation point.
-#' @param maxx perpendicular distance right-truncation point.
+#' <any-observer-level_variable>, and if \code{twosit}==TRUE then object as well. These can 
+#' have any names, but the names must be specified, via argument \code{colnames}.
+#' @param minvalue left-truncation point.
+#' @param maxvalue right-truncation point.
 #' @param twosit If TRUE, assumes this is an mrds-type dataset with two lines per detection.
-#' @param colnames name of columns containing stratum, stratum.area, transect, transect.length, 
-#' distance, and if \code{twosit}==TRUE then object as well, IN THIS ORDER in a character 
-#' vector. The default value is colnames=c("stratum","area","transect","L","x","obs").
-truncdat=function(dat,minx=0,maxx=NULL,twosit=FALSE,colnames=c("stratum","area","transect","L","x","obs")){
+#' @param colnames name of columns containing stratum, stratum area, transect, transect length, 
+#' <any-observer-level_variable>, and if \code{twosit}==TRUE then object as well, IN THIS ORDER, 
+#' in a character vector. The default value is 
+#' colnames=c("stratum","area","transect","L","x","obs").
+truncdat=function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum","area","transect","L","x","obs")){
   tdat=dat
   keepcols=rep(NA,4)
   for(i in 1:4) {
@@ -2232,13 +2233,13 @@ truncdat=function(dat,minx=0,maxx=NULL,twosit=FALSE,colnames=c("stratum","area",
   NAs[,-keepcols]=NA
   xcol=which(names(dat)==colnames[5])
   if(is.null(xcol)) stop("No column in dat called ",colnames[5])
-  if(is.null(maxx)) maxx=max(na.omit(dat[,xcol]))
+  if(is.null(maxval)) maxval=max(na.omit(dat[,xcol]))
   if(twosit){
-    if(length(colnames)<6) stop("With double-observer data, need 6th colname for objerver; only 5 colnames:",colnames)
+    if(length(colnames)<6) stop("With double-observer data, need 6th colname for observer; only 5 colnames:",colnames)
     obscol=which(names(dat)==colnames[6])
     if(is.null(obscol)) stop("No column in dat called ",colnames[6])
-    out1=which(dat[,obscol]==1 & (dat[,xcol]<minx | dat[,xcol]>maxx))
-    out2=which(dat[,obscol]==2 & (dat[,xcol]<minx | dat[,xcol]>maxx))
+    out1=which(dat[,obscol]==1 & (dat[,xcol]<minval | dat[,xcol]>maxval))
+    out2=which(dat[,obscol]==2 & (dat[,xcol]<minval | dat[,xcol]>maxval))
     if(length(out1) != length(out2)) stop("Different number of obs1 and obs2 detections for left-truncation")
     if(unique(out2-out1) != 1) stop("Looks like non-consecutive obs1 and obs2 detections for left-truncation")
     nout=length(out1)
@@ -2269,7 +2270,7 @@ truncdat=function(dat,minx=0,maxx=NULL,twosit=FALSE,colnames=c("stratum","area",
       }
     }    
   } else {
-    out=which(dat[,xcol]<minx | dat[,xcol]>maxx)
+    out=which(dat[,xcol]<minval | dat[,xcol]>maxval)
     nout=length(out)
     svalues=tvalues=rep(NA,nout)
     if(is.factor(dat[,keepcols[1]])) {
@@ -2300,7 +2301,7 @@ truncdat=function(dat,minx=0,maxx=NULL,twosit=FALSE,colnames=c("stratum","area",
     }
   }
   tdat=tdat[order(tdat[keepcols[1]],tdat[keepcols[3]]),]
-  tdat[!is.na(tdat[,xcol]),xcol]=tdat[!is.na(tdat[,xcol]),xcol]-minx # shift all left
+  tdat[!is.na(tdat[,xcol]),xcol]=tdat[!is.na(tdat[,xcol]),xcol]-minval # shift all left
   return(tdat)
 }
 
