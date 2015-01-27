@@ -2308,7 +2308,9 @@ truncdat=function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum","ar
 
 #' @title Reduces MRDS data frame to CDS data frame.
 #'
-#' @param dat distance data frame in mrds form.
+#' @param dat distance data frame in mrds form. Must have columns 'object' (unique detection 
+#' identifier), 'seen' (binary indicating detecteb by observer or not) and 'y' (forward) 
+#' detection distance.
 #' @param prefer which of the two observers' data to prefer when forward distances are 
 #'   missing/equal must be 1 or 2.
 #'   
