@@ -2422,8 +2422,11 @@ NDest=function(dat,hmltm.fit,W){
   L[nstrat+1]=sum(L[1:nstrat])
   a[nstrat+1]=sum(a[1:nstrat])
   sbar[nstrat+1]=D[nstrat+1]/Dg[nstrat+1]
+  # add transect frequency:
+  tfreq=apply(table(dat$stratum,dat$transect)>0,1,sum)
+  k=c(tfreq,sum(tfreq))
   
-  return(list(invp=invp,ests=data.frame(stratum=stratname,n=n,L=L,covered.area=a,stratum.Area=A,Dgroups=signif(Dg,3),Ngroups=signif(Ng,3),
+  return(list(invp=invp,ests=data.frame(stratum=stratname,n=n,k=k,L=L,covered.area=a,stratum.Area=A,Dgroups=signif(Dg,3),Ngroups=signif(Ng,3),
                                         mean.size=round(sbar,1),D=signif(D,5),N=round(N,1))))
   #                                        mean.size=signif(sbar,3),D=signif(D,3),N=signif(N,3))))
 }
@@ -2540,7 +2543,7 @@ est.hmltm=function(dat,
   if(twosit) dat1=make.onesit(dat) else dat1=dat
   # data truncation:
   if(!notrunc) if(min(na.omit(dat1$x)) < survey.pars$Wl | survey.pars$W < max(na.omit(dat1$x))) 
-    dat1=truncdat(dat1,minx=survey.pars$Wl,maxx=survey.pars$W,twosit=FALSE)
+    dat1=truncdat(dat1,minval=survey.pars$Wl,maxval=survey.pars$W,twosit=FALSE)
   # extract sightings rows only
 #  sits1=!is.na(dat1$seen)
 #  srows1=sits1 & dat1$seen==1 # mark rows that have sightings
@@ -2550,6 +2553,7 @@ est.hmltm=function(dat,
   hmltm.fit=fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt)
   # estimate density, etc:
   if(is.null(W.est)) W.est=survey.pars$W
+  if(!is.null(survey.pars$Wl)) W.est=survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
   point=NDest(dat1,hmltm.fit,W.est)
   hmltm.obj=list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
   class(hmltm.obj)=c(class(hmltm.obj),"hmltm")
