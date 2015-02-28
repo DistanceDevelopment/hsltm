@@ -3428,9 +3428,10 @@ cdfy.u=function(y,x,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,u)
 #' detections.
 #' 
 #' @param est output from \code{est.hmltm}.
-#' @param bs output  from \code{bs.hmltm} from the same model that created \code{est}.
+#' @param bs output  from \code{bootsum} using the same model that created \code{est}.
 #' 
 estable=function(est,bs){
+  est=est$point$ests
   nonzeros=which(est$n>0)
   if(!keepzeros) est=est[nonzeros,]
   # replace stratum.Area with p

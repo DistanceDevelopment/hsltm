@@ -8,7 +8,7 @@ estable(est, bs)
 \arguments{
 \item{est}{output from \code{est.hmltm}.}
 
-\item{bs}{output  from \code{bs.hmltm} from the same model that created \code{est}.}
+\item{bs}{output  from \code{bootsum} using the same model that created \code{est}.}
 }
 \description{
 Combines point estimates from \code{est.hmltm} and bootstrap estimates from \code{bs.hmltm}
