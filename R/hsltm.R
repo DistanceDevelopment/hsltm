@@ -2795,7 +2795,28 @@ strat.estable=function(est,cv){
   return(outp)
 }
 
-
+#' @title Calculate CV of mean time available.
+#'
+#' @description
+#' Calculates CV of mean time available and unavailable from an hmm.pars object. 
+#'
+#' @param hmm.pars object of class \code{hmm.pars}. 
+#' @param B number of bootstrap replicates to do.
+#' 
+cv.avail=function(hhm.pars,B=1000){
+  n=dim(hmm.pars$Et)[2]
+  b.Et=array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
+  cv.a=cv.u=rep(NA,n)
+  for(i in 1:n){
+    lN=Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i]) # get normal parameters corresponding to lognormal(mu,Sigma)
+    b.Et[,,i]=exp(mvrnorm(B,lN$mu,lN$Sigma)) # resample availability parameters on lognormal scale
+    a=b.Et[,1,i]/(b.Et[,1,i]+b.Et[,2,i])
+    u=b.Et[,2,i]/(b.Et[,1,i]+b.Et[,2,i])
+    cv.a[i]=cv(a)
+    cv.u[i]=cv(u)
+  }
+  return(list(cv.a=cv.a,cv.u=cv.u))
+}
 
 #' @title Bootstrap for hmltm model.
 #'
@@ -2850,9 +2871,9 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
       cat("Bootstrap with parametric resampling of mean times available and unavailable.\n")
       flush.console()
       n=dim(hmm.pars$Et)[2]
-      bsample(1:n,n,replace=TRUE) # sample animals to use
+      ns=bsample(1:n,n,replace=TRUE) # sample animals to use
       b.Et=array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
-      for(i in 1:n){
+      for(i in ns){
         lN=Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i]) # get normal parameters corresponding to lognormal(mu,Sigma)
         b.Et[,,i]=exp(mvrnorm(B,lN$mu,lN$Sigma)) # resample availability parameters on lognormal scale
       }
