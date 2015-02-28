@@ -2677,8 +2677,14 @@ bootsum=function(bests,ests=NULL,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
   else keepcols=colnames(bests)
   if(!is.null(ests)) bsests=bests[keepstrat,keepcols,]
   else bsests=bests[keepstrat,,]
-  bsests[,"L",]=bsests[,"n",]/bsests[,"L",] # replace L with encounter rate
-  colnames(bsests)[3]="n/L"
+  # replace L with encounter rate
+  Lcol=which(colnames(bests[,,1])=="L")
+  bsests[,Lcol,]=bsests[,"n",]/bsests[,"L",] 
+  colnames(bsests)[Lcol]="n/L"
+  # replace stratum.Area with p
+  Acol=which(colnames(bests[,,1])=="stratum.Area")
+  bsests[,Acol,]=bsests[,"n",]/(bsests[,"covered.area",]*bsests[,"Dgroups",]) 
+  colnames(bsests)[Acol]="p"
   bdim=dim(bsests)
   nstrat=bdim[1]
   nests=bdim[2]
