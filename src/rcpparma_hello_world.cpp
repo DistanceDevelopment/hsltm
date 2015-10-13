@@ -96,7 +96,7 @@ inline double yfrom_xr(double x, double r)
 
 
 inline double logit(double p)
-{ return log(p/1-p); }
+{ return log(p/(1-p)); }
 
 inline double inv_logit(double x)
 { return 1/(1+exp(-x)); }
