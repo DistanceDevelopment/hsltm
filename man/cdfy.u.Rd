@@ -4,7 +4,7 @@
 \alias{cdfy.u}
 \title{Calculate CDF of forward distance.}
 \usage{
-cdfy.u(y, x, hfun, b, pm, Pi, delta, ymax, dy, theta.f, theta.b, u)
+cdfy.u(y, x, hfun, b, pm, Pi, delta, ymax, dy, u)
 }
 \arguments{
 \item{y}{forward distance.}
@@ -24,10 +24,6 @@ cdfy.u(y, x, hfun, b, pm, Pi, delta, ymax, dy, theta.f, theta.b, u)
 \item{ymax}{forward distance by which detection hazard has fallen to zero.}
 
 \item{dy}{Markov model distance step size.}
-
-\item{theta.f}{REDUNDANT must = 0.}
-
-\item{theta.b}{REDUNDANT must = 90.}
 
 \item{u}{uniform random variable (scalar).}
 }

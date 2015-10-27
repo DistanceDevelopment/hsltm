@@ -4,7 +4,7 @@
 \alias{gety.obs}
 \title{Return all (discrete) forward distances in veiw.}
 \usage{
-gety.obs(Ix, Inull_yobs, Iyobs, Itheta_f, Itheta_b, Iymax, Idy)
+gety.obs(Ix, Inull_yobs, Iyobs, Iymax, Idy)
 }
 \arguments{
 \item{Ix}{Perpendicular distance.}
@@ -12,10 +12,6 @@ gety.obs(Ix, Inull_yobs, Iyobs, Itheta_f, Itheta_b, Iymax, Idy)
 \item{Inull_yobs}{REDUNDANT; must = NULL.}
 
 \item{Iyobs}{Forward distance.}
-
-\item{Itheta_f}{REDUNDANT; must = 0}
-
-\item{Itheta_b}{REDUNDANT; must = 90}
 
 \item{Iymax}{Maximum forward distance in view.}
 

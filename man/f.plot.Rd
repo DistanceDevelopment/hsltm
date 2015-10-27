@@ -5,11 +5,11 @@
 \title{detection function plotting.}
 \usage{
 f.plot(hmltm, obs = 1:length(hmltm$hmltm.fit$xy$x), new.ymax = NULL,
-  new.pars = NULL, theta.f = 0, theta.b = 90, xrange = c(0,
-  max(hmltm$hmltm.fit$xy$x)), yrange = c(0, 1.5 * max(hmltm$hmltm.fit$xy$y)),
-  nx = 50, ny = nx, xlab = "Perpendicular distance",
-  ylab = "Forward distance", type = "contour", nlevels = 20,
-  add = FALSE, col = "black", logscale = FALSE, theta = 90, phi = 35,
+  new.pars = NULL, xrange = c(0, max(hmltm$hmltm.fit$xy$x)), yrange = c(0,
+  1.5 * max(hmltm$hmltm.fit$xy$y)), nx = 50, ny = nx,
+  xlab = "Perpendicular distance", ylab = "Forward distance",
+  type = "contour", nlevels = 20, add = FALSE, col = "black",
+  logscale = FALSE, theta = 90, phi = 35,
   zlab = "pdf of first detections", values = FALSE, ...)
 }
 \arguments{
@@ -21,10 +21,6 @@ f.plot(hmltm, obs = 1:length(hmltm$hmltm.fit$xy$x), new.ymax = NULL,
 ymax already in \code{hmltm}).}
 
 \item{new.pars}{model parameter vector  (used to override the pars already in \code{hmltm}).}
-
-\item{theta.f}{REDUNDANT must = 0.}
-
-\item{theta.b}{REDUNDANT must = 90.}
 
 \item{xrange}{range of x-axis.}
 

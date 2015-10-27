@@ -4,8 +4,8 @@
 \alias{negllik.xy}
 \title{HMM line transect model likelihood with at least some forward distances.}
 \usage{
-negllik.xy(b, xy, FUN, models = list(y = NULL, x = NULL), pm, Pi, delta,
-  theta.f, theta.b, W, ymax, dy, nx = 100, groupfromy = NULL)
+negllik.xy(b, xy, FUN, models = list(y = NULL, x = NULL), pm, Pi, delta, W,
+  ymax, dy, nx = 100, groupfromy = NULL)
 }
 \arguments{
 \item{b}{likelihood function parameters.}
@@ -22,10 +22,6 @@ plus any covariates in \code{model}).}
 \item{Pi}{Markov model transition probability matrix.}
 
 \item{delta}{Markov model stationary distribution.}
-
-\item{theta.f}{REDUNDANT must = 0.}
-
-\item{theta.b}{REDUNDANT must = 90.}
 
 \item{W}{perpendicular truncation distance for fitting.}
 

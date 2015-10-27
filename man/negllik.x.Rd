@@ -4,8 +4,7 @@
 \alias{negllik.x}
 \title{HMM line transect model likelihood with only perpendicular distances.}
 \usage{
-negllik.x(b, xy, FUN, models, pm, Pi, delta, theta.f, theta.b, W, ymax, dy,
-  nx = 100)
+negllik.x(b, xy, FUN, models, pm, Pi, delta, W, ymax, dy, nx = 100)
 }
 \arguments{
 \item{b}{likelihood function parameters.}
@@ -22,10 +21,6 @@ in \code{model}).}
 \item{Pi}{Markov model transition probability matrix.}
 
 \item{delta}{Markov model stationary distribution.}
-
-\item{theta.f}{REDUNDANT must = 0.}
-
-\item{theta.b}{REDUNDANT must = 90.}
 
 \item{W}{perpendicular truncation distance for fitting.}
 

@@ -5,9 +5,8 @@
 \title{Maximises hidden Markov line transect model likelihood.}
 \usage{
 fit.xy(pars, xy, FUN, models = list(y = NULL, x = NULL), pm, Pi,
-  delta = delta, theta.f = 0, theta.b = 90, W, ymax, dy, nx = 50,
-  hessian = FALSE, control = list(trace = 5, reltol = 1e-06, maxit = 200),
-  groupfromy = NULL)
+  delta = delta, W, ymax, dy, nx = 50, hessian = FALSE,
+  control = list(trace = 5, reltol = 1e-06, maxit = 200), groupfromy = NULL)
 }
 \arguments{
 \item{pars}{starting parameter values.}
@@ -27,10 +26,6 @@ probability of being available, given state).}
 with each dimension equal to that of \code{pm}.)}
 
 \item{delta}{is a vector specifying the stationary distribution of the Markov model governed by Pi.}
-
-\item{theta.f}{REDUNDANT parameter determining the max forward angle in view (must=0).}
-
-\item{theta.b}{REDUNDANT parameter determining the max forward angle in view (must=90).}
 
 \item{W}{perpendicular truncation distance for fitting. Must be greater than \code{max(xy$x)}.}
 

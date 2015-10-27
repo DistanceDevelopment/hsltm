@@ -4,8 +4,7 @@
 \alias{p.xy}
 \title{Calculates probability of first observing animal at (x,y).}
 \usage{
-p.xy(x, y, hfun, b, pm, Pi, delta, ymax, dy, theta.f, theta.b, ally = FALSE,
-  cdf = FALSE)
+p.xy(x, y, hfun, b, pm, Pi, delta, ymax, dy, ally = FALSE, cdf = FALSE)
 }
 \arguments{
 \item{x}{perpendicular distance.}
@@ -26,10 +25,6 @@ p.xy(x, y, hfun, b, pm, Pi, delta, ymax, dy, theta.f, theta.b, ally = FALSE,
 
 \item{dy}{distance step in forward distance direction corresponding to the time step size of the
 Markov model governed by \code{Pi}.}
-
-\item{theta.f}{REDUNDANT must = 0.}
-
-\item{theta.b}{REDUNDANT must = 90.}
 
 \item{ally}{If TRUE calculates probability of detection at all (i.e., at some y. (Argument
 \code{cdf} is redundant in this case).}

@@ -5,8 +5,7 @@
 \title{Makes survey parameter list (\code{survey.pars}) suitable for passing to
 \code{\link{est.hmltm}}.}
 \usage{
-make.survey.pars(spd, W, ymax, Wl = 0, dT = 1, theta.f = 0,
-  theta.b = 90)
+make.survey.pars(spd, W, ymax, Wl = 0, dT = 1)
 }
 \arguments{
 \item{spd}{is observer speed.}
@@ -20,10 +19,6 @@ not possible to detect anyting beyond \code{ymax}.}
 subtracted from all perpendicular distances.)}
 
 \item{dT}{is the time step on which the availability hidden Markov model operates.}
-
-\item{theta.f}{is REDUNDANT and should be removed. It must equal 0.}
-
-\item{theta.b}{is REDUNDANT and should be removed. It must equal 90.}
 }
 \description{
 \code{make.survey.pars} just puts a bunch of stuff in a list in a format that \code{\link{est.hmltm}}

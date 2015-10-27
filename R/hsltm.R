@@ -11,12 +11,12 @@
 #' @param Ix Perpendicular distance.
 #' @param Inull_yobs REDUNDANT; must = NULL.
 #' @param Iyobs Forward distance.
-#' @param Itheta_f REDUNDANT; must = 0
-#' @param Itheta_b REDUNDANT; must = 90
 #' @param Iymax Maximum forward distance in view.
 #' @param Idy Forward distance step increment.
 #' 
-gety.obs <- function(Ix, Inull_yobs, Iyobs, Itheta_f, Itheta_b, Iymax, Idy) {
+gety.obs <- function(Ix, Inull_yobs, Iyobs, Iymax, Idy) {
+  Itheta_f <- 0
+  Itheta_b <- 90
   .Call( "bias_gety_obs", Ix, Inull_yobs, Iyobs, Itheta_f, Itheta_b, Iymax, Idy, PACKAGE = "hsltm" )
 }
 
@@ -34,13 +34,13 @@ gety.obs <- function(Ix, Inull_yobs, Iyobs, Itheta_f, Itheta_b, Iymax, Idy) {
 #' @param Idelta Markov model stationary distribution.
 #' @param Iymax Maximum forward distance in view.
 #' @param Idy Forward distance step increment.
-#' @param Itheta_f REDUNDANT; must = 0
-#' @param Itheta_b REDUNDANT; must = 90
 #' @param Ially Flag for whether or not to return probabilities at all forward distances in view.
 #' @param Icdf Flag for whether or not to return cumulative distribution function in forward dimension.
 #' This differes from specifying Ially=TRUE in that Ially=TRUE calculates the cdf from ymax 
 #' to y=0, whereas Icdf=TRUE calculates the cdf from ymax to y.
-p.xy1 <- function(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b, Ially, Icdf){
+p.xy1 <- function(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Ially, Icdf){
+  Itheta_f <- 0
+  Itheta_b <- 90
   .Call( "bias_p_xy1", Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b, Ially, Icdf, PACKAGE = "hsltm" )
 }
 
@@ -597,13 +597,11 @@ make.hmm.pars.from.Et=function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
 #' @param Wl is perpendicular left-truncation distance for estimation. (After truncating \code{Wl} is 
 #' subtracted from all perpendicular distances.)
 #' @param dT is the time step on which the availability hidden Markov model operates.
-#' @param theta.f is REDUNDANT and should be removed. It must equal 0. 
-#' @param theta.b is REDUNDANT and should be removed. It must equal 90. 
 #'
 #' @details Packs the above in a list suitable for passing as \code{survey.pars} to 
 #' \code{\link{est.hmltm}}.
-make.survey.pars=function(spd,W,ymax,Wl=0,dT=1,theta.f=0,theta.b=90){
-  return(list(spd=spd,W=W,ymax=ymax,Wl=Wl,dT=dT,dy=spd*dT,theta.f=theta.f,theta.b=theta.b))
+make.survey.pars=function(spd,W,ymax,Wl=0,dT=1){
+  return(list(spd=spd,W=W,ymax=ymax,Wl=Wl,dT=dT,dy=spd*dT))
 }
 
 #' @title Decides if model is a null model.
@@ -982,8 +980,6 @@ h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx
 #' @param new.ymax a forward distance beyond which things can't be detected (used to override the 
 #' ymax already in \code{hmltm}).
 #' @param new.pars model parameter vector  (used to override the pars already in \code{hmltm}).
-#' @param theta.f REDUNDANT must = 0.
-#' @param theta.b REDUNDANT must = 90.
 #' @param xrange range of x-axis.
 #' @param yrange range of y-axis.
 #' @param nx number of points on x-axis at which to evaluate detection function.
@@ -1001,7 +997,6 @@ h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx
 #' @param values If TRUE, returns hazard function values on nx by ny grid.
 #' @param ... other arguments to \code{\link{image}}, \code{\link{contour}} or \code{\link{persp}}.
 f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=NULL,
-                theta.f=0,theta.b=90,
                 xrange=c(0,max(hmltm$hmltm.fit$xy$x)),yrange=c(0,1.5*max(hmltm$hmltm.fit$xy$y)),
                 nx=50,ny=nx,
                 xlab="Perpendicular distance",ylab="Forward distance",type="contour",
@@ -1048,7 +1043,7 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
   y=seq(yrange[1],yrange[2],length=ny)
   f.xy=matrix(rep(0,nx*ny),nrow=nx)
   for(i in 1:nx){
-    f.xy[i,]=p.xy(rep(x[i],ny),y,hfun=hfun,b=rep(covb,ny),pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b)
+    f.xy[i,]=p.xy(rep(x[i],ny),y,hfun=hfun,b=rep(covb,ny),pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy)
   }
   if(logscale) f.xy=log(f.xy)
   if(type=="image" | type=="both") image(x,y,f.xy,add=add,xlab=xlab,ylab=ylab,...)
@@ -1087,8 +1082,6 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
   pm=hmmlt$fitpars$hmm.pars$pm
   Pi=hmmlt$fitpars$hmm.pars$Pi
   delta=hmmlt$fitpars$hmm.pars$delta
-  theta.f=hmmlt$fitpars$survey.pars$theta.f
-  theta.b=hmmlt$fitpars$survey.pars$theta.b
   W=hmmlt$fitpars$survey.pars$W
   ymax=hmmlt$fitpars$survey.pars$ymax
   dy=hmmlt$fitpars$survey.pars$dy
@@ -1112,19 +1105,19 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
   
   maxy=0;maxi=0
   for(i in 1:nx) { # find maximum y
-    maxyi=max(gety.obs(min(x),TRUE,0,theta.f,theta.b,ymax,dy))
+    maxyi=max(gety.obs(min(x),TRUE,0,ymax,dy))
 #CJ#    maxyi=max(gety.obs(min(x),0,theta.f,theta.b,ymax,dy))
     if(maxy<maxyi) {
       maxy=maxyi
       maxi=i
     }
   }
-  ys=gety.obs(x[maxi],TRUE,0,theta.f,theta.b,ymax,dy) # get y's spanning maximum forward distance
+  ys=gety.obs(x[maxi],TRUE,0,ymax,dy) # get y's spanning maximum forward distance
 #CJ#  ys=gety.obs(x[maxi],0,theta.f,theta.b,ymax,dy) # get y's spanning maximum forward distance
   fyx=matrix(rep(NA,nx*length(ys)),ncol=nx) # set matrix to largest y-dimension
     
   for(i in nx:1){
-    yi=gety.obs(x[i],TRUE,0,theta.f,theta.b,ymax,dy) # TRUE,0 used to be NULL. get all y's in view at this x
+    yi=gety.obs(x[i],TRUE,0,ymax,dy) # TRUE,0 used to be NULL. get all y's in view at this x
 #CJ#    yi=gety.obs(x[i],0,theta.f,theta.b,ymax,dy) # TRUE,0 used to be NULL. get all y's in view at this x
     #    ndys=length(yi)
 #    if(!is.null(nys)&length(yi)>nys) {
@@ -1134,7 +1127,7 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
     nyi=length(yi)
     start=(i-1)*nb+1
     bi=c(rep(covb[start:(start+nb-1)],nyi)) # nx replicates of covb for ith detection
-    fyx[1:nyi,i]=p.xy(x=rep(x[i],nyi),y=yi,hfun=hfun,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b)
+    fyx[1:nyi,i]=p.xy(x=rep(x[i],nyi),y=yi,hfun=hfun,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy)
     cat("Done ",nx-i+1," of ",nx,"\n")
   }
   f=apply(na.omit(fyx),1,mean)
@@ -1267,8 +1260,6 @@ fxfit.plot=function(hmltm,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL
 #' @param Pi is a Markov model transition matrix governing the transition between states. (Square matrix
 #' with each dimension equal to that of \code{pm}.)
 #' @param delta is a vector specifying the stationary distribution of the Markov model governed by Pi.
-#' @param theta.f REDUNDANT parameter determining the max forward angle in view (must=0).
-#' @param theta.b REDUNDANT parameter determining the max forward angle in view (must=90).
 #' @param W perpendicular truncation distance for fitting. Must be greater than \code{max(xy$x)}.
 #' @param ymax maximum forward distance that things could be detected. Must be greater than \code{max(xy$y)}.
 #' @param dy resolution of forward distances for Markov model (typically observer speed times time step size).
@@ -1282,13 +1273,13 @@ fxfit.plot=function(hmltm,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL
 #' @return A list comprising \code{\link{optim}} ouptut plus element $par containing the estimated parameters 
 #'  on the same scale as input parameters pars (which are transformed before calling \code{\link{optim}}).
 fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
-                theta.f=0,theta.b=90,W,ymax,dy,nx=50,hessian=FALSE,
+                W,ymax,dy,nx=50,hessian=FALSE,
                 control=list(trace=5,reltol=1e-6,maxit=200),groupfromy=NULL)
 {
   b=tfm(pars,FUN)
   fit=optim(par=b,fn=negllik.xy,control=control,hessian=hessian,xy=xy,
             FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,
-            theta.f=theta.f,theta.b=theta.b,W=W,ymax=ymax,dy=dy,nx=nx,
+            W=W,ymax=ymax,dy=dy,nx=nx,
             groupfromy=groupfromy)
   fit$par=invtfm(fit$par,FUN)
   return(fit)
@@ -1344,8 +1335,6 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
   # unpack things:
   hessian=control.fit$hessian
   nx=control.fit$nx
-  theta.f=survey.pars$theta.f
-  theta.b=survey.pars$theta.b
   W=survey.pars$W
   ymax=survey.pars$ymax
   dy=survey.pars$dy
@@ -1354,7 +1343,7 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
   delta=hmm.pars$delta
   
   # fit model
-  est=fit.xy(pars=pars,xy=xy,FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,theta.f=theta.f,theta.b=theta.b,W=W,ymax=ymax,dy=dy,nx=nx,hessian=hessian,
+  est=fit.xy(pars=pars,xy=xy,FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,W=W,ymax=ymax,dy=dy,nx=nx,hessian=hessian,
              control=control.optim,groupfromy=groupfromy)
   
   # store transformed parameters
@@ -1365,7 +1354,7 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
   xs=seq(0,W,length=nx)
   if(is.nullmodel(models)) {
     px=rep(0,nx)
-    px=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=rep(b,nx),pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+    px=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=rep(b,nx),pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     phat=sintegral(px,xs)/W
   } else {
     px=matrix(rep(0,nx*n),nrow=n)
@@ -1375,7 +1364,7 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
     for(i in 1:n) {
       start=(i-1)*nb+1
       bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      px[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+      px[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     phat=apply(px,1,sintegral,xs)/W
   }
@@ -1409,8 +1398,6 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
 #' @param pm state-dependent Bernoulli parameters.
 #' @param Pi Markov model transition probability matrix.
 #' @param delta Markov model stationary distribution.
-#' @param theta.f REDUNDANT must = 0.
-#' @param theta.b REDUNDANT must = 90.
 #' @param W perpendicular truncation distance for fitting.
 #' @param ymax forward distance by which detection hazard has fallen to zero.
 #' @param dy Markov model distance step size.
@@ -1418,7 +1405,7 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
 #' @param groupfromy a forward distance (y) below which all y's are grouped into a single
 #' interval in the likelihood function (i.e. exact y,s < groupfromy are combined into
 #' an interval rather than passed as exact distances).
-negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100,groupfromy=NULL)
+negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
 {
   # If asked to group close y's, split data accordingly:
   if(!is.null(groupfromy)){
@@ -1440,20 +1427,20 @@ negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,t
   if(length(y)!=n) stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
   llik=0
   # calculate p(see first @ y|x) at each (x,y):
-  li=p.xy(x,y,hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b)
+  li=p.xy(x,y,hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy)
   if(any(li<.Machine$double.xmin)) return(.Machine$double.xmax)
   xs=seq(0,W,length=nx)
   nb=length(covb)/n # number of parameters for each observation
   if(is.nullmodel(models)) {
     bi=c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
-    ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+    ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     p=sintegral(ps,xs)/W
   } else {
     ps=matrix(rep(0,n*nx),nrow=n)
     for(i in 1:n) {
       start=(i-1)*nb+1
       bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+      ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     p=apply(ps,1,sintegral,xs)/W
   }
@@ -1472,20 +1459,20 @@ negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,t
       nb=length(covbgrp)/ngrp # number of parameters for each observation
       if(is.nullmodel(models)) {
         bi=c(rep(covbgrp[1:nb],nx)) # nx replicates of covbgrp for ith detection
-        ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+        ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         p=sintegral(ps,xs)/W
       } else {
         ps=matrix(rep(0,ngrp*nx),nrow=ngrp)
         for(i in 1:ngrp) {
           start=(i-1)*nb+1
           bi=c(rep(covbgrp[start:(start+nb-1)],nx)) # nx replicates of covbgrp for ith detection
-          ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+          ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         }
         p=apply(ps,1,sintegral,xs)/W
       }
       #  # calculate p(see first at or after groupfromy|x) at each x:
-      pfar=p.xy(x=xgrp,y=rep(groupfromy,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,cdf=TRUE)
-      p0=p.xy(x=xgrp,y=rep(0,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,cdf=TRUE)
+      pfar=p.xy(x=xgrp,y=rep(groupfromy,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,cdf=TRUE)
+      p0=p.xy(x=xgrp,y=rep(0,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,cdf=TRUE)
       pnear=p0-pfar
       llik=llik+sum(log(pnear)-log(p))
     }
@@ -1508,14 +1495,12 @@ negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,t
 #' @param pm state-dependent Bernoulli parameters.
 #' @param Pi Markov model transition probability matrix.
 #' @param delta Markov model stationary distribution.
-#' @param theta.f REDUNDANT must = 0.
-#' @param theta.b REDUNDANT must = 90.
 #' @param W perpendicular truncation distance for fitting.
 #' @param ymax forward distance by which detection hazard has fallen to zero.
 #' @param dy Markov model distance step size.
 #' @param nx number of x-values to use in evaluating detection function.
 #' 
-negllik.x=function(b,xy,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
+negllik.x=function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 {
   covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
   x=xy$x;y=xy$y
@@ -1523,7 +1508,7 @@ negllik.x=function(b,xy,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
   if(length(y)!=n) stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
   llik=0
   # calculate p(see BY y=0 |x) at each x:
-  li=p.xy(x,y=rep(0,n),hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+  li=p.xy(x,y=rep(0,n),hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
   # calculate p(see by min y in window|x) over all x:
   #*# xs=seq(0,W,length=nx)
   #*# px=p.xy(x=xs,y=xy$y,hfun=FUN,b=b,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
@@ -1534,14 +1519,14 @@ negllik.x=function(b,xy,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
   nb=length(covb)/n # number of parameters for each observation
   if(is.nullmodel(models)) {
     bi=c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
-    ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+    ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     p=sintegral(ps,xs)/W
   } else {
     ps=matrix(rep(0,n*nx),nrow=n)
     for(i in 1:n) {
       start=(i-1)*nb+1
       bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
+      ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     p=apply(ps,1,sintegral,xs)/W
   }
@@ -1568,8 +1553,6 @@ negllik.x=function(b,xy,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
 #' @param pm state-dependent Bernoulli parameters.
 #' @param Pi Markov model transition probability matrix.
 #' @param delta Markov model stationary distribution.
-#' @param theta.f REDUNDANT must = 0.
-#' @param theta.b REDUNDANT must = 90.
 #' @param W perpendicular truncation distance for fitting.
 #' @param ymax forward distance by which detection hazard has fallen to zero.
 #' @param dy Markov model distance step size.
@@ -1578,13 +1561,13 @@ negllik.x=function(b,xy,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100)
 #' interval in the likelihood function (i.e. exact y,s < groupfromy are combined into
 #' an interval rather than passed as exact distances).
 #' 
-negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx=100,groupfromy=NULL)
+negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
 {
   xydat=xy[!is.na(xy$y),] # detections with x (perp) and y (forward) data
   xdat=xy[is.na(xy$y),]   # detections with x (perp) data only (no y data)
-  xy.negllik=negllik.xandy(b,xydat,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx,groupfromy)
+  xy.negllik=negllik.xandy(b,xydat,FUN,models,pm,Pi,delta,W,ymax,dy,nx,groupfromy)
   x.negllik=0
-  if(length(xdat$x)>0) negllik.x(b,xdat,FUN,models,pm,Pi,delta,theta.f,theta.b,W,ymax,dy,nx)
+  if(length(xdat$x)>0) negllik.x(b,xdat,FUN,models,pm,Pi,delta,W,ymax,dy,nx)
   negllik=xy.negllik+x.negllik
   return(negllik)
 }
@@ -1606,8 +1589,6 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,thet
 #' @param ymax forward distance at or beyond which things are undetectable.
 #' @param dy distance step in forward distance direction corresponding to the time step size of the 
 #' Markov model governed by \code{Pi}.
-#' @param theta.f REDUNDANT must = 0.
-#' @param theta.b REDUNDANT must = 90.
 #' @param ally If TRUE calculates probability of detection at all (i.e., at some y. (Argument
 #' \code{cdf} is redundant in this case).
 #' @param cdf If TRUE returns 1 -(the cdf at y), which is equal to the probability of detection BY y.
@@ -1616,7 +1597,7 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,theta.f,thet
 #' 
 #' @seealso \code{\link{p.xy1}}
 #' 
-p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=FALSE)
+p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
 {
   if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) stop("Single animal: pm is not a vector or Pi is not a matrix")
   if(is.vector(pm)) { # convert to matrix and array so can use loop below
@@ -1633,7 +1614,7 @@ p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=FALS
     Pi.w=Pi[,,w]
     pm.w=pm[,w]
     delta.w=delta[,w]
-    p.w=p.xy1(x,y,hfun,b,pm.w,Pi.w,delta.w,ymax,dy,theta.f,theta.b,ally,cdf)
+    p.w=p.xy1(x,y,hfun,b,pm.w,Pi.w,delta.w,ymax,dy,ally,cdf)
     ##print(c('p.w',p.w,' p',p))
     p=p+p.w
   }
@@ -1672,8 +1653,6 @@ p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=FALS
 #' 
 hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,
                   type="response",ally=TRUE){
-  theta.f=survey.pars$theta.f
-  theta.b=survey.pars$theta.b
   ymax=survey.pars$ymax
   dy=survey.pars$dy
   pm=hmm.pars$pm
@@ -1695,7 +1674,7 @@ hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
   for(i in 1:n) {
     start=(i-1)*nb+1
     bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-    px[i,]=p.xy(x=x,y=rep(0,nx),hfun=hfun,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=ally)
+    px[i,]=p.xy(x=x,y=rep(0,nx),hfun=hfun,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=ally)
   }
   return(px)
 }
@@ -2007,8 +1986,6 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars
   dat=hmmlt$xy[!is.na(hmmlt$xy$y),]
   hfun=hmmlt$h.fun
   b=hmmlt$fit$b
-  theta.b=hmmlt$fitpars$survey.pars$theta.b
-  theta.f=hmmlt$fitpars$survey.pars$theta.f
   
   if(is.null(dat$y)) stop("Can't do goodness-of-fit in y-dimension when don't have y observations!")
   models=hmmlt$models
@@ -2019,8 +1996,8 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars
   delta=hmmlt$fitpars$hmm.pars$delta
   n=length(dat$x)
   covb=make.covb(b,hfun,models,dat) # put covariates into paramerters
-  Fy=p.xy(dat$x,dat$y,hfun,b=covb,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=TRUE)
-  F0=p.xy(dat$x,dat$y,hfun,b=covb,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=TRUE,cdf=FALSE)
+  Fy=p.xy(dat$x,dat$y,hfun,b=covb,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=TRUE)
+  F0=p.xy(dat$x,dat$y,hfun,b=covb,pm,Pi,delta,ymax,dy,ally=TRUE,cdf=FALSE)
   #  Fy=Fx.cox.Q(dat$x,dat$y,mu,ystart,Q,b) # area up to y
   #  F0=Fx.cox.Q(dat$x,rep(0,n),mu,ystart,Q,b) # area up to y=0
   Fy0=Fy/F0
@@ -3425,18 +3402,16 @@ bootsum.p=function(bs,probs=c(0.025,0.975),pcut=0){
 #' @param delta Markov model stationary distribution.
 #' @param ymax forward distance by which detection hazard has fallen to zero.
 #' @param dy Markov model distance step size.
-#' @param theta.f REDUNDANT must = 0.
-#' @param theta.b REDUNDANT must = 90.
 #' @param u uniform random variable (scalar).
 #' 
-cdfy.u=function(y,x,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,u)
+cdfy.u=function(y,x,hfun,b,pm,Pi,delta,ymax,dy,u)
   #----------------------------------------------------------------------------
 # For use with function uniroot.
 # Calculates CDF(y)-u for single x,y and u~runif(1,0,1)
 # Calls p.xy and calculates difference from u.
 #----------------------------------------------------------------------------
 {
-  cdf=p.xy(x,y,hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=TRUE)
+  cdf=p.xy(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=TRUE)
   return(cdf-u)
 }
 
@@ -3517,8 +3492,6 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
   pm=hmm.pars$pm
   Pi=hmm.pars$Pi
   delta=hmm.pars$delta
-  theta.f=survey.pars$theta.f
-  theta.b=survey.pars$theta.b
   W=survey.pars$W
   ymax=survey.pars$ymax
   dy=survey.pars$dy
@@ -3528,7 +3501,7 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
   ymax=tmax*dy # ymax adjusted to be divisible by dy
   starty=rep(ymax,nw)-runif(nw,0,dy) # randomise start location within inteval dy of ymax
   xx=runif(nw,0,W) # generate perp dists of animals
-  px=p.xy(xx,NULL,hfun,rep(b,nw),pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=TRUE) # calculate p(see|x)
+  px=p.xy(xx,NULL,hfun,rep(b,nw),pm,Pi,delta,ymax,dy,ally=TRUE) # calculate p(see|x)
   u=runif(nw,0,1)# random cdf(y) values for nw animals
   seen=which(px>=u) # identify those detected by the time they leave visible area
   nseen=length(seen)
@@ -3547,19 +3520,19 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
       #      p=p.xy(rep(xi[i],length(yi)),yi,hfun,b=tfm(pars,hfun),pm,Pi,ymax,dy,theta.f,theta.b,cdf=TRUE) # calc prob(seen by y) for all y>y[i]
       ##      if(max(p)<pseen[i]) p=c(pseen[i],p) # add p(see by y=0) to p if it is not there (because of discretizatoin of yi)
       #      seenaty=max(which(p<=ui[i])) # index of closest y at which p(y)<=cdf(y) (vector y starts at ymax and gets smaller)
-      mincdf=p.xy(x=x[i],y=range(yi)[2],hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=TRUE)
+      mincdf=p.xy(x=x[i],y=range(yi)[2],hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=TRUE)
       if(ui[i]<mincdf) {
         y[i]=ymax
         warning(paste("Observation y[",i,"]= ",y[i],">ymax put at ymax= ",ymax,".\n",sep=""))
       } else {
-        cdf1=p.xy(x=x[i],y=range(yi)[1],hfun,b,pm,Pi,delta,ymax,dy,theta.f,theta.b,ally=FALSE,cdf=TRUE)
+        cdf1=p.xy(x=x[i],y=range(yi)[1],hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=TRUE)
         uu=ui[i]
         if((cdf1<uu & mincdf<uu) | (cdf1>uu & mincdf>uu)) {
           cat(" (x,y) = (",x[i],",",range(yi),"); \n minCDF=",mincdf,"\n u=",uu,"\n maxCDF=",cdf1,"\n")
           #          cat("i, mincdf[i]=",i,", ",mincdf[i],"\n")
           #          cat("mincdf[i]=",mincdf,"\n")
         }
-        cdf=uniroot(cdfy.u,interval=range(yi),tol=rootol,x=x[i],hfun=hfun,b=b,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,u=ui[i])
+        cdf=uniroot(cdfy.u,interval=range(yi),tol=rootol,x=x[i],hfun=hfun,b=b,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,u=ui[i])
         y[i]=cdf$root
         if(is.null(y[i])) {
           cat("cdf(y)= ",ui[i],"\n")

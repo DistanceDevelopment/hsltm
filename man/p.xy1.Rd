@@ -4,8 +4,7 @@
 \alias{p.xy1}
 \title{Calculate probability of detection at (x,y).}
 \usage{
-p.xy1(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b,
-  Ially, Icdf)
+p.xy1(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Ially, Icdf)
 }
 \arguments{
 \item{Ix}{Perpendicular distance.}
@@ -25,10 +24,6 @@ p.xy1(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b,
 \item{Iymax}{Maximum forward distance in view.}
 
 \item{Idy}{Forward distance step increment.}
-
-\item{Itheta_f}{REDUNDANT; must = 0}
-
-\item{Itheta_b}{REDUNDANT; must = 90}
 
 \item{Ially}{Flag for whether or not to return probabilities at all forward distances in view.}
 
