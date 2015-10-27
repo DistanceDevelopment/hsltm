@@ -1565,7 +1565,7 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx
   xdat=xy[is.na(xy$y),]   # detections with x (perp) data only (no y data)
   xy.negllik=negllik.xandy(b,xydat,FUN,models,pm,Pi,delta,W,ymax,dy,nx,groupfromy)
   x.negllik=0
-  if(length(xdat$x)>0) negllik.x(b,xdat,FUN,models,pm,Pi,delta,W,ymax,dy,nx)
+  if(length(xdat$x)>0) x.negllik <- negllik.x(b,xdat,FUN,models,pm,Pi,delta,W,ymax,dy,nx)
   negllik=xy.negllik+x.negllik
   return(negllik)
 }
