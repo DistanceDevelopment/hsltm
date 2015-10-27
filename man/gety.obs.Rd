@@ -4,12 +4,10 @@
 \alias{gety.obs}
 \title{Return all (discrete) forward distances in veiw.}
 \usage{
-gety.obs(Ix, Inull_yobs, Iyobs, Iymax, Idy)
+gety.obs(Ix, Iyobs, Iymax, Idy)
 }
 \arguments{
 \item{Ix}{Perpendicular distance.}
-
-\item{Inull_yobs}{REDUNDANT; must = NULL.}
 
 \item{Iyobs}{Forward distance.}
 

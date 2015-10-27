@@ -6,7 +6,7 @@
 \usage{
 fyfit.plot(hmltm, values = TRUE, breaks = NULL, allx = FALSE, nys = 250,
   xlab = "Forward distance (y)", ylab = "pdf(y)", main = "",
-  ylim = NULL, theta.b = 90, text.cex = 0.66)
+  ylim = NULL, text.cex = 0.66)
 }
 \arguments{
 \item{hmltm}{object produced by \code{\link{est.hmltm}}.}
@@ -27,8 +27,6 @@ fyfit.plot(hmltm, values = TRUE, breaks = NULL, allx = FALSE, nys = 250,
 \item{main}{title.}
 
 \item{ylim}{y-value limits.}
-
-\item{theta.b}{REDUNDANT must = 90.}
 
 \item{text.cex}{relative text size.}
 }

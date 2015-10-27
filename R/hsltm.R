@@ -9,14 +9,14 @@
 #'  C++ function to return all (discrete) forward distances in veiw.
 #'  
 #' @param Ix Perpendicular distance.
-#' @param Inull_yobs REDUNDANT; must = NULL.
 #' @param Iyobs Forward distance.
 #' @param Iymax Maximum forward distance in view.
 #' @param Idy Forward distance step increment.
 #' 
-gety.obs <- function(Ix, Inull_yobs, Iyobs, Iymax, Idy) {
+gety.obs <- function(Ix, Iyobs, Iymax, Idy) {
   Itheta_f <- 0
   Itheta_b <- 90
+  Inull_yobs <- NULL
   .Call( "bias_gety_obs", Ix, Inull_yobs, Iyobs, Itheta_f, Itheta_b, Iymax, Idy, PACKAGE = "hsltm" )
 }
 
@@ -1071,13 +1071,11 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
 #' @param main title.
 #' @param ylim y-value limits.
 #' @param text.cex relative text size.
-#' @param theta.b REDUNDANT must = 90.
 fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
-                    xlab="Forward distance (y)",ylab="pdf(y)",main="",ylim=NULL,theta.b=90,
+                    xlab="Forward distance (y)",ylab="pdf(y)",main="",ylim=NULL,
                     text.cex=0.66)
 {
   hmmlt=hmltm$hmltm.fit
-  if(theta.b !=90) stop("This function only allows theta.b=90 degrees at present.")
   # unpack things from hmmlt object:
   pm=hmmlt$fitpars$hmm.pars$pm
   Pi=hmmlt$fitpars$hmm.pars$Pi
