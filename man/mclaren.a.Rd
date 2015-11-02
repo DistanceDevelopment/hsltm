@@ -8,7 +8,7 @@ mclaren.a(hmm.pars, w, spd = 1)
 }
 \arguments{
 \item{hmm.pars}{is a list with 2x2xm Markov model transition matrices (in which state 1 is UNavailable)
-in element \code{$Pi} (where m is number of availability parameter sets).}
+in element \code{\$Pi} (where m is number of availability parameter sets).}
 
 \item{w}{is max forward distance things can be seen at (or max forward time). Must be scalar.}
 

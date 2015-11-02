@@ -11,6 +11,8 @@
 #' @param hfun Name of hazard detection function
 #' 
 #' @return Unconstrained parameters (scaled to the set of real numbers)
+#' 
+#' @export
 n2w_rcpp <- function(par, hfun) {
     .Call('hsltm_n2w_rcpp', PACKAGE = 'hsltm', par, hfun)
 }
@@ -25,6 +27,8 @@ n2w_rcpp <- function(par, hfun) {
 #' @param hfun Name of hazard detection function
 #' 
 #' @return Parameters on their natural scale
+#' 
+#' @export
 w2n_rcpp <- function(par, hfun) {
     .Call('hsltm_w2n_rcpp', PACKAGE = 'hsltm', par, hfun)
 }
@@ -39,6 +43,10 @@ w2n_rcpp <- function(par, hfun) {
 #' @param hfun Name of hazard detection function
 #' 
 #' @return The value of the hazard function at (x,y)
+#' 
+#' @export
+#' 
+#' @importFrom Rcpp evalCpp
 h_rcpp <- function(x, y, b, hfun) {
     .Call('hsltm_h_rcpp', PACKAGE = 'hsltm', x, y, b, hfun)
 }
@@ -55,6 +63,8 @@ h_rcpp <- function(x, y, b, hfun) {
 #' @param dy Forward distance step increment
 #' 
 #' @return A vector of the forward distances in view.
+#' 
+#' @export
 gety_obs_rcpp <- function(x, null_yobs, yobs, ymax, dy) {
     .Call('hsltm_gety_obs_rcpp', PACKAGE = 'hsltm', x, null_yobs, yobs, ymax, dy)
 }
@@ -78,6 +88,8 @@ gety_obs_rcpp <- function(x, null_yobs, yobs, ymax, dy) {
 #' @param cdf Flag for whether or not to return cumulative distribution function in forward dimension.
 #' This differs from specifying ally=TRUE in that ally=TRUE calculates the cdf from ymax 
 #' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
+#' 
+#' @export
 pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) {
     .Call('hsltm_pxy_simple_rcpp', PACKAGE = 'hsltm', x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf)
 }
@@ -88,8 +100,8 @@ pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) 
 #' of a model with two observers.
 #' Written in C++.
 #'  
-#' @param x Perpendicular distance.
-#' @param y Forward distance.
+#' @param obs1 Observations of observer 1
+#' @param obs2 Observations of observer 2
 #' @param hfun Hazard function name.
 #' @param b1 Hazard function parameter vector of first observer.
 #' @param b2 Hazard function parameter vector of second oberver.
@@ -102,6 +114,8 @@ pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) 
 #' @param cdf Flag for whether or not to return cumulative distribution function in forward dimension.
 #' This differs from specifying ally=TRUE in that ally=TRUE calculates the cdf from ymax 
 #' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
+#' 
+#' @export
 pxy_double_rccp <- function(obs1, obs2, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf) {
     .Call('hsltm_pxy_double_rccp', PACKAGE = 'hsltm', obs1, obs2, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
 }

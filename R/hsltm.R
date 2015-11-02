@@ -15,7 +15,6 @@
 #' @param size a positive number, the number of items to choose from.
 #' @param replace Should sampling be with replacement?
 #' @param prob A vector of probability weights for obtaining the elements of the vector being sampled.
-#' 
 bsample=function(x,size,replace=FALSE,prob=NULL) {
   if(length(x)==1) return(x)
   else return(sample(x,size,replace,prob))
@@ -59,6 +58,8 @@ nm2m=function(x) return(x*1852) # converts nautical miles to metres
 #' @param xlab Label for x-axis.
 #' @param ylab Label for y-axis.
 #' @param ... See aargument \code{fill}.
+#' 
+#' @export
 histline=function(height,breaks,lineonly=FALSE,outline=FALSE,fill=FALSE,ylim=range(height),
                   xlab="x",ylab="y",...)
 {
@@ -147,6 +148,9 @@ sintegral=function (fx, x, n.pts=16, type="int")
 #' Ea=c(10,12);Eu=c(20,22);seEa=c(2,3);seEu=c(4,6);covEt=c(2,3)
 #' hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt)
 #' laake.a(hmm.pars,ymax=200,spd=4) # because hmm.pars is in units of time, not distance, you need to specify spd.
+#' 
+#' @export
+
 laake.a=function(hmm.pars,ymax,spd=NULL){
   if(length(dim(hmm.pars$Pi))==2) hmm.pars$Pi=array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
   nav=dim(hmm.pars$Pi)[3] # number of HMM parameter sets
@@ -178,6 +182,8 @@ laake.a=function(hmm.pars,ymax,spd=NULL){
 #' 
 #' Laake, J., Calambokidis, J., Osmek, S., and Rugh, D. 1997. Probability of detecting harbor 
 #' porpoise from aerial surveys: estimating g(0). Journal of Wildlife Management 61, 63-75.
+#' 
+#' @export
 jeffa=function(Pi,w,spd=NULL,E=NULL)
 {
   if(!is.null(spd)) w=w/spd # convert distance to time if spd given
@@ -211,6 +217,8 @@ jeffa=function(Pi,w,spd=NULL,E=NULL)
 #' instant.a(hmm.pars)
 #' instant.a(NULL,Et=matrix(c(Eu,Ea),ncol=2,byrow=TRUE))
 #' instant.a(NULL,c(Eu[1],Ea[1]))
+#' 
+#' @export
 instant.a=function(hmm.pars,Et=NULL){
   if(!is.null(Et)) {
     if(!is.null(hmm.pars)) warning("Used Et, not Pi for calculations")
@@ -240,6 +248,8 @@ instant.a=function(hmm.pars,Et=NULL){
 #' @param E is expected time in each state (state 1 in UNavailable).
 #'
 #' @details If \code{E} is NULL, uses Pi to calculate proportion of time available, else uses \code{E}.
+#' 
+#' @export
 simplea=function(Pi,E=NULL)
 {
   if(is.null(E)) E=makeE(Pi) # expected time up, expected time down
@@ -254,7 +264,7 @@ simplea=function(Pi,E=NULL)
 #' availability parameters passed to it and returns these and their mean.
 #'
 #' @param hmm.pars is a list with 2x2xm Markov model transition matrices (in which state 1 is UNavailable) 
-#' in element \code{$Pi} (where m is number of availability parameter sets).
+#' in element \code{\$Pi} (where m is number of availability parameter sets).
 #' @param w is max forward distance things can be seen at (or max forward time). Must be scalar.
 #' @param spd is observer speed; omit if w is max forward TIME.
 #'
@@ -269,6 +279,8 @@ simplea=function(Pi,E=NULL)
 #' hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt)
 #' mclaren.a(hmm.pars,w=10,spd=4)
 #' mclaren.a(hmm.pars,w=100,spd=4) # can be greater than 1 (!)
+#' 
+#' @export
 mclaren.a=function(hmm.pars,w,spd=1){
   if(dim(hmm.pars$Pi)[1]!=2 | dim(hmm.pars$Pi)[2]!=2) stop("1st two dimensions of hmm.pars$Pi must be 2.")
   if(length(dim(hmm.pars$Pi))==2) hmm.pars$Pi=array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
@@ -308,6 +320,8 @@ mclaren.a=function(hmm.pars,w,spd=1){
 #' richard.a(hmm.pars,w=10,spd=4)
 #' richard.a(hmm.pars,w=100,spd=4) # can be greater than 1 (!)
 #' richard.a(hmm.pars,w=rexp(20,1/100),spd=4)
+#' 
+#' @export
 richard.a=function(hmm.pars,w,spd=1){
   y=na.omit(w)
   n=length(y)
@@ -336,6 +350,8 @@ richard.a=function(hmm.pars,w,spd=1){
 #' Ea=c(10,12);Eu=c(20,22)
 #' makePi(Eu,Ea)
 #' makePi(Eu[1],Ea[1])
+#' 
+#' @export
 makePi=function(Eu,Ea)
 {
   nav=length(Eu)
@@ -378,6 +394,8 @@ makePi=function(Eu,Ea)
 #' makeE(Pi2) # recover c(Eu,Ea)
 #' Pi1=makePi(Eu[1],Ea[1]) # make a single transition matrix
 #' makeE(Pi1) # recover c(Eu,Ea)
+#' 
+#' @export
 makeE=function(Pi){
   #----------------------------------------------------------
   # Returns expected time in states 1 and 2 for the 2x2 
@@ -457,6 +475,7 @@ makeE=function(Pi){
 #' of harbour porpoises, Phocoena phocoena. Canadian Journal of Fisheries and Aquatic Sciences 52, 
 #' 1064-1073.
 #' 
+#' @export
 make.hmm.pars.from.Et=function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
   nav=length(Ea)
   if(length(Eu)!=nav |length(seEa)!=nav |length(seEu)!=nav |length(covEt)!=nav) stop("Lengths of Ea, Eu, seEa, seEu, covEt must all be the same.")
@@ -505,6 +524,8 @@ make.hmm.pars.from.Et=function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
 #'
 #' @details Packs the above in a list suitable for passing as \code{survey.pars} to 
 #' \code{\link{est.hmltm}}.
+#' 
+#' @export
 make.survey.pars=function(spd,W,ymax,Wl=0,dT=1){
   return(list(spd=spd,W=W,ymax=ymax,Wl=Wl,dT=dT,dy=spd*dT))
 }
@@ -516,6 +537,8 @@ make.survey.pars=function(spd,W,ymax,Wl=0,dT=1){
 #'  
 #' @param models list of characters with elements \code{$y} and \code{$x} specifying y- and 
 #' x-covariate models. Either \code{NULL} or regression model format (without response on left).
+#' 
+#' @export
 is.nullmodel=function(models){
   null=TRUE
   for(i in 1:length(models)) null=null & is.null(models[[i]])
@@ -540,6 +563,8 @@ is.nullmodel=function(models){
 #' \code{height+weight} or \code{height:weight} or \code{height*weight}, etc.).
 #' @param dat data frame, which must have columns corresponding to variable names in \code{$y} and
 #' \code{$x}.
+#' 
+#' @export
 make.covb=function(b,FUN,models,dat)
 {
   nfixed=switch(FUN,
@@ -611,6 +636,8 @@ make.covb=function(b,FUN,models,dat)
 #'  
 #' @param availhmm availability model list of the sort passed to \code{\link{est.hmltm}}.
 #' @param zero REDUNDANT (I think - CHECK)
+#' 
+#' @export
 poiss.equiv=function(availhmm,zero=0){
   Pois.availhmm=availhmm
   Pi=availhmm$Pi
@@ -841,6 +868,8 @@ inv.logit=function(x) return(1/(1+exp(-x))) # returns p from x=(logit of p)
 #' @param theta argument for \code{\link{image}}.
 #' @param phi argument for \code{\link{image}}.
 #' @param ... other arguments to image, contour or persp.
+#' 
+#' @export
 h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx=50,ny=nx,
                 type="contour",nlevels=20,add=FALSE,col="black",logscale=FALSE,
                 xlab="Perpendicular distance",ylab="Forward distance",theta=90,phi=35,...)
@@ -901,6 +930,8 @@ h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx
 #' @param zlab label in z-dimension for persp plots
 #' @param values If TRUE, returns hazard function values on nx by ny grid.
 #' @param ... other arguments to \code{\link{image}}, \code{\link{contour}} or \code{\link{persp}}.
+#' 
+#' @export
 f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=NULL,
                 xrange=c(0,max(hmltm$hmltm.fit$xy$x)),yrange=c(0,1.5*max(hmltm$hmltm.fit$xy$y)),
                 nx=50,ny=nx,
@@ -976,6 +1007,8 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
 #' @param main title.
 #' @param ylim y-value limits.
 #' @param text.cex relative text size.
+#' 
+#' @export
 fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
                     xlab="Forward distance (y)",ylab="pdf(y)",main="",ylim=NULL,
                     text.cex=0.66)
@@ -1078,6 +1111,7 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
 #' @param type "prob" for probability function, "density" for pdf.
 #' @param text.cex relative text size.
 #' 
+#' @export
 fxfit.plot=function(hmltm,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL,ylab=NULL,
                     type="prob",text.cex=0.66)
 {
@@ -1175,6 +1209,8 @@ fxfit.plot=function(hmltm,allx=FALSE,values=TRUE,breaks=NULL,ylim=NULL,xlab=NULL
 #'
 #' @return A list comprising \code{\link{optim}} ouptut plus element $par containing the estimated parameters 
 #'  on the same scale as input parameters pars (which are transformed before calling \code{\link{optim}}).
+#'  
+#' @export
 fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
                 W,ymax,dy,nx=50,hessian=FALSE,
                 control=list(trace=5,reltol=1e-6,maxit=200),groupfromy=NULL)
@@ -1232,6 +1268,8 @@ fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
 #'  
 #' @references Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 
 #' 2013. Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
+#' 
+#' @export
 fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
                    control.fit,control.optim,groupfromy=NULL)
 {
@@ -1308,6 +1346,8 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
 #' @param groupfromy a forward distance (y) below which all y's are grouped into a single
 #' interval in the likelihood function (i.e. exact y,s < groupfromy are combined into
 #' an interval rather than passed as exact distances).
+#' 
+#' @export
 negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
 {
   # If asked to group close y's, split data accordingly:
@@ -1403,6 +1443,7 @@ negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy
 #' @param dy Markov model distance step size.
 #' @param nx number of x-values to use in evaluating detection function.
 #' 
+#' @export
 negllik.x=function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 {
   covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
@@ -1464,6 +1505,7 @@ negllik.x=function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 #' interval in the likelihood function (i.e. exact y,s < groupfromy are combined into
 #' an interval rather than passed as exact distances).
 #' 
+#' @export
 negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
 {
   xydat=xy[!is.na(xy$y),] # detections with x (perp) and y (forward) data
@@ -1500,6 +1542,7 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx
 #' 
 #' @seealso \code{\link{pxy_simple_rcpp}}
 #' 
+#' @export
 p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
 {
   if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) stop("Single animal: pm is not a vector or Pi is not a matrix")
@@ -1554,6 +1597,7 @@ p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
 #' the natural scale
 #' @param ally If TRUE calculates detection probability at all forward distances, else at zero.
 #' 
+#' @export
 hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,
                   type="response",ally=TRUE){
   ymax=survey.pars$ymax
@@ -1602,12 +1646,14 @@ hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
 #' \item{p:}{estimated mean probability of detection.}
 #' \item{invp:}{estimated inverse mean probability of detection.}
 #' }
+#' 
+#' @export
 calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
-  if(stat=="esw") {return(fitted.esw(hmmlt,obs))}
-  else if(stat=="invesw") {return(fitted.invesw(hmmlt,obs))}
-  else if(stat=="p0") {return(fitted.px(hmmlt,obs,at.x=0))}
-  else if(stat=="p") {return(fitted.p(hmmlt,obs))}
-  else if(stat=="invp") {return(fitted.invp(hmmlt,obs))}
+  if(stat=="esw") {return(fitted_esw(hmmlt,obs))}
+  else if(stat=="invesw") {return(fitted_invesw(hmmlt,obs))}
+  else if(stat=="p0") {return(fitted_px(hmmlt,obs,at.x=0))}
+  else if(stat=="p") {return(fitted_p(hmmlt,obs))}
+  else if(stat=="invp") {return(fitted_invp(hmmlt,obs))}
   else stop(paste(stat," is an invalid stat type"))
 }
 
@@ -1634,7 +1680,9 @@ calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
 #'   vector of values of p_i(x=hmmlt$xy$x[j]) for all i if obs not given;}
 #'   \item{at.x is specified}{as when at.x is NULL, but with x=at.x instead of hmmlt$xy$x.}
 #'}
-fitted.px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL){
+#'
+#'@export
+fitted_px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL){
   cov=hmmlt$xy
   if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
   if(min(obs)<1) stop("obs < 1")
@@ -1673,9 +1721,11 @@ fitted.px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL){
 #' @param hmmlt output from \code{\link{fit.hmltm}}
 #' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
 #' @param nx number of x-values (perpendicular distance values) to use in calculation.
-fitted.p=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
+#' 
+#' @export
+fitted_p=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
   W=hmmlt$fitpars$survey.pars$W
-  esw=fitted.esw(hmmlt,obs,nx)
+  esw=fitted_esw(hmmlt,obs,nx)
   return(esw/W)
 }
 
@@ -1688,9 +1738,11 @@ fitted.p=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @param hmmlt output from \code{\link{fit.hmltm}}
 #' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
 #' @param nx number of x-values (perpendicular distance values) to use in calculation.
-fitted.invp=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
+#' 
+#' @export
+fitted_invp=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
   W=hmmlt$fitpars$survey.pars$W
-  esw=fitted.esw(hmmlt,obs,nx)
+  esw=fitted_esw(hmmlt,obs,nx)
   return(W/esw)
 }
 
@@ -1703,8 +1755,10 @@ fitted.invp=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @param hmmlt output from \code{\link{fit.hmltm}}
 #' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
 #' @param nx number of x-values (perpendicular distance values) to use in calculation.
-fitted.invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
-  return(1/fitted.esw(hmmlt,obs,nx))
+#' 
+#' @export
+fitted_invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
+  return(1/fitted_esw(hmmlt,obs,nx))
 }
 
 #' @title Calculates esw from model.
@@ -1721,8 +1775,9 @@ fitted.invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' 
 #' @details 
 #' Calls \code{\link{hmltm.esw}} to calclate effective stript width (esw) for fitted object \code{hmmlt}.
-#
-fitted.esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
+#' 
+#' @export
+fitted_esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
   if(!is.null(obs)){
     if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
     if(min(obs)<1) stop("obs < 1")
@@ -1764,6 +1819,8 @@ fitted.esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
 #' dimension.
 #' @param type if "link", assumes that parameter vector \code{b} is on link scale, else assumes 
 #' it is on natural scale.
+#' 
+#' @export
 hmltm.stat=function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
                     type="link"){
   if(type!="link") b=n2w_rcpp(b,hfun)
@@ -1792,6 +1849,7 @@ hmltm.stat=function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,
 #' @param type "response" (default) or "link". If "link", interprets pars as being on link scale, 
 #' else natural scale
 #' 
+#' @export
 hmltm.p=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
                  type="response"){
   esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
@@ -1815,6 +1873,7 @@ hmltm.p=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.p
 #' @param type "response" (default) or "link". If "link", interprets pars as being on link scale, 
 #' else natural scale
 #' 
+#' @export
 hmltm.invp=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
                     type="response"){
   esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
@@ -1845,6 +1904,7 @@ hmltm.invp=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
 #' Returns effective strip half-width (esw) for fitted object hmmlt, integrating 
 #' using Simpson's rule.
 #'
+#' @export
 hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="response",to.x=FALSE){
   n=dim(cov)[1]
   if(to.x) {maxx=cov$x}
@@ -1883,6 +1943,8 @@ hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="respon
 #' @param seplots if TRUE does additional diagnostic plots
 #' @param smult multiplier to size circles in third plot.
 #' @param ymax forward distance at which detection probability is assumed to be zero. 
+#' 
+#' @export
 hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars$survey.pars$ymax)
 {
   hmmlt=hmltm$hmltm.fit
@@ -1946,6 +2008,8 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars
 #' \code{sqrt(2*pi)/x*sum{i=1}^infty exp(-(2i-1)^2*pi^2/(8x^2)))}
 #' by a finite sum to inf (default 1000) if sum to inf and inf+1 differ by less
 #' than dp (default 1e-4), else sum until difference is less than dp.
+#' 
+#' @export
 p.kolomogarov=function(x,inf=1000,dp=1e-4)
 {
   infsum=rep(0,inf)
@@ -1973,11 +2037,15 @@ p.kolomogarov=function(x,inf=1000,dp=1e-4)
 #' @param hmltm fitted model, as output by \code{\link{est.hmltm}}
 #' @param ks.plot If TRUE, does Q-Q plot. Point corresponding to largest difference between
 #' empirical and theoretical cdf (on which the Kolmogarov-Smirnov test is based) is circled in red.
+#' 
+#' @importFrom goftest cvm.test
+#' 
+#' @export
 hmmlt.gof.x=function(hmltm,ks.plot=TRUE){
   hmmlt=hmltm$hmltm.fit
   n=length(hmmlt$xy$x)
   edf=(1:n)/n
-  cdf=fitted.esw(hmmlt,to.x=TRUE,all=TRUE)/fitted.esw(hmmlt,all=TRUE)
+  cdf=fitted_esw(hmmlt,to.x=TRUE,all=TRUE)/fitted_esw(hmmlt,all=TRUE)
   cdf.order=order(cdf)
   cdf=cdf[cdf.order]
   e.cdf=cdf.order/n
@@ -2028,12 +2096,14 @@ hmmlt.gof.x=function(hmltm,ks.plot=TRUE){
 #' @param W actual half-width over which to integrate (overrides W in \code{hmmlt}).
 #' 
 #' @details
-#' Identical to fitted.invp but returns data frame instead of numerical scalar or vector.
+#' Identical to fitted_invp but returns data frame instead of numerical scalar or vector.
 #' This is to allow it to be used in NDest for estimating density and abundance. (Also has extra 
 #' parameter: W)
-fitted.invp1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
+#' 
+#' @export
+fitted_invp1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
   if(is.null(W)) W=hmmlt$fitpars$survey.pars$W
-  esw=fitted.esw1(hmmlt,obs,nx,W=W)
+  esw=fitted_esw1(hmmlt,obs,nx,W=W)
   return(data.frame(stratum=esw$stratum,transect=esw$transect,object=esw$object,invp=W/esw$esw))
 }
 
@@ -2053,13 +2123,15 @@ fitted.invp1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
 #' @param W limit of perp. dist integration. If NULL, uses survey.pars$W.
 #' 
 #' @details
-#' Designed to be called by \code{\link{fitted.invp1}}.
-#' Identical to fitted.esw but returns list instead of numerical scalar or vector. This is to allow 
+#' Designed to be called by \code{\link{fitted_invp1}}.
+#' Identical to fitted_esw but returns list instead of numerical scalar or vector. This is to allow 
 #' it to be used in \code{\link{NDest}} for estimating density and abundance.
 #
 #' Calls \code{\link{hmltm.esw}} to calclate effective stript width (esw) for 1 observer for fitted 
 #' object \code{hmmlt}.
-fitted.esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=NULL){
+#' 
+#' @export
+fitted_esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=NULL){
   if(!is.null(obs)){
     if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
     if(min(obs)<1) stop("obs < 1")
@@ -2102,7 +2174,7 @@ fitted.esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=
 #' @param W limit of perpendicular dist integration. If NULL, uses \code{survey.pars$W}
 #' 
 #' @details
-#' Designed to be called by \code{\link{fitted.esw1}}.
+#' Designed to be called by \code{\link{fitted_esw1}}.
 #' Identical to hmltm.esw but returns list instead of numerical scalar or vector, and allows limit 
 #' of integration (W) to be specified explicitly, which overrides limit \code{survey.pars$W}.
 #' This is to allow it to be used in \code{\link{NDest}} for estimating density and abundance.
@@ -2110,6 +2182,7 @@ fitted.esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=
 #' Returns effective stript half-width (esw) for 1 observer for fitted object \code{hmmlt}, 
 #' integrating using Simpson's rule.
 #' 
+#' @export
 hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="response",to.x=FALSE,
                     W=NULL){
   nmax=dim(cov)[1]
@@ -2150,13 +2223,15 @@ hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="re
 #' @param dat distance data frame. Must have columns for stratum stratum.area, transect, transect.length, 
 #' <any-observer-level_variable>, and if \code{twosit}==TRUE then object as well. These can 
 #' have any names, but the names must be specified, via argument \code{colnames}.
-#' @param minvalue left-truncation point.
-#' @param maxvalue right-truncation point.
+#' @param minval left-truncation point.
+#' @param maxval right-truncation point.
 #' @param twosit If TRUE, assumes this is an mrds-type dataset with two lines per detection.
 #' @param colnames name of columns containing stratum, stratum area, transect, transect length, 
 #' <any-observer-level_variable>, and if \code{twosit}==TRUE then object as well, IN THIS ORDER, 
 #' in a character vector. The default value is 
 #' colnames=c("stratum","area","transect","L","x","obs").
+#' 
+#' @export
 truncdat=function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum","area","transect","L","x","obs")){
   tdat=dat
   keepcols=rep(NA,4)
@@ -2257,7 +2332,7 @@ truncdat=function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum","ar
 #' \code{y}, it chooses according to the parameter \code{prefer}. If only one of the duplicates 
 #' has a \code{y}, it chooses that one.
 #' 
-#' @param dat MRDS data frame.
+#' @export
 make.onesit=function(dat,prefer=1) {
   if(prefer!=1 & prefer!=2) stop("Argument 'prefer' must be 1 or 2.")
   n=dim(dat)[1]
@@ -2302,6 +2377,8 @@ make.onesit=function(dat,prefer=1) {
 #' (and possibly others).
 #' @param hmltm.fit output from \code{\link{fit.hmltm}}.
 #' @param W perpendicular truncation distance for estimation.
+#' 
+#' @export
 NDest=function(dat,hmltm.fit,W){
   maxx=max(na.omit(dat$x))
   if(maxx>W) {
@@ -2310,7 +2387,7 @@ NDest=function(dat,hmltm.fit,W){
   }
   # Add 1/p column
   dat$invp=rep(NA,dim(dat)[1])
-  invp=fitted.invp1(hmltm.fit,W=W)
+  invp=fitted_invp1(hmltm.fit,W=W)
   for(i in 1:length(invp$object)) {
     row=which(dat$stratum==invp$stratum[i] & dat$transect==invp$transect[i] & dat$object==invp$object[i])
     if(length(row)>1) {
@@ -2473,6 +2550,10 @@ NDest=function(dat,hmltm.fit,W){
 #' 
 #' @references Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 
 #' 2013. Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
+#' 
+#' @export
+#' 
+#' @useDynLib hsltm
 est.hmltm=function(dat,
                    pars,FUN,models=list(y=NULL,x=NULL),
                    survey.pars,hmm.pars,control.fit,control.opt,
@@ -2516,8 +2597,8 @@ est.hmltm=function(dat,
 #' @param write.csvs if TRUE, writes each output (see Value below) to separate .csv file.
 #' @param dir directory to which to write outputs if \code{write.csvs} is TRUE. 
 #'
-#' @return If \code{ests} is NULL:\cr
-#' Returns a list with elements as follows for each statistic in \code{bests}:
+#' @return If \code{ests} is NULL, returns a list with elements as follows for each statistic 
+#' in \code{bests}:
 #' \itemize{
 #'  \item{nbad} {number of bad estimates of the statistic in question that were excluded from the 
 #'  summary. (Bad estimates occur, for example, when a bootstrap sample involves no detections and
@@ -2527,27 +2608,29 @@ est.hmltm=function(dat,
 #'  \item{se} {SEs of the statistic in question.}
 #'  \item{lower} {Lower \code{cilevel} percentiles of the statistic in question.}
 #'  \item{upper} {Upper \code{cilevel} percentiles of the statistic in question.}
-#'} \cr
-#' If \code{ests} is an object of class 'hmltm':\cr
-#' Returns a data frame with rows only for every stratum with detections (and the total) and columns as follows: \cr
+#' }
+#' If \code{ests} is an object of class 'hmltm', returns a data frame with rows only for every 
+#' stratum with detections (and the total) and columns as follows:
 #' \itemize{
-#' \item{Stratum} stratum number \cr
-#' \item{n} original number of detections \cr
-#' \item{n.L} original encounter rate \cr
-#' \item{CV.n.L} percentage coefficient of variation of encounter rate\cr
-#' \item{N.grp} original estimate of group abundance\cr
-#' \item{CV.N.grp} percentage coefficient of variation of group abundance\cr
-#' \item{N.grp.lo} lower bound of group abundance confidence interval\cr
-#' \item{N.grp.hi} upper bound of group abundance confidence interval\cr
-#' \item{Es} original mean group size estimate\cr
-#' \item{CV.Es} percentage coefficient of variation of mean group size\cr
-#' \item{Es.lo} lower bound of mean group size confidence interval\cr
-#' \item{Es.hi} upper bound of mean group size confidence interval\cr
-#' \item{N} original individual abundance estimate\cr
-#' \item{CV.N} percentage coefficient of individual abundance\cr
-#' \item{N.lo} lower bound of individual abundance confidence interval\cr
-#' \item{N.hi} upper bound of individual abundance confidence interval\cr
+#' \item{Stratum} stratum number
+#' \item{n} original number of detection
+#' \item{n.L} original encounter rate
+#' \item{CV.n.L} percentage coefficient of variation of encounter rate
+#' \item{N.grp} original estimate of group abundance
+#' \item{CV.N.grp} percentage coefficient of variation of group abundance
+#' \item{N.grp.lo} lower bound of group abundance confidence interval
+#' \item{N.grp.hi} upper bound of group abundance confidence interval
+#' \item{Es} original mean group size estimate
+#' \item{CV.Es} percentage coefficient of variation of mean group size
+#' \item{Es.lo} lower bound of mean group size confidence interval
+#' \item{Es.hi} upper bound of mean group size confidence interval
+#' \item{N} original individual abundance estimate
+#' \item{CV.N} percentage coefficient of individual abundance
+#' \item{N.lo} lower bound of individual abundance confidence interval
+#' \item{N.hi} upper bound of individual abundance confidence interval
 #'}
+#'
+#' @export
 bootsum=function(bests,ests=NULL,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
   if(cilevel<=0 | cilevel>=1) stop("cilevel must be greater than 0 and less than 1.")
   if(!is.null(ests) & !inherits(ests,"hmltm")) stop("ests must be of class 'hmltm'.")
@@ -2629,21 +2712,23 @@ bootsum=function(bests,ests=NULL,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
 #' @param est output from \code{\link{est.hmltm}}.
 #' @param cv \code{$cv} element of output from \code{\link{bs.hmltm}}. 
 #' 
-#' @return Returns a data frame with columns as follows: \cr
-#' Stratum: stratum number \cr
-#' n: original number of detections \cr
-#' n.L: original encounter rate \cr
-#' CV.n.L: percentage coefficient of variation of encounter rate\cr
-#' N.grp original estimate of group abundance\cr
-#' CV.N.grp: percentage coefficient of variation of group abundance\cr
-#' N.grp.lo: lower bound of group abundance confidence interval\cr
-#' N.grp.hi: upper bound of group abundance confidence interval\cr
-#' E.s: original mean group size estimate\cr
-#' CV.E.s: percentage coefficient of variation of mean group size\cr
-#' N: original individual abundance estimate\cr
-#' CV.N: percentage coefficient of individual abundance\cr
-#' N.lo: lower bound of individual abundance confidence interval\cr
-#' N.hi: upper bound of individual abundance confidence interval\cr
+#' @return Returns a data frame with columns as follows:
+#' \item{Stratum}{stratum number}
+#' \item{n}{original number of detections}
+#' \item{n.L}{original encounter rate}
+#' \item{CV.n.L}{percentage coefficient of variation of encounter rate}
+#' \item{N.grp}{original estimate of group abundance}
+#' \item{CV.N.grp}{percentage coefficient of variation of group abundance}
+#' \item{N.grp.lo}{lower bound of group abundance confidence interval}
+#' \item{N.grp.hi}{upper bound of group abundance confidence interval}
+#' \item{E.s}{original mean group size estimate}
+#' \item{CV.E.s}{percentage coefficient of variation of mean group size}
+#' \item{N}{original individual abundance estimate}
+#' \item{CV.N}{percentage coefficient of individual abundance}
+#' \item{N.lo}{lower bound of individual abundance confidence interval}
+#' \item{N.hi}{upper bound of individual abundance confidence interval}
+#' 
+#' @export
 strat.estable=function(est,cv){
   min=est[,"n"]
   N=est[,"N"]
@@ -2683,7 +2768,8 @@ strat.estable=function(est,cv){
 #' @param hmm.pars object of class \code{hmm.pars}. 
 #' @param B number of bootstrap replicates to do.
 #' 
-cv.avail=function(hhm.pars,B=1000){
+#' @export
+cv.avail=function(hmm.pars,B=1000){
   n=dim(hmm.pars$Et)[2]
   b.Et=array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
   cv.a=cv.u=rep(NA,n)
@@ -2729,6 +2815,7 @@ cv.avail=function(hhm.pars,B=1000){
 #' 
 #' @seealso \code{\link{hmmpars.boot}}, which is is used to generate \code{hmm.pars.bs}.
 #' 
+#' @export
 bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.avail=FALSE){
   #------------------------------------------------------------------------------------------
   # Produces 3-dim array containing B sets of density and abundance estimates from
@@ -2847,6 +2934,7 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
 #' @param mu multivariate logNormal distribution mean.
 #' @param Sigma multivariate logNormal distribution variace-covarice matrix.
 #' 
+#' @export
 Npars.from.lNpars=function(mu,Sigma){
   cv2=diag(Sigma)/mu^2 # Sigma is variance matrix
   logvar=log(cv2+1)
@@ -2896,6 +2984,10 @@ Npars.from.lNpars=function(mu,Sigma){
 #' animals=1:8
 #' resamp=resample.hmmpars(bowhead.hmm.pars,bowhead.adat,animals)
 #' 
+#' @importFrom HiddenMarkov dthmm
+#' @importFrom HiddenMarkov BaumWelch
+#' 
+#' @export
 resample.hmmpars=function(availhmm,adat,animals,seed=NULL,nperow=10,printprog=TRUE){
   b.availhmm=availhmm # initialise bootstrap HMM parameters
   # filter out animals not chosen
@@ -2934,6 +3026,8 @@ resample.hmmpars=function(availhmm,adat,animals,seed=NULL,nperow=10,printprog=TR
 #' \code{\link{est.hmltm}}.
 #' 
 #' @return A numeric vector.
+#' 
+#' @export
 vectorize.hmmpars=function(hmmpars) {
   Pi=hmmpars$Pi
   pm=hmmpars$pm
@@ -2954,6 +3048,8 @@ vectorize.hmmpars=function(hmmpars) {
 #' @param hv vector that was vectorised using \code{\link{vectorize.hmmpars}}.
 #' 
 #' @return A hmm.pars object (a list).
+#' 
+#' @export
 unvectorize.hmmpars=function(hv) {
   m3d=hv[1:3]
   m2d=c(m3d[1],m3d[3])
@@ -3001,6 +3097,7 @@ unvectorize.hmmpars=function(hv) {
 #' animals=1:8
 #' bs=hmmpars.boot(bowhead.hmm.pars,bowhead.adat,animals,B=3)
 #' 
+#' @export
 hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
   # initialise matrix of correct dimensions:
   na=length(adat)
@@ -3068,6 +3165,10 @@ hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
 #' }
 #' }
 #' 
+#' @importFrom MASS mvrnorm
+#' @importFrom HiddenMarkov compdelta
+#' 
+#' @export
 bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
                            control.fit,control.opt,fixed.avail=FALSE,B=999){
   n=length(dat$x)
@@ -3158,6 +3259,7 @@ bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
 #' probability over all detections), \code{$convergence} convergence diagnostic from \code{optim}.}
 #' }
 #' 
+#' @export
 bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
                             control.fit,control.opt,fixed.avail=FALSE,B=999,silent=FALSE){
   n=length(dat$x)
@@ -3238,6 +3340,7 @@ bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
 #' detection probability), (c) estimated p(0), ad (d) detection hazard function parameters.}
 #' }
 #' 
+#' @export
 bootsum.p=function(bs,probs=c(0.025,0.975),pcut=0){
   #--------------------------------------------------------------------------------
   # bs is output from bootstrap.p.with.Et() or bootstrap.with.hmm()
@@ -3307,6 +3410,7 @@ bootsum.p=function(bs,probs=c(0.025,0.975),pcut=0){
 #' @param dy Markov model distance step size.
 #' @param u uniform random variable (scalar).
 #' 
+#' @export
 cdfy.u=function(y,x,hfun,b,pm,Pi,delta,ymax,dy,u)
   #----------------------------------------------------------------------------
 # For use with function uniroot.
@@ -3329,6 +3433,7 @@ cdfy.u=function(y,x,hfun,b,pm,Pi,delta,ymax,dy,u)
 #' @param est output from \code{est.hmltm}.
 #' @param bs output  from \code{bootsum} using the same model that created \code{est}.
 #' 
+#' @export
 estable=function(est,bs){
   est=est$point$ests
   nonzeros=which(est$n>0)
@@ -3391,6 +3496,7 @@ estable=function(est,bs){
 #' Data frame with two elements: \code{$x} and \code{$y}, being perpendicular and forward distances
 #' of detected animals, respectively.
 #' 
+#' @export
 simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
   pm=hmm.pars$pm
   Pi=hmm.pars$Pi
@@ -3490,6 +3596,7 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
 #' Data frame with two elements: \code{$x} and \code{$y}, being perpendicular and forward distances
 #' of detected animals, respectively.
 #' 
+#' @export
 simhmltm.w=function(adat,xmax,ymax,spd,animals,hfun,pars,N,dmax=NULL,seed=NULL,poiss=FALSE)
 {
   h=match.fun(hfun)
@@ -3613,6 +3720,7 @@ simhmltm.w=function(adat,xmax,ymax,spd,animals,hfun,pars,N,dmax=NULL,seed=NULL,p
 #' \item{p0se:}{ estimated standard error of p(0) estimates from each simulation (if varest=TRUE).}
 #' }
 #' 
+#' @export
 simest=function(simethod="hmm",shfun,spars,ehfun=shfun,parstart=spars,survey.pars,
                 shmm.pars,ehmm.pars=shmm.pars,animal=NULL,adat=NULL,
                 control.opt,control.fit,nsim=50,report.progress=TRUE,En=100,
@@ -3777,7 +3885,7 @@ simest=function(simethod="hmm",shfun,spars,ehfun=shfun,parstart=spars,survey.par
 #' @param simout output from \code{\link{simest}}.
 #' @param brief if TRUE, prints briefer summary.
 #' 
-#sumsim=function(simout,p=NULL,p0=NULL,brief=FALSE){
+#' @export
 sumsim=function(simout,brief=FALSE){
   p=simout$p.
   p0=simout$p0
@@ -3895,6 +4003,7 @@ sumsim=function(simout,brief=FALSE){
 #' @seealso \code{\link{hmltm.stat}} for calculation of derived statistics, and 
 #' \code{\link{splinefun}} for approximation of function derivatives.
 #' 
+#' @export
 invHessvar=function(stat,hmmlt,nx4spline=50,doplot=FALSE){
   # extract things we need:
   models=hmmlt$models
@@ -4101,10 +4210,10 @@ NULL
 #' Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 2013. 
 #' Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
 #' 
-#' Heide-Jørgensen, M. P., Laidre, K., Borchers, D. L., Samarrra,F., and Stern, H. 2007. Increasing 
+#' Heide-Jorgensen, M. P., Laidre, K., Borchers, D. L., Samarrra,F., and Stern, H. 2007. Increasing 
 #' abundance of bowhead whales in west greenland. Biology Letters 3, 577–580.
 #' 
-#' Laidre, K., Heide-Jørgensen, M. P., and Nielsen, T. 2007. Role of bowhead whale as a predator in 
+#' Laidre, K., Heide-Jorgensen, M. P., and Nielsen, T. 2007. Role of bowhead whale as a predator in 
 #' West Rreenland. Marine Ecology Progress Series 346, 285–297.
 #' 
 #' @examples

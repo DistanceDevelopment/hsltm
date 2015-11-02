@@ -4,12 +4,12 @@
 \alias{cv.avail}
 \title{Calculate CV of mean time available.}
 \usage{
-cv.avail(hhm.pars, B = 1000)
+cv.avail(hmm.pars, B = 1000)
 }
 \arguments{
-\item{B}{number of bootstrap replicates to do.}
-
 \item{hmm.pars}{object of class \code{hmm.pars}.}
+
+\item{B}{number of bootstrap replicates to do.}
 }
 \description{
 Calculates CV of mean time available and unavailable from an hmm.pars object.

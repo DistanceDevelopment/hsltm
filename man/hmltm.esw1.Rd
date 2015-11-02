@@ -37,7 +37,7 @@ else natural scale}
 Calculates effective strip width from fitted model.
 }
 \details{
-Designed to be called by \code{\link{fitted.esw1}}.
+Designed to be called by \code{\link{fitted_esw1}}.
 Identical to hmltm.esw but returns list instead of numerical scalar or vector, and allows limit
 of integration (W) to be specified explicitly, which overrides limit \code{survey.pars$W}.
 This is to allow it to be used in \code{\link{NDest}} for estimating density and abundance.

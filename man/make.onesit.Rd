@@ -13,8 +13,6 @@ detection distance.}
 
 \item{prefer}{which of the two observers' data to prefer when forward distances are
   missing/equal must be 1 or 2.}
-
-\item{dat}{MRDS data frame.}
 }
 \description{
 Reduces mark-recapture Distance sampling (MRDS) data frame dat, with two lines per detection, to a

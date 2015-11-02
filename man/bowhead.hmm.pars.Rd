@@ -42,10 +42,10 @@ data(bowhead.hmm.pars)
 Borchers, D.L., Zucchini, W., Heide-Jorgenssen, M.P., Canadas, A. and Langrock, R. 2013.
 Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
 
-Heide-Jørgensen, M. P., Laidre, K., Borchers, D. L., Samarrra,F., and Stern, H. 2007. Increasing
+Heide-Jorgensen, M. P., Laidre, K., Borchers, D. L., Samarrra,F., and Stern, H. 2007. Increasing
 abundance of bowhead whales in west greenland. Biology Letters 3, 577–580.
 
-Laidre, K., Heide-Jørgensen, M. P., and Nielsen, T. 2007. Role of bowhead whale as a predator in
+Laidre, K., Heide-Jorgensen, M. P., and Nielsen, T. 2007. Role of bowhead whale as a predator in
 West Rreenland. Marine Ecology Progress Series 346, 285–297.
 }
 \seealso{

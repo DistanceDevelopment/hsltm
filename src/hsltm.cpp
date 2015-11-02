@@ -19,6 +19,8 @@ double inv_logit(double x) {
 //' @param hfun Name of hazard detection function
 //' 
 //' @return Unconstrained parameters (scaled to the set of real numbers)
+//' 
+//' @export
 // [[Rcpp::export]]
 arma::rowvec n2w_rcpp(arma::rowvec par, std::string hfun)
 {
@@ -48,6 +50,8 @@ arma::rowvec n2w_rcpp(arma::rowvec par, std::string hfun)
 //' @param hfun Name of hazard detection function
 //' 
 //' @return Parameters on their natural scale
+//' 
+//' @export
 // [[Rcpp::export]]
 arma::rowvec w2n_rcpp(arma::rowvec par, std::string hfun)
 {
@@ -77,6 +81,10 @@ arma::rowvec w2n_rcpp(arma::rowvec par, std::string hfun)
 //' @param hfun Name of hazard detection function
 //' 
 //' @return The value of the hazard function at (x,y)
+//' 
+//' @export
+//' 
+//' @importFrom Rcpp evalCpp
 // [[Rcpp::export]]
 double h_rcpp(double x, double y, arma::rowvec b, std::string hfun)
 {
@@ -139,6 +147,8 @@ double h_rcpp(double x, double y, arma::rowvec b, std::string hfun)
 //' @param dy Forward distance step increment
 //' 
 //' @return A vector of the forward distances in view.
+//' 
+//' @export
 // [[Rcpp::export]]
 arma::vec gety_obs_rcpp(double x, bool null_yobs, double yobs, double ymax, double dy)
 {
@@ -182,6 +192,8 @@ arma::vec gety_obs_rcpp(double x, bool null_yobs, double yobs, double ymax, doub
 //' @param cdf Flag for whether or not to return cumulative distribution function in forward dimension.
 //' This differs from specifying ally=TRUE in that ally=TRUE calculates the cdf from ymax 
 //' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
+//' 
+//' @export
 // [[Rcpp::export]] 
 arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowvec b, 
                           arma::vec pcu, arma::mat Pi, arma::rowvec delta, double ymax, 
@@ -255,8 +267,8 @@ arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowv
 //' of a model with two observers.
 //' Written in C++.
 //'  
-//' @param x Perpendicular distance.
-//' @param y Forward distance.
+//' @param obs1 Observations of observer 1
+//' @param obs2 Observations of observer 2
 //' @param hfun Hazard function name.
 //' @param b1 Hazard function parameter vector of first observer.
 //' @param b2 Hazard function parameter vector of second oberver.
@@ -269,6 +281,8 @@ arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowv
 //' @param cdf Flag for whether or not to return cumulative distribution function in forward dimension.
 //' This differs from specifying ally=TRUE in that ally=TRUE calculates the cdf from ymax 
 //' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
+//' 
+//' @export
 // [[Rcpp::export]]
 arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma::rowvec b1, 
                           arma::rowvec b2, arma::vec pcu, arma::mat Pi, arma::rowvec delta, 

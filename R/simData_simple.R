@@ -20,6 +20,8 @@
 #' b <- c(0.9,0.75,10)
 #' hfun <- "h.EP2.0"
 #' data <- simData_simple(nbObs=100,pcu=pcu,gamma=gamma,b=b,hfun=hfun,xmax=80,ymax=80,ystep=1)
+#' 
+#' @export
 
 simData_simple <- function(nbObs,pcu,gamma,b,hfun,xmax,ymax,ystep)
 {

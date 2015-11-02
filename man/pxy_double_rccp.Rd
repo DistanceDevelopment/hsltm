@@ -7,6 +7,10 @@
 pxy_double_rccp(obs1, obs2, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
 }
 \arguments{
+\item{obs1}{Observations of observer 1}
+
+\item{obs2}{Observations of observer 2}
+
 \item{hfun}{Hazard function name.}
 
 \item{b1}{Hazard function parameter vector of first observer.}
@@ -28,10 +32,6 @@ pxy_double_rccp(obs1, obs2, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
 \item{cdf}{Flag for whether or not to return cumulative distribution function in forward dimension.
 This differs from specifying ally=TRUE in that ally=TRUE calculates the cdf from ymax
 to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.}
-
-\item{x}{Perpendicular distance.}
-
-\item{y}{Forward distance.}
 }
 \description{
 Calculate probability of detection at (x,y), or if cdf=TRUE, by (x,y), in the case

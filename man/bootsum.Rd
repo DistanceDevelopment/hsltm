@@ -19,8 +19,8 @@ bootsum(bests, ests = NULL, cilevel = 0.95, write.csvs = FALSE,
 \item{dir}{directory to which to write outputs if \code{write.csvs} is TRUE.}
 }
 \value{
-If \code{ests} is NULL:\cr
-Returns a list with elements as follows for each statistic in \code{bests}:
+If \code{ests} is NULL, returns a list with elements as follows for each statistic
+in \code{bests}:
 \itemize{
  \item{nbad} {number of bad estimates of the statistic in question that were excluded from the
  summary. (Bad estimates occur, for example, when a bootstrap sample involves no detections and
@@ -30,26 +30,26 @@ Returns a list with elements as follows for each statistic in \code{bests}:
  \item{se} {SEs of the statistic in question.}
  \item{lower} {Lower \code{cilevel} percentiles of the statistic in question.}
  \item{upper} {Upper \code{cilevel} percentiles of the statistic in question.}
-} \cr
-If \code{ests} is an object of class 'hmltm':\cr
-Returns a data frame with rows only for every stratum with detections (and the total) and columns as follows: \cr
+}
+If \code{ests} is an object of class 'hmltm', returns a data frame with rows only for every
+stratum with detections (and the total) and columns as follows:
 \itemize{
-\item{Stratum} stratum number \cr
-\item{n} original number of detections \cr
-\item{n.L} original encounter rate \cr
-\item{CV.n.L} percentage coefficient of variation of encounter rate\cr
-\item{N.grp} original estimate of group abundance\cr
-\item{CV.N.grp} percentage coefficient of variation of group abundance\cr
-\item{N.grp.lo} lower bound of group abundance confidence interval\cr
-\item{N.grp.hi} upper bound of group abundance confidence interval\cr
-\item{Es} original mean group size estimate\cr
-\item{CV.Es} percentage coefficient of variation of mean group size\cr
-\item{Es.lo} lower bound of mean group size confidence interval\cr
-\item{Es.hi} upper bound of mean group size confidence interval\cr
-\item{N} original individual abundance estimate\cr
-\item{CV.N} percentage coefficient of individual abundance\cr
-\item{N.lo} lower bound of individual abundance confidence interval\cr
-\item{N.hi} upper bound of individual abundance confidence interval\cr
+\item{Stratum} stratum number
+\item{n} original number of detection
+\item{n.L} original encounter rate
+\item{CV.n.L} percentage coefficient of variation of encounter rate
+\item{N.grp} original estimate of group abundance
+\item{CV.N.grp} percentage coefficient of variation of group abundance
+\item{N.grp.lo} lower bound of group abundance confidence interval
+\item{N.grp.hi} upper bound of group abundance confidence interval
+\item{Es} original mean group size estimate
+\item{CV.Es} percentage coefficient of variation of mean group size
+\item{Es.lo} lower bound of mean group size confidence interval
+\item{Es.hi} upper bound of mean group size confidence interval
+\item{N} original individual abundance estimate
+\item{CV.N} percentage coefficient of individual abundance
+\item{N.lo} lower bound of individual abundance confidence interval
+\item{N.hi} upper bound of individual abundance confidence interval
 }
 }
 \description{

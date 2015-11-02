@@ -12,16 +12,16 @@ truncdat(dat, minval = 0, maxval = NULL, twosit = FALSE,
 <any-observer-level_variable>, and if \code{twosit}==TRUE then object as well. These can
 have any names, but the names must be specified, via argument \code{colnames}.}
 
+\item{minval}{left-truncation point.}
+
+\item{maxval}{right-truncation point.}
+
 \item{twosit}{If TRUE, assumes this is an mrds-type dataset with two lines per detection.}
 
 \item{colnames}{name of columns containing stratum, stratum area, transect, transect length,
 <any-observer-level_variable>, and if \code{twosit}==TRUE then object as well, IN THIS ORDER,
 in a character vector. The default value is
 colnames=c("stratum","area","transect","L","x","obs").}
-
-\item{minvalue}{left-truncation point.}
-
-\item{maxvalue}{right-truncation point.}
 }
 \description{
 Left- and/or right-truncates any variable in data frame dat, inserting effort-only record if
