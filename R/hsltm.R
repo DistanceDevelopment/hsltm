@@ -1,99 +1,4 @@
 # Changed all pcu to pm 6th May 2013. Not yet tested with bootstrap.
-#
-#
-#                      -------------------
-#--------------------- Start C++ functions --------------------
-#' @title Return all (discrete) forward distances in veiw.
-#'
-#' @description
-#'  C++ function to return all (discrete) forward distances in veiw.
-#'  
-#' @param Ix Perpendicular distance.
-#' @param Iyobs Forward distance.
-#' @param Iymax Maximum forward distance in view.
-#' @param Idy Forward distance step increment.
-#' 
-gety.obs <- function(Ix, Iyobs, Iymax, Idy) {
-  Itheta_f <- 0
-  Itheta_b <- 90
-  Inull_yobs <- NULL
-  .Call( "bias_gety_obs", Ix, Inull_yobs, Iyobs, Itheta_f, Itheta_b, Iymax, Idy, PACKAGE = "hsltm" )
-}
-
-#' @title Calculate probability of detection at (x,y).
-#'
-#' @description
-#'  C++ function to calculate probability of detection at (x,y), or if cdf=TRUE, BY (x,y).
-#'  
-#' @param Ix Perpendicular distance.
-#' @param Iy Forward distance.
-#' @param Ihfun Hazard function name.
-#' @param Ib Hazard function parameter vector.
-#' @param Ipcu Bernoulli state-dependent probability parameters.
-#' @param IPi Markov model transition probability matrix.
-#' @param Idelta Markov model stationary distribution.
-#' @param Iymax Maximum forward distance in view.
-#' @param Idy Forward distance step increment.
-#' @param Ially Flag for whether or not to return probabilities at all forward distances in view.
-#' @param Icdf Flag for whether or not to return cumulative distribution function in forward dimension.
-#' This differes from specifying Ially=TRUE in that Ially=TRUE calculates the cdf from ymax 
-#' to y=0, whereas Icdf=TRUE calculates the cdf from ymax to y.
-p.xy1 <- function(Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Ially, Icdf){
-  Itheta_f <- 0
-  Itheta_b <- 90
-  .Call( "bias_p_xy1", Ix, Iy, Ihfun, Ib, Ipcu, IPi, Idelta, Iymax, Idy, Itheta_f, Itheta_b, Ially, Icdf, PACKAGE = "hsltm" )
-}
-
-#' @title Parameter transformation function for all models.
-#'
-#' @description
-#'  Parameter transformation for all models
-#'  
-#' @param b parameters on original scale.
-#' @param fun detection hazard function name (character) - see details below.
-#' 
-#' @details
-#' Valid detection hazard function names for detection hazards with certain detection at radial
-#' distance zero are "h.EP1.0", "h.EP1x.0", "h.EP2.0", "h.EP2x.0", "h.IP.0".
-#' #' Transformations are:
-#' \describe{
-#' \item{h.EP1.0}{log transform}
-#' \item{h.EP1x.0}{log transform}
-#' \item{h.EP2.0}{log transform}
-#' \item{h.EP2x.0}{log transform}
-#' \item{h.IP.0}{log transform}
-#' }
-tfm <- function(b, fun) {
-  .Call("hsltm_get_tfm", b, fun, PACKAGE = "hsltm" )
-}
-
-#' @title Parameter inverse transformation function for all models.
-#'
-#' @description
-#'  Parameter inverse transformation for all models.
-#'  
-#' @param b parameters on transformed scale
-#' @param fun detection hazard function name (character) - see details below.
-#'  
-#' @details
-#' Valid detection hazard function names for detection hazards with certain detection at radial
-#' distance zero are "h.EP1.0", "h.EP1x.0", "h.EP2.0", "h.EP2x.0", "h.IP.0".
-#' Inverse transformations are:
-#' \describe{
-#' \item{h.EP1.0}{exponential}
-#' \item{h.EP1x.0}{exponential}
-#' \item{h.EP2.0}{exponential}
-#' \item{h.EP2x.0}{exponential}
-#' \item{h.IP.0}{exponential}
-#' }
-invtfm <- function(b, fun) {
-  .Call("hsltm_get_invtfm", b, fun, PACKAGE = "hsltm" )
-}
-
-
-
-#---------------------  End C++ functions --------------------
-#                      -------------------
 
 #                      -----------------------------
 #--------------------- Start DLB's utility functions --------------------
@@ -941,7 +846,7 @@ h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx
                 xlab="Perpendicular distance",ylab="Forward distance",theta=90,phi=35,...)
 {
   if(type!="persp" & type!="both" & type!="contour" & type!="image") stop("Agrument `type' must be `persp', `contour', `image'or `both' (for contour on image).")
-  b=tfm(pars,hfun)
+  b=n2w_rcpp(pars,hfun)
   nb=length(b)
   n=dim(dat)[1]
   if(n>1) {
@@ -1026,7 +931,7 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
     warning("ymax<max(yrange) so ymax set equal to max(yrange)+dy")
   }
 #  h=match.fun(hfun)
-  b=tfm(pars,hfun)
+  b=n2w_rcpp(pars,hfun)
   nb=length(b)
   n=dim(dat[obs,])[1]
   if(n>1) {
@@ -1084,7 +989,7 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
   ymax=hmmlt$fitpars$survey.pars$ymax
   dy=hmmlt$fitpars$survey.pars$dy
   hfun=hmmlt$h.fun
-  b=tfm(hmmlt$fit$par,hfun)
+  b=n2w_rcpp(hmmlt$fit$par,hfun)
   models=hmmlt$models
   xy=hmmlt$xy[!is.na(hmmlt$xy$y),]
   if(is.null(breaks)) {
@@ -1103,19 +1008,19 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
   
   maxy=0;maxi=0
   for(i in 1:nx) { # find maximum y
-    maxyi=max(gety.obs(min(x),TRUE,0,ymax,dy))
+    maxyi=max(gety_obs_rcpp(min(x),TRUE,0,ymax,dy))
 #CJ#    maxyi=max(gety.obs(min(x),0,theta.f,theta.b,ymax,dy))
     if(maxy<maxyi) {
       maxy=maxyi
       maxi=i
     }
   }
-  ys=gety.obs(x[maxi],TRUE,0,ymax,dy) # get y's spanning maximum forward distance
+  ys=gety_obs_rcpp(x[maxi],TRUE,0,ymax,dy) # get y's spanning maximum forward distance
 #CJ#  ys=gety.obs(x[maxi],0,theta.f,theta.b,ymax,dy) # get y's spanning maximum forward distance
   fyx=matrix(rep(NA,nx*length(ys)),ncol=nx) # set matrix to largest y-dimension
     
   for(i in nx:1){
-    yi=gety.obs(x[i],TRUE,0,ymax,dy) # TRUE,0 used to be NULL. get all y's in view at this x
+    yi=gety_obs_rcpp(x[i],TRUE,0,ymax,dy) # TRUE,0 used to be NULL. get all y's in view at this x
 #CJ#    yi=gety.obs(x[i],0,theta.f,theta.b,ymax,dy) # TRUE,0 used to be NULL. get all y's in view at this x
     #    ndys=length(yi)
 #    if(!is.null(nys)&length(yi)>nys) {
@@ -1274,12 +1179,12 @@ fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
                 W,ymax,dy,nx=50,hessian=FALSE,
                 control=list(trace=5,reltol=1e-6,maxit=200),groupfromy=NULL)
 {
-  b=tfm(pars,FUN)
+  b=n2w_rcpp(pars,FUN)
   fit=optim(par=b,fn=negllik.xy,control=control,hessian=hessian,xy=xy,
             FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,
             W=W,ymax=ymax,dy=dy,nx=nx,
             groupfromy=groupfromy)
-  fit$par=invtfm(fit$par,FUN)
+  fit$par=as.vector(w2n_rcpp(fit$par,FUN))
   return(fit)
 }
 
@@ -1345,7 +1250,7 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
              control=control.optim,groupfromy=groupfromy)
   
   # store transformed parameters
-  b=tfm(est$par,FUN)
+  b=n2w_rcpp(est$par,FUN)
   est$b=b
   
   n=length(xy$x)
@@ -1575,7 +1480,7 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx
 #' @title Calculates probability of first observing animal at (x,y).
 #'
 #' @description
-#' Just calls \code{\link{p.xy1}} >= once, cycling through 3rd index of Pi and 2nd indices of pm and delta.
+#' Just calls \code{\link{pxy_simple_rcpp}} >= once, cycling through 3rd index of Pi and 2nd indices of pm and delta.
 # 
 #' @param x perpendicular distance.
 #' @param y forward distance.
@@ -1593,7 +1498,7 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx
 #' This differes from specifying ally=TRUE in that ally=TRUE calculates the cdf from ymax 
 #' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
 #' 
-#' @seealso \code{\link{p.xy1}}
+#' @seealso \code{\link{pxy_simple_rcpp}}
 #' 
 p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
 {
@@ -1612,7 +1517,7 @@ p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
     Pi.w=Pi[,,w]
     pm.w=pm[,w]
     delta.w=delta[,w]
-    p.w=p.xy1(x,y,hfun,b,pm.w,Pi.w,delta.w,ymax,dy,ally,cdf)
+    p.w=pxy_simple_rcpp(x,y,hfun,b,pm.w,Pi.w,delta.w,ymax,dy,ally,cdf)
     ##print(c('p.w',p.w,' p',p))
     p=p+p.w
   }
@@ -1658,7 +1563,7 @@ hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
   delta=hmm.pars$delta
   
   b=pars
-  if(type!="link") b=tfm(pars,hfun)
+  if(type!="link") b=n2w_rcpp(pars,hfun)
   
   nx=length(x)
   n=1
@@ -1861,7 +1766,7 @@ fitted.esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
 #' it is on natural scale.
 hmltm.stat=function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
                     type="link"){
-  if(type!="link") b=tfm(b,hfun)
+  if(type!="link") b=n2w_rcpp(b,hfun)
   if(stat=="p0") {return(hmltm.px(x=0,b,hfun,models,cov,survey.pars,hmm.pars,type))}  
   else if(stat=="p") {return(hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}  
   else if(stat=="invp") {return(1/hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}
@@ -3493,7 +3398,7 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
   W=survey.pars$W
   ymax=survey.pars$ymax
   dy=survey.pars$dy
-  b=tfm(pars,hfun)
+  b=n2w_rcpp(pars,hfun)
   
   tmax=ceiling(ymax/dy) # max time units
   ymax=tmax*dy # ymax adjusted to be divisible by dy
@@ -3588,7 +3493,7 @@ simhmltm=function(nw,hfun,pars,hmm.pars,survey.pars,print.progress=TRUE){
 simhmltm.w=function(adat,xmax,ymax,spd,animals,hfun,pars,N,dmax=NULL,seed=NULL,poiss=FALSE)
 {
   h=match.fun(hfun)
-  b=tfm(pars,hfun) # this is inefficient ('cause just back-transform in h()) but makes for uniform handling outside this function
+  b=n2w_rcpp(pars,hfun) # this is inefficient ('cause just back-transform in h()) but makes for uniform handling outside this function
   if(!is.null(seed)) set.seed(seed)
   ytmax=ceiling(ymax/spd) # needs to be integer cause is number of time units
   wst=wa=adata=adat[animals] # select which time series to use
