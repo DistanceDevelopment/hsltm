@@ -18,9 +18,11 @@
 #' parameter: W)
 #' 
 #' @export
-fitted_invp1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
-  if(is.null(W)) W=hmmlt$fitpars$survey.pars$W
-  esw=fitted_esw1(hmmlt,obs,nx,W=W)
+fitted_invp1 <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
+  if(is.null(W)) 
+    W <- hmmlt$fitpars$survey.pars$W
+  esw <- fitted_esw1(hmmlt,obs,nx,W=W)
+  
   return(data.frame(stratum=esw$stratum,transect=esw$transect,object=esw$object,invp=W/esw$esw))
 }
 
@@ -48,24 +50,31 @@ fitted_invp1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
 #' object \code{hmmlt}.
 #' 
 #' @export
-fitted_esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=NULL){
-  if(!is.null(obs)){
-    if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
-    if(min(obs)<1) stop("obs < 1")
-    cov=hmmlt$xy[obs,]
+fitted_esw1 <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=NULL){
+  if(!is.null(obs)) {
+    if(max(obs)>dim(hmmlt$xy)[1]) 
+      stop("obs greater than number observations in hmmlt$xy")
+    if(min(obs)<1) 
+      stop("obs < 1")
+    
+    cov <- hmmlt$xy[obs,]
   } 
-  if(is.nullmodel(hmmlt$models) & !all){
-    cov=hmmlt$xy[1,]
-  } else {
-    cov=hmmlt$xy[obs,]
-  }
-  pars=hmmlt$fit$par
-  hfun=hmmlt$h.fun
-  models=hmmlt$models
-  survey.pars=hmmlt$fitpars$survey.pars
-  hmm.pars=hmmlt$fitpars$hmm.pars
-  sID=list(stratum=hmmlt$xy$stratum,transect=hmmlt$xy$transect,object=hmmlt$xy$object) # unique sighting identifier
-  esw=hmltm.esw1(pars,hfun,models,cov,survey.pars,hmm.pars,ID=sID,nx,to.x,type="response",W=W)
+  
+  if(is.nullmodel(hmmlt$models) & !all)
+    cov <- hmmlt$xy[1,]
+  else
+    cov <- hmmlt$xy[obs,]
+  
+  pars <- hmmlt$fit$par
+  hfun <- hmmlt$h.fun
+  models <- hmmlt$models
+  survey.pars <- hmmlt$fitpars$survey.pars
+  hmm.pars <- hmmlt$fitpars$hmm.pars
+  
+  # unique sighting identifier
+  sID <- list(stratum=hmmlt$xy$stratum,transect=hmmlt$xy$transect,object=hmmlt$xy$object) 
+  
+  esw <- hmltm.esw1(pars,hfun,models,cov,survey.pars,hmm.pars,ID=sID,nx,to.x,type="response",W=W)
   return(esw)
 }
 
@@ -100,30 +109,44 @@ fitted_esw1=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=
 #' integrating using Simpson's rule.
 #' 
 #' @export
-hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="response",to.x=FALSE,
+hmltm.esw1 <- function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="response",to.x=FALSE,
                     W=NULL){
-  nmax=dim(cov)[1]
-  if(is.null(models$y) & is.null(models$x)) smax=length(ID$object) else smax=nmax # number detectoins
-  if(to.x) {maxx=cov$x}
+  nmax <- dim(cov)[1]
+  if(is.null(models$y) & is.null(models$x)) 
+    smax <- length(ID$object) 
+  else 
+    smax <- nmax # number detectoins
+  
+  if(to.x) 
+    maxx=cov$x
   else {
-    maxx=rep(survey.pars$W,nmax)
-    if(!is.null(W)) maxx=rep(W,nmax)
+    maxx <- rep(survey.pars$W,nmax)
+    if(!is.null(W)) 
+      maxx <- rep(W,nmax)
   }
-  ustrat=utrans=uobject=esw=rep(0,smax) # vectors for unique stratum, transect, sighting numbers and esws
+  
+  # vectors for unique stratum, transect, sighting numbers and esws
+  ustrat <- utrans <- uobject <- esw <- rep(0,smax) 
+  
   for(i in 1:nmax) {
     if(maxx[i]>0){
-      xs=seq(0,maxx[i],length=nx) # set of poiints on which to evaluate p(see|x)
-      px=hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,type)
-      ustrat[i]=ID$stratum[i];utrans[i]=ID$transect[i];uobject[i]=ID$object[i] # record sighting ID
-      esw[i]=sintegral(px,xs)
+      xs <- seq(0,maxx[i],length=nx) # set of poiints on which to evaluate p(see|x)
+      px <- hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,type)
+      ustrat[i] <- ID$stratum[i]
+      utrans[i] <- ID$transect[i]
+      uobject[i] <- ID$object[i] # record sighting ID
+      esw[i] <- sintegral(px,xs)
     }
   }
   if(smax>nmax){ # repeat single esw for all smax detections:
     for(i in 2:smax) {
-      ustrat[i]=ID$stratum[i];utrans[i]=ID$transect[i];uobject[i]=ID$object[i] # record sighting ID
-      esw[i]=esw[1]      
+      ustrat[i] <- ID$stratum[i]
+      utrans[i] <- ID$transect[i]
+      uobject[i] <- ID$object[i] # record sighting ID
+      esw[i] <- esw[1]      
     }
   }
+  
   return(list(stratum=ustrat,transect=utrans,object=uobject,esw=esw))
 }
 
@@ -149,86 +172,125 @@ hmltm.esw1=function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="re
 #' colnames=c("stratum","area","transect","L","x","obs").
 #' 
 #' @export
-truncdat=function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum","area","transect","L","x","obs")){
-  tdat=dat
-  keepcols=rep(NA,4)
+truncdat <- function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum","area","transect","L","x","obs")){
+  tdat <- dat
+  keepcols <- rep(NA,4)
+  
   for(i in 1:4) {
-    keepcols[i]=which(names(dat)==colnames[i])
-    if(is.null(keepcols[i])) stop("No column in dat called ",colnames[i])
+    keepcols[i] <- which(names(dat)==colnames[i])
+    if(is.null(keepcols[i])) 
+      stop("No column in dat called ",colnames[i])
   }
-  NAs=dat[1,,drop=FALSE]
-  NAs[,-keepcols]=NA
-  xcol=which(names(dat)==colnames[5])
-  if(is.null(xcol)) stop("No column in dat called ",colnames[5])
-  if(is.null(maxval)) maxval=max(na.omit(dat[,xcol]))
+  
+  NAs <- dat[1,,drop=FALSE]
+  NAs[,-keepcols] <- NA
+  xcol <- which(names(dat)==colnames[5])
+  
+  if(is.null(xcol)) 
+    stop("No column in dat called ",colnames[5])
+  
+  if(is.null(maxval)) 
+    maxval <- max(na.omit(dat[,xcol]))
+  
   if(twosit){
-    if(length(colnames)<6) stop("With double-observer data, need 6th colname for observer; only 5 colnames:",colnames)
-    obscol=which(names(dat)==colnames[6])
-    if(is.null(obscol)) stop("No column in dat called ",colnames[6])
-    out1=which(dat[,obscol]==1 & (dat[,xcol]<minval | dat[,xcol]>maxval))
-    out2=which(dat[,obscol]==2 & (dat[,xcol]<minval | dat[,xcol]>maxval))
-    if(length(out1) != length(out2)) stop("Different number of obs1 and obs2 detections for left-truncation")
-    if(unique(out2-out1) != 1) stop("Looks like non-consecutive obs1 and obs2 detections for left-truncation")
-    nout=length(out1)
-    svalues=tvalues=rep(NA,nout)
+    if(length(colnames)<6) 
+      stop("With double-observer data, need 6th colname for observer; only 5 colnames:",colnames)
+    
+    obscol <- which(names(dat)==colnames[6])
+    
+    if(is.null(obscol)) 
+      stop("No column in dat called ",colnames[6])
+    
+    out1 <- which(dat[,obscol]==1 & (dat[,xcol]<minval | dat[,xcol]>maxval))
+    out2 <- which(dat[,obscol]==2 & (dat[,xcol]<minval | dat[,xcol]>maxval))
+    
+    if(length(out1) != length(out2)) 
+      stop("Different number of obs1 and obs2 detections for left-truncation")
+    if(unique(out2-out1) != 1) 
+      stop("Looks like non-consecutive obs1 and obs2 detections for left-truncation")
+    
+    nout <- length(out1)
+    svalues <- tvalues <- rep(NA,nout)
+    
     if(is.factor(dat[,keepcols[1]])) {
-      svalues=rep(levels(dat[,keepcols[1]])[1],nout)
-      levels(svalues)=levels(dat[,keepcols[1]])
-      NAs[keepcols[1]]=svalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
-      levels(NAs)=levels(svalues)
+      svalues <- rep(levels(dat[,keepcols[1]])[1],nout)
+      levels(svalues) <- levels(dat[,keepcols[1]])
+      NAs[keepcols[1]] <- svalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs) <- levels(svalues)
     }
     if(is.factor(dat[,keepcols[3]])) {
-      tvalues=rep(levels(dat[,keepcols[3]])[3],nout)
-      levels(tvalues)=levels(dat[,keepcols[3]])
-      NAs[keepcols[3]]=tvalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
-      levels(NAs)=levels(tvalues)
+      tvalues <- rep(levels(dat[,keepcols[3]])[3],nout)
+      levels(tvalues) <- levels(dat[,keepcols[3]])
+      NAs[keepcols[3]] <- tvalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs) <- levels(tvalues)
     }
-    outeff=data.frame(stratum=svalues,area=rep(NA,nout),transect=tvalues,L=rep(NA,nout))
-    if(is.factor(outeff$stratum)) levels(outeff$stratum)=levels(svalues)
-    if(is.factor(outeff$transect)) levels(outeff$stratum)=levels(tvalues)
-    for(i in 1:nout) outeff[i,]=dat[out1[i],keepcols] # store effort info for truncated sightings
-    tdat=dat[-c(out1,out2),] # remove all truncated sightings
+    
+    outeff <- data.frame(stratum=svalues,area=rep(NA,nout),transect=tvalues,L=rep(NA,nout))
+    
+    if(is.factor(outeff$stratum)) 
+      levels(outeff$stratum) <- levels(svalues)
+    if(is.factor(outeff$transect)) 
+      levels(outeff$stratum) <- levels(tvalues)
+    
+    for(i in 1:nout) 
+      outeff[i,] <- dat[out1[i],keepcols] # store effort info for truncated sightings
+    
+    tdat <- dat[-c(out1,out2),] # remove all truncated sightings
+    
     for(i in 1:nout) {
-      got=which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
+      got <- which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
                   tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
+      
       if(length(got)==0) { # transect no longer in truncated dataset
-        tdat=rbind(tdat,NAs) # add row of NAs
-        tdat[dim(tdat)[1],keepcols]=outeff[i,] # add in missing transect info
+        tdat <- rbind(tdat,NAs) # add row of NAs
+        tdat[dim(tdat)[1],keepcols] <- outeff[i,] # add in missing transect info
       }
     }    
   } else {
-    out=which(dat[,xcol]<minval | dat[,xcol]>maxval)
-    nout=length(out)
-    svalues=tvalues=rep(NA,nout)
+    out <- which(dat[,xcol]<minval | dat[,xcol]>maxval)
+    nout <- length(out)
+    svalues <- tvalues <- rep(NA,nout)
+    
     if(is.factor(dat[,keepcols[1]])) {
-      svalues=rep(levels(dat[,keepcols[1]])[1],nout)
-      levels(svalues)=levels(dat[,keepcols[1]])
-      NAs[keepcols[1]]=svalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
-      levels(NAs)=levels(svalues)
+      svalues <- rep(levels(dat[,keepcols[1]])[1],nout)
+      levels(svalues) <- levels(dat[,keepcols[1]])
+      NAs[keepcols[1]] <- svalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs) <- levels(svalues)
     }
+    
     if(is.factor(dat[,keepcols[3]])) {
-      tvalues=rep(levels(dat[,keepcols[3]])[3],nout)
-      levels(tvalues)=levels(dat[,keepcols[3]])
-      NAs[keepcols[3]]=tvalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
-      levels(NAs)=levels(tvalues)
+      tvalues <- rep(levels(dat[,keepcols[3]])[3],nout)
+      levels(tvalues) <- levels(dat[,keepcols[3]])
+      NAs[keepcols[3]] <- tvalues[1] # put a factor in the NA row (arbitrary level, as it will be overwritten)
+      levels(NAs) <- levels(tvalues)
     }
-    outeff=data.frame(stratum=svalues,area=rep(NA,nout),transect=tvalues,L=rep(NA,nout))
-    if(is.factor(outeff$stratum)) levels(outeff$stratum)=levels(svalues)
-    if(is.factor(outeff$transect)) levels(outeff$stratum)=levels(tvalues)
-    #    for(i in 1:nout) outeff[i,]=dat[out1[i],keepcols] # store effort info for truncated sightings
-    for(i in 1:nout) outeff[i,]=dat[out[i],keepcols] # store effort info for truncated sightings
-    tdat=dat[-out,] # remove all truncated sightings
+    outeff <- data.frame(stratum=svalues,area=rep(NA,nout),transect=tvalues,L=rep(NA,nout))
+    
+    if(is.factor(outeff$stratum)) 
+      levels(outeff$stratum) <- levels(svalues)
+    
+    if(is.factor(outeff$transect)) 
+      levels(outeff$stratum) <- levels(tvalues)
+    
+    for(i in 1:nout) 
+      outeff[i,] <- dat[out[i],keepcols] # store effort info for truncated sightings
+    
+    tdat <- dat[-out,] # remove all truncated sightings
+    
     for(i in 1:nout) {
-      got=which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
+      got <- which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
                   tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
+      
       if(length(got)==0) { # transect no longer in truncated dataset
-        tdat=rbind(tdat,NAs) # add row of NAs
-        tdat[dim(tdat)[1],keepcols]=outeff[i,] # add in missing transect info
+        tdat <- rbind(tdat,NAs) # add row of NAs
+        tdat[dim(tdat)[1],keepcols] <- outeff[i,] # add in missing transect info
       }
     }
   }
-  tdat=tdat[order(tdat[keepcols[1]],tdat[keepcols[3]]),]
-  tdat[!is.na(tdat[,xcol]),xcol]=tdat[!is.na(tdat[,xcol]),xcol]-minval # shift all left
+  
+  tdat <- tdat[order(tdat[keepcols[1]],tdat[keepcols[3]]),]
+  tdat[!is.na(tdat[,xcol]),xcol] <- tdat[!is.na(tdat[,xcol]),xcol]-minval # shift all left
+  
   return(tdat)
 }
 
@@ -250,34 +312,43 @@ truncdat=function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum","ar
 #' has a \code{y}, it chooses that one.
 #' 
 #' @export
-make.onesit=function(dat,prefer=1) {
-  if(prefer!=1 & prefer!=2) stop("Argument 'prefer' must be 1 or 2.")
-  n=dim(dat)[1]
-  out=rep(FALSE,n)
-  i=1
+make.onesit <- function(dat,prefer=1) {
+  if(prefer!=1 & prefer!=2) 
+    stop("Argument 'prefer' must be 1 or 2.")
+  
+  n <- dim(dat)[1]
+  out <- rep(FALSE,n)
+  i <- 1
+  
   while(i<=n){
     if(!is.na(dat$object[i])){
-      if(dat$seen[i]==0) out[i]=TRUE
-      if(dat$seen[i+1]==0) out[i+1]=TRUE
+      if(dat$seen[i]==0) 
+        out[i] <- TRUE
+      
+      if(dat$seen[i+1]==0) 
+        out[i+1] <- TRUE
+      
       if(dat$seen[i]==1 & dat$seen[i+1]==1) {
-        if(is.na(dat$y[i]) & is.na(dat$y[i+1])) { # no y's; remove not preferred detection
-          out[i+(3-prefer)-1]=TRUE
-        } else if(is.na(dat$y[i]) & !is.na(dat$y[i+1])) { # keep only non-NA y
-          out[i]=TRUE
-        } else if(!is.na(dat$y[i]) & is.na(dat$y[i+1])){ # keep only non-NA y
-          out[i+1]=TRUE
-        } else if(dat$y[i]==dat$y[i+1]){# remove not preferred detection
-          out[i+(3-prefer)-1]=TRUE
-        } else if(dat$y[i]<dat$y[i+1]){ # remove later (closer) detection
-          out[i]=TRUE
-        } else {
-          out[i+1]=TRUE
-        }
+        if(is.na(dat$y[i]) & is.na(dat$y[i+1])) # no y's; remove not preferred detection
+          out[i+(3-prefer)-1] <- TRUE
+        else if(is.na(dat$y[i]) & !is.na(dat$y[i+1])) # keep only non-NA y
+          out[i] <- TRUE
+        else if(!is.na(dat$y[i]) & is.na(dat$y[i+1])) # keep only non-NA y
+          out[i+1] <- TRUE
+        else if(dat$y[i]==dat$y[i+1])# remove not preferred detection
+          out[i+(3-prefer)-1] <- TRUE
+        else if(dat$y[i]<dat$y[i+1]) # remove later (closer) detection
+          out[i] <- TRUE
+        else
+          out[i+1] <- TRUE
       }
-      i=i+2
-    } else i=i+1
+      
+      i <- i+2
+    } else 
+      i <- i+1
   }
-  dat=dat[!out,] # remove worse observer's lines
+  
+  dat <- dat[!out,] # remove worse observer's lines
   return(dat)
 }
 
@@ -296,17 +367,21 @@ make.onesit=function(dat,prefer=1) {
 #' @param W perpendicular truncation distance for estimation.
 #' 
 #' @export
-NDest=function(dat,hmltm.fit,W){
-  maxx=max(na.omit(dat$x))
+NDest <- function(dat,hmltm.fit,W){
+  maxx <- max(na.omit(dat$x))
+  
   if(maxx>W) {
     cat("Maximum perp. dist=",maxx,"is greater than W=",W,"\n")
     stop("You need a bigger W.")
   }
+  
   # Add 1/p column
-  dat$invp=rep(NA,dim(dat)[1])
-  invp=fitted_invp1(hmltm.fit,W=W)
+  dat$invp <- rep(NA,dim(dat)[1])
+  invp <- fitted_invp1(hmltm.fit,W=W)
+  
   for(i in 1:length(invp$object)) {
-    row=which(dat$stratum==invp$stratum[i] & dat$transect==invp$transect[i] & dat$object==invp$object[i])
+    row <- which(dat$stratum==invp$stratum[i] & dat$transect==invp$transect[i] & dat$object==invp$object[i])
+    
     if(length(row)>1) {
       cat("Target stratum:",invp$stratum[i],"\n")
       cat("Target transect:",invp$transect[i],"\n")
@@ -314,54 +389,60 @@ NDest=function(dat,hmltm.fit,W){
       cat("Found >1: at rows",row,"\n")
       stop("")
     }
-    dat$invp[row]=invp$invp[i]
+    
+    dat$invp[row] <- invp$invp[i]
   }
-  # Calculate density and abundance by stratum
-  m2km=1/1000
-  strat=unique(dat$stratum)
-  nstrat=length(strat)
-  n=L=a=A=Dg=D=Ng=N=sbar=rep(0,nstrat+1)
-  stratname=rep("",nstrat+1)
-  for(i in 1:nstrat){
-    stratname[i]=as.character(strat[i])
-    vdat=dat[dat$stratum==strat[i],]
-    trans=unique(vdat$transect)
-    L.tr=0
-    for(tr in 1:length(trans)) {
-      L.tr=L.tr+vdat$L[min(which(vdat$transect==trans[tr]))]
-    }
-    L[i]=L.tr
-    a[i]=L[i]*2*W*m2km
-    A[i]=vdat$area[1]
-    svdat=vdat[!is.na(vdat$object),]
-    n[i]=length(svdat$invp)
-    Dg[i]=sum(svdat$invp)/a[i]
-    D[i]=sum(svdat$size*svdat$invp)/a[i]
-    sbar[i]=D[i]/Dg[i]
-    Ng[i]=Dg[i]*A[i]
-    N[i]=D[i]*A[i]
-  }
-  stratname[nstrat+1]="Total"
-  Ng[nstrat+1]=sum(Ng[1:nstrat])
-  N[nstrat+1]=sum(N[1:nstrat])
-  A[nstrat+1]=sum(A[1:nstrat])
-  Dg[nstrat+1]=Ng[nstrat+1]/sum(A[1:nstrat])
-  D[nstrat+1]=N[nstrat+1]/sum(A[1:nstrat])
-  n[nstrat+1]=sum(n[1:nstrat])
-  L[nstrat+1]=sum(L[1:nstrat])
-  a[nstrat+1]=sum(a[1:nstrat])
-  sbar[nstrat+1]=D[nstrat+1]/Dg[nstrat+1]
-  # add transect frequency:
-  tfreq=apply(table(dat$stratum,dat$transect)>0,1,sum)
-  k=c(tfreq,sum(tfreq))
   
-  return(list(invp=invp,ests=data.frame(stratum=stratname,n=n,k=k,L=L,covered.area=a,stratum.Area=A,Dgroups=signif(Dg,3),Ngroups=signif(Ng,3),
-                                        mean.size=round(sbar,1),D=signif(D,5),N=round(N,1))))
-  #                                        mean.size=signif(sbar,3),D=signif(D,3),N=signif(N,3))))
+  # Calculate density and abundance by stratum
+  m2km <- 1/1000
+  strat <- unique(dat$stratum)
+  nstrat <- length(strat)
+  n <- L <- a <- A <- Dg <- D <- Ng <- N <- sbar <- rep(0,nstrat+1)
+  stratname <- rep("",nstrat+1)
+  
+  for(i in 1:nstrat){
+    stratname[i] <- as.character(strat[i])
+    vdat <- dat[dat$stratum==strat[i],]
+    trans <- unique(vdat$transect)
+    L.tr <- 0
+    
+    for(tr in 1:length(trans))
+      L.tr <- L.tr+vdat$L[min(which(vdat$transect==trans[tr]))]
+    
+    L[i] <- L.tr
+    a[i] <- L[i]*2*W*m2km
+    A[i] <- vdat$area[1]
+    svdat <- vdat[!is.na(vdat$object),]
+    n[i] <- length(svdat$invp)
+    Dg[i] <- sum(svdat$invp)/a[i]
+    D[i] <- sum(svdat$size*svdat$invp)/a[i]
+    sbar[i] <- D[i]/Dg[i]
+    Ng[i] <- Dg[i]*A[i]
+    N[i] <- D[i]*A[i]
+  }
+  
+  stratname[nstrat+1] <- "Total"
+  Ng[nstrat+1] <- sum(Ng[1:nstrat])
+  N[nstrat+1] <- sum(N[1:nstrat])
+  A[nstrat+1] <- sum(A[1:nstrat])
+  Dg[nstrat+1] <- Ng[nstrat+1]/sum(A[1:nstrat])
+  D[nstrat+1] <- N[nstrat+1]/sum(A[1:nstrat])
+  n[nstrat+1] <- sum(n[1:nstrat])
+  L[nstrat+1] <- sum(L[1:nstrat])
+  a[nstrat+1] <- sum(a[1:nstrat])
+  sbar[nstrat+1] <- D[nstrat+1]/Dg[nstrat+1]
+  
+  # add transect frequency:
+  tfreq <- apply(table(dat$stratum,dat$transect)>0,1,sum)
+  k <- c(tfreq,sum(tfreq))
+  
+  return(list(invp=invp,
+              ests=data.frame(stratum=stratname,n=n,k=k,L=L,covered.area=a,stratum.Area=A,
+                              Dgroups=signif(Dg,3),Ngroups=signif(Ng,3),mean.size=round(sbar,1),
+                              D=signif(D,5),N=round(N,1))
+              )
+         )
 }
-
-
-
 
 #' @title Line transect estimation with a hidden Markov availability model.
 #'
@@ -471,27 +552,42 @@ NDest=function(dat,hmltm.fit,W){
 #' @export
 #' 
 #' @useDynLib hsltm
-est.hmltm=function(dat,
+est.hmltm <- function(dat,
                    pars,FUN,models=list(y=NULL,x=NULL),
                    survey.pars,hmm.pars,control.fit,control.opt,
-                   twosit=FALSE,notrunc=FALSE,W.est=NULL,groupfromy=NULL){
+                   twosit=FALSE,notrunc=FALSE,W.est=NULL,groupfromy=NULL)
+{
   # convert mrds data to cds data format (combining detections)
-  if(twosit) dat1=make.onesit(dat) else dat1=dat
+  if(twosit) 
+    dat1 <- make.onesit(dat) 
+  else 
+    dat1 <- dat
+  
   # data truncation:
-  if(!notrunc) if(min(na.omit(dat1$x)) < survey.pars$Wl | survey.pars$W < max(na.omit(dat1$x))) 
-    dat1=truncdat(dat1,minval=survey.pars$Wl,maxval=survey.pars$W,twosit=FALSE)
+  if(!notrunc) 
+    if(min(na.omit(dat1$x)) < survey.pars$Wl | survey.pars$W < max(na.omit(dat1$x))) 
+      dat1 <- truncdat(dat1,minval=survey.pars$Wl,maxval=survey.pars$W,twosit=FALSE)
+  
   # extract sightings rows only
   #  sits1=!is.na(dat1$seen)
   #  srows1=sits1 & dat1$seen==1 # mark rows that have sightings
-  srows1=!is.na(dat1$object)
-  sdat1=dat1[srows1,]
+  srows1 <- !is.na(dat1$object)
+  sdat1 <- dat1[srows1,]
+  
   # fit the model:
-  hmltm.fit=fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,groupfromy=groupfromy)
+  hmltm.fit <- fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,
+                         groupfromy=groupfromy)
+  
   # estimate density, etc:
-  if(is.null(W.est)) W.est=survey.pars$W
-  if(!is.null(survey.pars$Wl)) W.est=survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
-  point=NDest(dat1,hmltm.fit,W.est)
-  hmltm.obj=list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
-  class(hmltm.obj)=c(class(hmltm.obj),"hmltm")
+  if(is.null(W.est)) 
+    W.est <- survey.pars$W
+  
+  if(!is.null(survey.pars$Wl)) 
+    W.est <- survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
+  
+  point <- NDest(dat1,hmltm.fit,W.est)
+  hmltm.obj <- list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
+  class(hmltm.obj) <- c(class(hmltm.obj),"hmltm")
+  
   return(hmltm.obj)
 }
