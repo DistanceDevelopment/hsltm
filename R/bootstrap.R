@@ -46,63 +46,79 @@
 #'}
 #'
 #' @export
-bootsum=function(bests,ests=NULL,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
-  if(cilevel<=0 | cilevel>=1) stop("cilevel must be greater than 0 and less than 1.")
-  if(!is.null(ests) & !inherits(ests,"hmltm")) stop("ests must be of class 'hmltm'.")
-  ns=apply(bests[,2,],1,sum) # sum sample sizes by stratum
-  keepstrat=(ns>0) # only consider strata with some detections
-  if(!is.null(ests)) keepcols=c("stratum","n","L","Ngroups","mean.size","N")
-  else keepcols=colnames(bests)
-  if(!is.null(ests)) bsests=bests[keepstrat,keepcols,]
-  else bsests=bests[keepstrat,,]
+bootsum <- function(bests,ests=NULL,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
+  if(cilevel<=0 | cilevel>=1) 
+    stop("cilevel must be greater than 0 and less than 1.")
+  if(!is.null(ests) & !inherits(ests,"hmltm")) 
+    stop("ests must be of class 'hmltm'.")
+  
+  ns <- apply(bests[,2,],1,sum) # sum sample sizes by stratum
+  keepstrat <- (ns>0) # only consider strata with some detections
+  
+  if(!is.null(ests)) 
+    keepcols <- c("stratum","n","L","Ngroups","mean.size","N")
+  else 
+    keepcols <- colnames(bests)
+  
+  if(!is.null(ests)) 
+    bsests <- bests[keepstrat,keepcols,]
+  else 
+    bsests <- bests[keepstrat,,]
+  
   # replace L with encounter rate
-  Lcol=which(colnames(bests[,,1])=="L")
-  bsests[,Lcol,]=bsests[,"n",]/bsests[,"L",] 
-  colnames(bsests)[Lcol]="n/L"
+  Lcol <- which(colnames(bests[,,1])=="L")
+  bsests[,Lcol,] <- bsests[,"n",]/bsests[,"L",] 
+  colnames(bsests)[Lcol] <- "n/L"
+  
   # replace stratum.Area with p
-  Acol=which(colnames(bests[,,1])=="stratum.Area")
-  bsests[,Acol,]=bsests[,"n",]/(bsests[,"covered.area",]*bsests[,"Dgroups",]) 
-  colnames(bsests)[Acol]="p"
-  bdim=dim(bsests)
-  nstrat=bdim[1]
-  nests=bdim[2]
-  cv=matrix(rep(NA,nstrat*nests),ncol=bdim[2])
-  rownames=dimnames(bsests)[[1]]
-  rownames[length(rownames)]="Total"
-  colnames=dimnames(bsests)[[2]]
-  dimnames(cv)=list(rep("",length(rownames)),colnames)
-  nbad=se=means=lower=upper=cv
-  B=bdim[3]
+  Acol <- which(colnames(bests[,,1])=="stratum.Area")
+  bsests[,Acol,] <- bsests[,"n",]/(bsests[,"covered.area",]*bsests[,"Dgroups",]) 
+  colnames(bsests)[Acol] <- "p"
+  bdim <- dim(bsests)
+  nstrat <- bdim[1]
+  nests <- bdim[2]
+  cv <- matrix(rep(NA,nstrat*nests),ncol=bdim[2])
+  rownames <- dimnames(bsests)[[1]]
+  rownames[length(rownames)] <- "Total"
+  colnames <- dimnames(bsests)[[2]]
+  dimnames(cv) <- list(rep("",length(rownames)),colnames)
+  nbad <- se <- means <- lower <- upper <- cv
+  B <- bdim[3]
+  
   cat("Results from ",B," bootstrap replicates:\n",sep="")
   cat("----------------------------------------\n")
+  
   for(i in 1:nstrat) {
     for(j in 1:nests){
-      goodests=na.omit(bsests[i,j,])
-      nbad[i,j]=B-length(goodests)
-      means[i,j]=mean(goodests)
-      se[i,j]=sd(goodests)
-      cv[i,j]=se[i,j]/means[i,j]
-      perc=quantile(goodests,probs=c((1-cilevel)/2,(1-(1-cilevel)/2)))
-      lower[i,j]=perc[1]
-      upper[i,j]=perc[2]
+      goodests <- na.omit(bsests[i,j,])
+      nbad[i,j] <- B-length(goodests)
+      means[i,j] <- mean(goodests)
+      se[i,j] <- sd(goodests)
+      cv[i,j] <- se[i,j]/means[i,j]
+      perc <- quantile(goodests,probs = c((1-cilevel)/2,(1-(1-cilevel)/2)))
+      lower[i,j] <- perc[1]
+      upper[i,j] <- perc[2]
     }
   }
-  # remove stats of stratum name, and make stratum a character
-  nbad=as.data.frame(nbad,row.names=1:dim(nbad)[1])
-  means=as.data.frame(means,row.names=1:dim(nbad)[1])
-  se=as.data.frame(se,row.names=1:dim(nbad)[1])
-  cv=as.data.frame(cv,row.names=1:dim(nbad)[1])
-  lower=as.data.frame(lower,row.names=1:dim(nbad)[1])
-  upper=as.data.frame(upper,row.names=1:dim(nbad)[1])
-  nbad[,1]=rownames
-  means[,1]=rownames
-  se[,1]=rownames
-  cv[,1]=rownames
-  lower[,1]=rownames
-  upper[,1]=rownames
   
-  outsum=list(nbad=nbad,mean=means,se=se,cv=cv,lower=lower,upper=upper)
-  if(!is.null(ests)) outsum=strat.estable(ests$point$ests[keepstrat,],outsum$cv)
+  # remove stats of stratum name, and make stratum a character
+  nbad <- as.data.frame(nbad,row.names=1:dim(nbad)[1])
+  means <- as.data.frame(means,row.names=1:dim(nbad)[1])
+  se <- as.data.frame(se,row.names=1:dim(nbad)[1])
+  cv <- as.data.frame(cv,row.names=1:dim(nbad)[1])
+  lower <- as.data.frame(lower,row.names=1:dim(nbad)[1])
+  upper <- as.data.frame(upper,row.names=1:dim(nbad)[1])
+  nbad[,1] <- rownames
+  means[,1] <- rownames
+  se[,1] <- rownames
+  cv[,1] <- rownames
+  lower[,1] <- rownames
+  upper[,1] <- rownames
+  
+  outsum <- list(nbad=nbad,mean=means,se=se,cv=cv,lower=lower,upper=upper)
+  
+  if(!is.null(ests)) 
+    outsum <- strat.estable(ests$point$ests[keepstrat,],outsum$cv)
   
   if(write.csvs){
     if(is.null(ests)) {
@@ -144,34 +160,35 @@ bootsum=function(bests,ests=NULL,cilevel=0.95,write.csvs=FALSE,dir=getwd()){
 #' \item{N.hi}{upper bound of individual abundance confidence interval}
 #' 
 #' @export
-strat.estable=function(est,cv){
-  min=est[,"n"]
-  N=est[,"N"]
-  Ngrp=est[,"Ngroups"]
-  Es=est[,"mean.size"]
-  cv.N=cv[,"N"]
-  cv.Ngp=cv[,"Ngroups"]
-  cv.Es=cv[,"mean.size"]
-  N.ci=lnci.nmin(min,N,cv.N)
-  Ngrp.ci=lnci.nmin(min,Ngrp,cv.N)
-  Es.ci=lnci.nmin(0,Es,cv.Es)  
-  outp=data.frame(Stratum=est$stratum,
-                  n=est$n,
-                  n.L=signif(est$n/est$L,3),
-                  CV.n.L=round(cv[,3]*100),
-                  N.grp=round(est$Ngroups),
-                  CV.N.grp=round(cv$Ngroups*100),
-                  N.grp.lo=round(Ngrp.ci$lower),
-                  N.grp.hi=round(Ngrp.ci$upper),
-                  Es=round(est$mean.size,1),
-                  CV.Es=round(cv.Es*100),
-                  Es.lo=round(Es.ci$lower),
-                  Es.hi=round(Es.ci$upper),
-                  N=round(est$N),
-                  CV.N=round(cv$N*100),
-                  N.lo=round(N.ci$lower),
-                  N.hi=round(N.ci$upper)
-  )
+strat.estable <- function(est,cv){
+  min <- est[,"n"]
+  N <- est[,"N"]
+  Ngrp <- est[,"Ngroups"]
+  Es <- est[,"mean.size"]
+  cv.N <- cv[,"N"]
+  cv.Ngp <- cv[,"Ngroups"]
+  cv.Es <- cv[,"mean.size"]
+  N.ci <- lnci.nmin(min,N,cv.N)
+  Ngrp.ci <- lnci.nmin(min,Ngrp,cv.N)
+  Es.ci <- lnci.nmin(0,Es,cv.Es)  
+  
+  outp <- data.frame(Stratum=est$stratum,
+                     n=est$n,
+                     n.L=signif(est$n/est$L,3),
+                     CV.n.L=round(cv[,3]*100),
+                     N.grp=round(est$Ngroups),
+                     CV.N.grp=round(cv$Ngroups*100),
+                     N.grp.lo=round(Ngrp.ci$lower),
+                     N.grp.hi=round(Ngrp.ci$upper),
+                     Es=round(est$mean.size,1),
+                     CV.Es=round(cv.Es*100),
+                     Es.lo=round(Es.ci$lower),
+                     Es.hi=round(Es.ci$upper),
+                     N=round(est$N),
+                     CV.N=round(cv$N*100),
+                     N.lo=round(N.ci$lower),
+                     N.hi=round(N.ci$upper))
+  
   return(outp)
 }
 
@@ -184,18 +201,24 @@ strat.estable=function(est,cv){
 #' @param B number of bootstrap replicates to do.
 #' 
 #' @export
-cv.avail=function(hmm.pars,B=1000){
-  n=dim(hmm.pars$Et)[2]
-  b.Et=array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
-  cv.a=cv.u=rep(NA,n)
+cv.avail <- function(hmm.pars,B=1000){
+  n <- dim(hmm.pars$Et)[2]
+  b.Et <- array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
+  cv.a <- cv.u <- rep(NA,n)
+  
   for(i in 1:n){
-    lN=Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i]) # get normal parameters corresponding to lognormal(mu,Sigma)
-    b.Et[,,i]=exp(mvrnorm(B,lN$mu,lN$Sigma)) # resample availability parameters on lognormal scale
-    a=b.Et[,1,i]/(b.Et[,1,i]+b.Et[,2,i])
-    u=b.Et[,2,i]/(b.Et[,1,i]+b.Et[,2,i])
-    cv.a[i]=cv(a)
-    cv.u[i]=cv(u)
+    # get normal parameters corresponding to lognormal(mu,Sigma)
+    lN <- Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i])
+    
+    # resample availability parameters on lognormal scale
+    b.Et[,,i] <- exp(mvrnorm(B,lN$mu,lN$Sigma)) 
+    
+    a <- b.Et[,1,i]/(b.Et[,1,i]+b.Et[,2,i])
+    u <- b.Et[,2,i]/(b.Et[,1,i]+b.Et[,2,i])
+    cv.a[i] <- cv(a)
+    cv.u[i] <- cv(u)
   }
+  
   return(list(cv.a=cv.a,cv.u=cv.u))
 }
 
@@ -232,43 +255,55 @@ cv.avail=function(hmm.pars,B=1000){
 #' 
 #' @export
 bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.avail=FALSE){
-  #------------------------------------------------------------------------------------------
-  # Produces 3-dim array containing B sets of density and abundance estimates from
-  #------------------------------------------------------------------------------------------
-  # data extraction:
-  dat1=hmltm.est$dat # extract original data frame from fitted object
-  W.est=hmltm.est$W.est # extract estimation perp dist truncation
-  survey.pars=hmltm.est$hmltm.fit$fitpars$survey.pars
-  hmm.pars=hmltm.est$hmltm.fit$fitpars$hmm.pars
-  control.fit=hmltm.est$hmltm.fit$fitpars$control.fit
-  control.opt=hmltm.est$hmltm.fit$fitpars$control.opt
-  control.opt$trace=bs.trace
-  h.fun=hmltm.est$hmltm.fit$h.fun
-  models=hmltm.est$hmltm.fit$models
-  pars=hmltm.est$hmltm.fit$fit$par
+  #######################################################
+  ## Produces 3-dim array containing B sets of density ##
+  ## and abundance estimates from data extraction      ##
+  #######################################################
+  
+  dat1 <- hmltm.est$dat # extract original data frame from fitted object
+  W.est <- hmltm.est$W.est # extract estimation perp dist truncation
+  survey.pars <- hmltm.est$hmltm.fit$fitpars$survey.pars
+  hmm.pars <- hmltm.est$hmltm.fit$fitpars$hmm.pars
+  control.fit <- hmltm.est$hmltm.fit$fitpars$control.fit
+  control.opt <- hmltm.est$hmltm.fit$fitpars$control.opt
+  control.opt$trace <- bs.trace
+  h.fun <- hmltm.est$hmltm.fit$h.fun
+  models <- hmltm.est$hmltm.fit$models
+  pars <- hmltm.est$hmltm.fit$fit$par
   
   if(!fixed.avail) {
     # bootstrap availability parameters
     if(!is.null(hmm.pars$Et)){
       cat("Bootstrap with parametric resampling of mean times available and unavailable.\n")
       flush.console()
-      n=dim(hmm.pars$Et)[2]
-      ns=bsample(1:n,n,replace=TRUE) # sample animals to use
-      b.Et=array(rep(NA,B*2*n),dim=c(B,2,n),dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
+      
+      n <- dim(hmm.pars$Et)[2]
+      ns <- bsample(1:n,n,replace=TRUE) # sample animals to use
+      b.Et <- array(rep(NA,B*2*n),dim=c(B,2,n),
+                    dimnames=list(1:B,State=c("Unavailable","Available"),Animal=1:n))
+      
       for(i in ns){
-        lN=Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i]) # get normal parameters corresponding to lognormal(mu,Sigma)
-        b.Et[,,i]=exp(mvrnorm(B,lN$mu,lN$Sigma)) # resample availability parameters on lognormal scale
+        # get normal parameters corresponding to lognormal(mu,Sigma)
+        lN <- Npars.from.lNpars(hmm.pars$Et[,i],hmm.pars$Sigma.Et[,,i]) 
+        
+        # resample availability parameters on lognormal scale
+        b.Et[,,i] <- exp(mvrnorm(B,lN$mu,lN$Sigma)) 
       }
     } else if(!is.null(hmm.pars.bs)) { # resample availability parameters
       cat("Bootstrap with parametric resampling of HMM parameters.\n")
       flush.console()
-      nhmm=dim(hmm.pars.bs)[1]
-      if(nhmm==1) stop("Only one set of hmm pars. need multiple sets of pars if not fixed avail. (i.e. if hmm.pars.bs!=NULL)")
-      reps=bsample(1:nhmm,B,replace=TRUE)
+      
+      nhmm <- dim(hmm.pars.bs)[1]
+      
+      if(nhmm==1) 
+        stop(paste("Only one set of hmm pars. need multiple sets of pars if not fixed avail ",
+                   "(i.e. if hmm.pars.bs!=NULL)"))
+      
+      reps <- bsample(1:nhmm,B,replace=TRUE)
     } else {
       warning("No availability parameters to resample from. Treating availability parameters as constant.")
       flush.console()
-      fixed.avail=TRUE
+      fixed.avail <- TRUE
     }
   } else {
     cat("Bootstrap treating HMM parameters as constant.\n")
@@ -276,66 +311,97 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
   }
   
   # get stuff needed to set up bootstrap datasets
-  strat=unique(dat1$stratum) # unique stratum names
-  nrows=table(dat1$stratum,dat1$transect) # number of rows required for each transect
-  get.ntrans=function(trans) sum(trans>0)
-  ntrans=apply(nrows,1,get.ntrans) # number of transects in each stratum
-  nstrat=length(ntrans) # number of strata
-  transects=as.numeric(colnames(nrows)) # vector of transect numbers
+  strat <- unique(dat1$stratum) # unique stratum names
+  nrows <- table(dat1$stratum,dat1$transect) # number of rows required for each transect
+  get.ntrans <- function(trans) sum(trans>0)
+  ntrans <- apply(nrows,1,get.ntrans) # number of transects in each stratum
+  nstrat <- length(ntrans) # number of strata
+  transects <- as.numeric(colnames(nrows)) # vector of transect numbers
   
   # create bootstrap data, estimate, and store estimates
-  estdim=dim(hmltm.est$point$ests) #### bitchange
-  bestdim=c(estdim,B) #### bitchange
-  bestdimnames=list(as.character(hmltm.est$point$ests$stratum),colnames(hmltm.est$point$ests),1:B)
-  best=array(rep(NA,B*prod(estdim)),dim=bestdim,dimnames=bestdimnames)
-  bn=rep(0,B) #### bitchange
+  estdim <- dim(hmltm.est$point$ests) #### bitchange
+  bestdim <- c(estdim,B) #### bitchange
+  bestdimnames <- list(as.character(hmltm.est$point$ests$stratum),colnames(hmltm.est$point$ests),1:B)
+  best <- array(rep(NA,B*prod(estdim)),dim=bestdim,dimnames=bestdimnames)
+  bn <- rep(0,B) #### bitchange
+  
   for(b in 1:B) { # do bootstraps
     # get hmm pars
     if(!fixed.avail) {
       if(!is.null(hmm.pars$Et)) {
-        Pi=makePi(b.Et[b,1,],b.Et[b,2,]) # make Pi from resampled times
-        delta=matrix(rep(NA,2*n),nrow=2)
-        for(i in 1:n) delta[,i]=compdelta(Pi[,,i])
-        b.hmm.pars=hmm.pars
-        b.hmm.pars$pm=hmm.pars$pm
-        b.hmm.pars$Pi=Pi
-        b.hmm.pars$delta=delta
-        b.hmm.pars$Et=b.Et[b,,]
+        Pi <- makePi(b.Et[b,1,],b.Et[b,2,]) # make Pi from resampled times
+        delta <- matrix(rep(NA,2*n),nrow=2)
+        
+        for(i in 1:n) 
+          delta[,i] <- compdelta(Pi[,,i])
+        
+        b.hmm.pars <- hmm.pars
+        b.hmm.pars$pm <- hmm.pars$pm
+        b.hmm.pars$Pi <- Pi
+        b.hmm.pars$delta <- delta
+        b.hmm.pars$Et <- b.Et[b,,]
       } else {
-        b.hmm.pars=unvectorize.hmmpars(hmm.pars.bs[reps[b],]) # resampled HMM pars
+        b.hmm.pars <- unvectorize.hmmpars(hmm.pars.bs[reps[b],]) # resampled HMM pars
       }
     } else {
-      b.hmm.pars=hmm.pars # fixed availability pars
+      b.hmm.pars <- hmm.pars # fixed availability pars
     }
-    if(is.element("pm",names(b.hmm.pars))) names(b.hmm.pars)[which(names(b.hmm.pars)=="pm")]="pm" # to fix naming cock-up when creating hmmpars.bs
+    
+    # to fix naming cock-up when creating hmmpars.bs
+    if(is.element("pm",names(b.hmm.pars))) 
+      names(b.hmm.pars)[which(names(b.hmm.pars)=="pm")] <- "pm"
+    
     # resample transects with replacement
-    newtransind=matrix(rep(NA,nstrat*max(ntrans)),nrow=nstrat) # matrix of indices for resampled transects
-    for(st in 1:nstrat) newtransind[st,1:ntrans[st]]=bsample(which(nrows[st,]>0),ntrans[st],replace=TRUE) # indices of matrix nrows for resampled transects
-    newnrows=0;for(st in 1:nstrat) newnrows=newnrows+sum(na.omit(nrows[st,newtransind[st,]])) # calc number rows for bootstrap data frame
-    bdat1=data.frame(matrix(rep(NA,dim(dat1)[2]*newnrows),nrow=newnrows)) # set up empty bootstrap data frame
-    names(bdat1)=names(dat1)
-    start=1;tno=1 # fill in new data frame from old:
-    for(st in 1:nstrat) for(tr in 1:ntrans[st]) {
-      addtrans=transects[newtransind[st,tr]]
-      nadd=nrows[st,newtransind[st,tr]]
-      newi=start:(start+nadd-1)
-      oldi=which(dat1$stratum==strat[st] & dat1$transect==addtrans)
-      bdat1[newi,]=dat1[oldi,]
-      bdat1$transect[newi]=tno
-      start=start+nadd
-      tno=tno+1
+    newtransind <- matrix(rep(NA,nstrat*max(ntrans)),nrow=nstrat) # matrix of indices for resampled transects
+    for(st in 1:nstrat) {
+      # indices of matrix nrows for resampled transects
+      newtransind[st,1:ntrans[st]] <- bsample(which(nrows[st,]>0),ntrans[st],replace=TRUE)
     }
-    bn[b]=length(bdat1$object[!is.na(bdat1$object)])
-    if(b==1) cat("Sample sizes: ")
+    
+    # calc number rows for bootstrap data frame
+    newnrows <- 0
+    for(st in 1:nstrat) 
+      newnrows <- newnrows+sum(na.omit(nrows[st,newtransind[st,]]))
+    
+    # set up empty bootstrap data frame
+    bdat1 <- data.frame(matrix(rep(NA,dim(dat1)[2]*newnrows),nrow=newnrows))
+    names(bdat1) <- names(dat1)
+    start <- 1
+    tno <- 1 # fill in new data frame from old:
+    
+    for(st in 1:nstrat) 
+      for(tr in 1:ntrans[st]) {
+        addtrans <- transects[newtransind[st,tr]]
+        nadd <- nrows[st,newtransind[st,tr]]
+        newi <- start:(start+nadd-1)
+        oldi <- which(dat1$stratum==strat[st] & dat1$transect==addtrans)
+        bdat1[newi,] <- dat1[oldi,]
+        bdat1$transect[newi] <- tno
+        start <- start+nadd
+        tno <- tno+1
+      }
+    
+    bn[b] <- length(bdat1$object[!is.na(bdat1$object)])
+    
+    if(b==1) 
+      cat("Sample sizes: ")
+    
     if(b%%report.by==0) {
       cat(paste(bn[b],";",sep=""),"Iterations done:",b,"\n")
-      if(b!=B) cat("Sample sizes: ")
+      if(b!=B) 
+        cat("Sample sizes: ")
     }
-    else cat(paste(bn[b],";",sep=""))
-    bhat=est.hmltm(bdat1,pars=pars,FUN=h.fun,models=models,survey.pars,b.hmm.pars,control.fit,control.opt,notrunc=TRUE,W.est=W.est) 
-    for(st in 1:(nstrat+1)) best[st,,b]=as.numeric(bhat$point$ests[st,])
+    else 
+      cat(paste(bn[b],";",sep=""))
+    
+    bhat <- est.hmltm(bdat1,pars=pars,FUN=h.fun,models=models,survey.pars,b.hmm.pars,control.fit,
+                      control.opt,notrunc=TRUE,W.est=W.est) 
+    
+    for(st in 1:(nstrat+1)) 
+      best[st,,b] <- as.numeric(bhat$point$ests[st,])
   }
-  class(best)=c(class(best),"hmltm.bs")
+  
+  class(best) <- c(class(best),"hmltm.bs")
   return(best)
 }
 
@@ -350,20 +416,23 @@ bs.hmltm=function(hmltm.est,B,hmm.pars.bs=NULL,bs.trace=0,report.by=10,fixed.ava
 #' @param Sigma multivariate logNormal distribution variace-covarice matrix.
 #' 
 #' @export
-Npars.from.lNpars=function(mu,Sigma){
-  cv2=diag(Sigma)/mu^2 # Sigma is variance matrix
-  logvar=log(cv2+1)
-  logmu=log(mu)-logvar/2
-  logSigma=Sigma*0
-  np=length(mu)
+Npars.from.lNpars <- function(mu,Sigma){
+  cv2 <- diag(Sigma)/mu^2 # Sigma is variance matrix
+  logvar <- log(cv2+1)
+  logmu <- log(mu)-logvar/2
+  logSigma <- Sigma*0
+  np <- length(mu)
+  
   for(i in 1:(np-1)) {
-    logSigma[i,i]=logvar[i] # variance of normal
+    logSigma[i,i] <- logvar[i] # variance of normal
     for(j in (i+1):np) {
-      logSigma[i,j]=log(Sigma[i,j]/(exp(logmu[i]+logmu[j]+(logvar[i]+logvar[j])/2))+1) # covariance of normal
-      logSigma[j,i]=logSigma[i,j]
+      # covariance of normal
+      logSigma[i,j] <- log(Sigma[i,j]/(exp(logmu[i]+logmu[j]+(logvar[i]+logvar[j])/2))+1) 
+      logSigma[j,i] <- logSigma[i,j]
     } 
   }
-  logSigma[np,np]=logvar[np] # variance of normal
+  
+  logSigma[np,np] <- logvar[np] # variance of normal
   return(list(mu=logmu,Sigma=logSigma))
 }
 
@@ -403,30 +472,41 @@ Npars.from.lNpars=function(mu,Sigma){
 #' @importFrom HiddenMarkov BaumWelch
 #' 
 #' @export
-resample.hmmpars=function(availhmm,adat,animals,seed=NULL,nperow=10,printprog=TRUE){
-  b.availhmm=availhmm # initialise bootstrap HMM parameters
+resample.hmmpars <- function(availhmm,adat,animals,seed=NULL,nperow=10,printprog=TRUE){
+  b.availhmm <- availhmm # initialise bootstrap HMM parameters
+  
   # filter out animals not chosen
-  b.availhmm$Pi=b.availhmm$Pi[,,animals]
-  b.availhmm$pm=b.availhmm$pm[,animals]
-  b.availhmm$delta=b.availhmm$delta[,animals]
+  b.availhmm$Pi <- b.availhmm$Pi[,,animals]
+  b.availhmm$pm <- b.availhmm$pm[,animals]
+  b.availhmm$delta <- b.availhmm$delta[,animals]
+  
   # simulate and fit new HMMs
-  newanimal=1
+  newanimal <- 1
   for(animal in animals) {
-    hmmobj=dthmm(adat[[animal]],availhmm$Pi[,,animal],availhmm$delta[,animal],"binom",pm=list(prob=availhmm$pm[,animal]),pn=list(size=rep(1,length(adat[[animal]]))),discrete = TRUE)
-    sdat=simulate(hmmobj, nsim=length(hmmobj$x),seed=seed)
-    fitanimal=BaumWelch(sdat,control=list(maxiter=500,tol=1e-05,prt=FALSE,posdiff=TRUE,converge = expression(diff < tol)))
-    b.availhmm$pm[,newanimal]=fitanimal$pm$prob
-    b.availhmm$Pi[,,newanimal]=fitanimal$Pi
-    b.availhmm$delta[,newanimal]=compdelta(fitanimal$Pi)
+    hmmobj <- dthmm(adat[[animal]],availhmm$Pi[,,animal],availhmm$delta[,animal],"binom",
+                    pm=list(prob=availhmm$pm[,animal]),pn=list(size=rep(1,length(adat[[animal]]))),
+                    discrete = TRUE)
+    
+    sdat <- simulate(hmmobj, nsim=length(hmmobj$x),seed=seed)
+    fitanimal <- BaumWelch(sdat,control=list(maxiter=500,tol=1e-05,prt=FALSE,posdiff=TRUE,
+                                             converge = expression(diff < tol)))
+    
+    b.availhmm$pm[,newanimal] <- fitanimal$pm$prob
+    b.availhmm$Pi[,,newanimal] <- fitanimal$Pi
+    b.availhmm$delta[,newanimal] <- compdelta(fitanimal$Pi)
+    
     if(printprog) {
-      if(animal==1) cat("Individuals done:")
-      if((animal%/%nperow)*nperow==animal) { # got an exact multiple of 10
-        if(animal>1) cat(": Total=",animal,"\nIndividuals done:")
-      }
+      if(animal==1) 
+        cat("Individuals done:")
+      if((animal%/%nperow)*nperow==animal) # got an exact multiple of 10
+        if(animal>1) 
+          cat(": Total=",animal,"\nIndividuals done:")
     }
+    
     cat(" *")
-    newanimal=newanimal+1
+    newanimal <- newanimal+1
   }
+  
   cat("\n Total=",animal," individuals done\n")
   return(b.availhmm)  
 }
@@ -443,15 +523,21 @@ resample.hmmpars=function(availhmm,adat,animals,seed=NULL,nperow=10,printprog=TR
 #' @return A numeric vector.
 #' 
 #' @export
-vectorize.hmmpars=function(hmmpars) {
-  Pi=hmmpars$Pi
-  pm=hmmpars$pm
-  delta=hmmpars$delta
-  dims=dim(Pi)
-  if(length(dims)!=3) stop("Pi must be a 3-D array")
-  if(dims[1]!=dims[2]) stop("First two dimensions of Pi unequal")
-  if(dim(pm)[1]!=dims[1] | dim(pm)[2]!=dims[3]) stop("dim(pm) inconsistent with dim(Pi)")
-  if(dim(delta)[1]!=dims[1] | dim(delta)[2]!=dims[3]) stop("dim(delta) inconsistent with dim(Pi)")
+vectorize.hmmpars <- function(hmmpars) {
+  Pi <- hmmpars$Pi
+  pm <- hmmpars$pm
+  delta <- hmmpars$delta
+  dims <- dim(Pi)
+  
+  if(length(dims)!=3) 
+    stop("Pi must be a 3-D array")
+  if(dims[1]!=dims[2]) 
+    stop("First two dimensions of Pi unequal")
+  if(dim(pm)[1]!=dims[1] | dim(pm)[2]!=dims[3]) 
+    stop("dim(pm) inconsistent with dim(Pi)")
+  if(dim(delta)[1]!=dims[1] | dim(delta)[2]!=dims[3]) 
+    stop("dim(delta) inconsistent with dim(Pi)")
+  
   return(c(as.vector(dim(Pi)),as.vector(Pi),as.vector(pm),as.vector(delta)))
 }
 
@@ -465,14 +551,14 @@ vectorize.hmmpars=function(hmmpars) {
 #' @return A hmm.pars object (a list).
 #' 
 #' @export
-unvectorize.hmmpars=function(hv) {
-  m3d=hv[1:3]
-  m2d=c(m3d[1],m3d[3])
-  m3size=prod(m3d)
-  m2size=prod(m2d)
-  Pi=array(hv[(3+1):(3+m3size)],dim=m3d)
-  pm=array(hv[(3+m3size+1):(3+m3size+m2size)],dim=m2d)
-  delta=array(hv[(3+m3size+m2size+1):(3+m3size+m2size+m2size)],dim=m2d)
+unvectorize.hmmpars <- function(hv) {
+  m3d <- hv[1:3]
+  m2d <- c(m3d[1],m3d[3])
+  m3size <- prod(m3d)
+  m2size <- prod(m2d)
+  Pi <- array(hv[(3+1):(3+m3size)],dim=m3d)
+  pm <- array(hv[(3+m3size+1):(3+m3size+m2size)],dim=m2d)
+  delta <- array(hv[(3+m3size+m2size+1):(3+m3size+m2size+m2size)],dim=m2d)
   return(list(pm=pm,Pi=Pi,delta=delta))
 }
 
@@ -513,24 +599,31 @@ unvectorize.hmmpars=function(hv) {
 #' bs=hmmpars.boot(bowhead.hmm.pars,bowhead.adat,animals,B=3)
 #' 
 #' @export
-hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
+hmmpars.boot <- function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
   # initialise matrix of correct dimensions:
-  na=length(adat)
+  na <- length(adat)
   #  ncol=1
   #  for(i in 1:na) if(length(adat[[i]])>ncol) ncol=length(adat[[i]])
-  onelength=length(vectorize.hmmpars(list(Pi=availhmm$Pi[,,1,drop=FALSE],
-                                          pm=availhmm$pm[,1,drop=FALSE],delta=availhmm$delta[,1,drop=FALSE])))
-  ncol=3+(onelength-3)*length(animals) # 3 numbers specify vectorized length parameters
-  hmmat=matrix(rep(NA,ncol*B),ncol=ncol)
+  
+  onelength <- length(vectorize.hmmpars(list(Pi=availhmm$Pi[,,1,drop=FALSE],
+                                             pm=availhmm$pm[,1,drop=FALSE],
+                                             delta=availhmm$delta[,1,drop=FALSE])))
+  
+  ncol <- 3+(onelength-3)*length(animals) # 3 numbers specify vectorized length parameters
+  hmmat <- matrix(rep(NA,ncol*B),ncol=ncol)
+  
   # do the bootstrapping
   for(b in 1:B) {
-    hmp=resample.hmmpars(availhmm,adat,animals,seed=NULL)
-    hmmvec=vectorize.hmmpars(hmp)
+    hmp <- resample.hmmpars(availhmm,adat,animals,seed=NULL)
+    hmmvec <- vectorize.hmmpars(hmp)
     #    nobs=length(hmmvec)
     #    hmmat[b,nobs]=hmmvec
-    hmmat[b,]=hmmvec
-    if(printprog) cat("Resamples done: ",b,"\n")
+    hmmat[b,] <- hmmvec
+    
+    if(printprog) 
+      cat("Resamples done: ",b,"\n")
   }
+  
   cat("\n Total=",b," Resamples done\n")
   return(hmmat)
 }
@@ -584,49 +677,59 @@ hmmpars.boot=function(availhmm,adat,animals,seed=NULL,B,printprog=TRUE){
 #' @importFrom HiddenMarkov compdelta
 #' 
 #' @export
-bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
-                             control.fit,control.opt,fixed.avail=FALSE,B=999){
-  n=length(dat$x)
-  npar=length(pars)
-  b.p0=b.phat=rep(NA,B)
-  b.pars=matrix(rep(NA,B*npar),ncol=npar)
-  b.phats=matrix(rep(NA,B*n),ncol=n)# matrix for detection probs of each individual.
+bootstrap.p.with.Et <- function(dat,pars,hfun,models,survey.pars,hmm.pars,
+                                control.fit,control.opt,fixed.avail=FALSE,B=999){
+  n <- length(dat$x)
+  npar <- length(pars)
+  b.p0 <- b.phat <- rep(NA,B)
+  b.pars <- matrix(rep(NA,B*npar),ncol=npar)
+  b.phats <- matrix(rep(NA,B*n),ncol=n)# matrix for detection probs of each individual.
+  
   # bootstrap availability parameters
   if(!fixed.avail) {
-    #    b.Et=mvrnorm(B,hmm.pars$Et,hmm.pars$Sigma.Et) # resample availability parameters
-    lN=Npars.from.lNpars(hmm.pars$Et,hmm.pars$Sigma.Et) # get normal parameters corresponding to lognormal(mu,Sigma)
-    b.Et=exp(mvrnorm(B,lN$mu,lN$Sigma)) # resample availability parameters on lognormal scale
+    # get normal parameters corresponding to lognormal(mu,Sigma)
+    lN <- Npars.from.lNpars(hmm.pars$Et,hmm.pars$Sigma.Et) 
+    
+    # resample availability parameters on lognormal scale
+    b.Et <- exp(mvrnorm(B,lN$mu,lN$Sigma)) 
   }
+  
   # resample sightings data and re-estimate, using a resample of availability paramters:
   for(nb in 1:B){
     # resample detection locations
-    samp.ind=bsample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
-    b.dat=dat[samp.ind,]# get resampled data
+    samp.ind <- bsample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
+    b.dat <- dat[samp.ind,]# get resampled data
+    
     # create new hmm.pars object with resampled availability parameters
     if(!fixed.avail) {
-      pi21=1/b.Et[nb,2]
-      pi12=1/b.Et[nb,1]
-      Pi=matrix(c((1-pi12),pi12,pi21,(1-pi21)),nrow=2,byrow=TRUE)
-      delta=compdelta(Pi)
-      pm=c(0.0,1.0)
-      b.hmm.pars=list(pm=pm,Pi=Pi,delta=delta,b.Et[nb],hmm.pars$Sigma.Et)
+      pi21 <- 1/b.Et[nb,2]
+      pi12 <- 1/b.Et[nb,1]
+      Pi <- matrix(c((1-pi12),pi12,pi21,(1-pi21)),nrow=2,byrow=TRUE)
+      delta <- compdelta(Pi)
+      pm <- c(0.0,1.0)
+      b.hmm.pars <- list(pm=pm,Pi=Pi,delta=delta,b.Et[nb],hmm.pars$Sigma.Et)
     }else {
-      b.hmm.pars=hmm.pars
+      b.hmm.pars <- hmm.pars
     }
+    
     # refit model
-    b.fit=fit.hmltm(b.dat,pars=pars,FUN=hfun,models=models,survey.pars=survey.pars,hmm.pars=b.hmm.pars,control.fit=control.fit,control.optim=control.opt)
-    #    b.p0[nb]=b.fit$p[1]
-    b.p0[nb]=b.fit$pzero
-    b.phat[nb]=b.fit$phat
-    b.phats[nb,]=b.fit$phats
-    b.pars[nb,]=b.fit$fit$par
+    b.fit <- fit.hmltm(b.dat,pars=pars,FUN=hfun,models=models,survey.pars=survey.pars,
+                       hmm.pars=b.hmm.pars,control.fit=control.fit,control.optim=control.opt)
+    
+    b.p0[nb] <- b.fit$pzero
+    b.phat[nb] <- b.fit$phat
+    b.phats[nb,] <- b.fit$phats
+    b.pars[nb,] <- b.fit$fit$par
+    
     cat(paste("done",nb,"\n"))
     flush.console()
   }
+  
   # package results and return
-  callist=list(dat=dat,pars=pars,hmm.pars=hmm.pars,hfun=hfun,models=models,
-               survey.pars=survey.pars,control.fit=control.fit,control.optim=control.opt)
-  bs=list(phats=b.phats,pars=b.pars,p0=b.p0,phat=b.phat,b.Et=b.Et)
+  callist <- list(dat=dat,pars=pars,hmm.pars=hmm.pars,hfun=hfun,models=models,
+                  survey.pars=survey.pars,control.fit=control.fit,control.optim=control.opt)
+  bs <- list(phats=b.phats,pars=b.pars,p0=b.p0,phat=b.phat,b.Et=b.Et)
+  
   return(list(callist=callist,bs=bs))
 }
 
@@ -675,55 +778,62 @@ bootstrap.p.with.Et=function(dat,pars,hfun,models,survey.pars,hmm.pars,
 #' }
 #' 
 #' @export
-bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
-                              control.fit,control.opt,fixed.avail=FALSE,B=999,silent=FALSE){
-  n=length(dat$x)
-  npar=length(pars)
-  conv=b.p0=b.phat=rep(NA,B)
-  b.pars=matrix(rep(NA,B*npar),ncol=npar)
-  b.phats=matrix(rep(NA,B*n),ncol=n) # matrix for detection probs of each individual.
+bootstrap.p.with.hmm <- function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
+                                 control.fit,control.opt,fixed.avail=FALSE,B=999,silent=FALSE){
+  n <- length(dat$x)
+  npar <- length(pars)
+  conv <- b.p0 <- b.phat <- rep(NA,B)
+  b.pars <- matrix(rep(NA,B*npar),ncol=npar)
+  b.phats <- matrix(rep(NA,B*n),ncol=n) # matrix for detection probs of each individual.
+  
   # bootstrap availability parameters
   if(!fixed.avail) { # resample availability parameters
-    nhmm=dim(hmm.pars.bs)[1]
+    nhmm <- dim(hmm.pars.bs)[1]
     if(nhmm==1) stop("Only one set of hmm pars. need multiple sets of pars if not fixed avail.")
-    reps=bsample(1:nhmm,B,replace=TRUE)
+    reps <- bsample(1:nhmm,B,replace=TRUE)
   }
   for(nb in 1:B) {
-    if(!fixed.avail)  {
-      b.hmm.pars=unvectorize.hmmpars(hmm.pars.bs[reps[nb],])
-    }else {
-      b.hmm.pars=hmm.pars.bs
-    }
-    if(is.element("pm",names(b.hmm.pars))) names(b.hmm.pars)[which(names(b.hmm.pars)=="pm")]="pm" # to fix naming cock-up when creating hmmpars.bs
+    if(!fixed.avail)
+      b.hmm.pars <- unvectorize.hmmpars(hmm.pars.bs[reps[nb],])
+    else
+      b.hmm.pars <- hmm.pars.bs
+    
+    # to fix naming cock-up when creating hmmpars.bs
+    if(is.element("pm",names(b.hmm.pars))) 
+      names(b.hmm.pars)[which(names(b.hmm.pars)=="pm")] <- "pm" 
+    
     # resample detection locations
-    samp.ind=bsample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
-    b.dat=dat[samp.ind,,drop=FALSE]# get resampled data
-    names(b.dat)=names(dat)
+    samp.ind <- bsample(1:n,size=n,replace=TRUE) # resample sightings data indices with replacement
+    b.dat <- dat[samp.ind,,drop=FALSE]# get resampled data
+    names(b.dat) <- names(dat)
+    
     # refit model
-    b.fit=try(fit.hmltm(b.dat,pars=pars,FUN=hfun,models=models,survey.pars=survey.pars,
-                        hmm.pars=b.hmm.pars,control.fit=control.fit,control.optim=control.opt),
-              silent=silent)
+    b.fit <- try(fit.hmltm(b.dat,pars=pars,FUN=hfun,models=models,survey.pars=survey.pars,
+                           hmm.pars=b.hmm.pars,control.fit=control.fit,control.optim=control.opt),
+                 silent=silent)
+    
     if((class(b.fit)=="try-error")) {
-      conv[nb]=-999
-      b.p0[nb]=-999
-      b.phat[nb]=-999
-      b.phats[nb,]=rep(-999,n)
-      b.pars[nb,]=rep(-999,length(pars))
-    }else {
-      conv[nb]=b.fit$fit$convergence
-      b.p0[nb]=b.fit$p[1]
-      b.phat[nb]=b.fit$phat
-      b.phats[nb,]=b.fit$phats
-      b.pars[nb,]=b.fit$fit$par
+      conv[nb] <- -999
+      b.p0[nb] <- -999
+      b.phat[nb] <- -999
+      b.phats[nb,] <- rep(-999,n)
+      b.pars[nb,] <- rep(-999,length(pars))
+    } else {
+      conv[nb] <- b.fit$fit$convergence
+      b.p0[nb] <- b.fit$p[1]
+      b.phat[nb] <- b.fit$phat
+      b.phats[nb,] <- b.fit$phats
+      b.pars[nb,] <- b.fit$fit$par
       cat(paste("done",nb,"\n"))
     }
     flush.console()
   }
+  
   # package results and return
-  callist=list(dat=dat,pars=pars,hmm.pars=hmm.pars.bs,hfun=hfun,survey.pars=survey.pars,
-               control.fit=control.fit,control.optim=control.opt)
-  #  bs=list(hmm.pars=hmm.pars,p0=b.p0,phat=b.phat,phats=b.phats,pars=b.pars,convergence=conv)
-  bs=list(phats=b.phats,pars=b.pars,p0=b.p0,phat=b.phat,convergence=conv)
+  callist <- list(dat=dat,pars=pars,hmm.pars=hmm.pars.bs,hfun=hfun,survey.pars=survey.pars,
+                  control.fit=control.fit,control.optim=control.opt)
+  
+  bs <- list(phats=b.phats,pars=b.pars,p0=b.p0,phat=b.phat,convergence=conv)
   return(list(callist=callist,bs=bs))
 }
 
@@ -756,47 +866,58 @@ bootstrap.p.with.hmm=function(dat,pars,hfun,models,survey.pars,hmm.pars.bs,
 #' }
 #' 
 #' @export
-bootsum.p=function(bs,probs=c(0.025,0.975),pcut=0){
-  #--------------------------------------------------------------------------------
-  # bs is output from bootstrap.p.with.Et() or bootstrap.with.hmm()
-  # pcut is a quick and dirty min phat to allow - robustifies 1/phat for small 
-  # samples, although it is ad-hoc. Do hist of $bs$phat to see if there is a 
-  # reasonable cutpoint.
-  #--------------------------------------------------------------------------------
-  nboot=length(bs$bs$p0)
-  if(is.null(bs$bs$convergence)) keep=which(bs$bs$p0>=0 & bs$bs$phat>pcut)
-  else keep=which(bs$bs$p0>=0 & bs$bs$convergence==0 & bs$bs$phat>pcut)
-  nbad=nboot-length(keep)
-  npar=dim(bs$bs$par)[2]
-  cinames=paste(as.character(probs*100),"%",sep="")  
-  bests=matrix(rep(NA,(3+npar)*5),ncol=5)
-  colnames(bests)=c("mean","std.err.","%CV",cinames)
-  parnames=paste("par",as.character(1:npar),sep="")
-  rownames(bests)=c("1/phat","phat","p(0)",parnames)
+bootsum.p <- function(bs,probs=c(0.025,0.975),pcut=0){
+  ################################################################################
+  ## bs is output from bootstrap.p.with.Et() or bootstrap.with.hmm()            ##
+  ## pcut is a quick and dirty min phat to allow - robustifies 1/phat for small ##
+  ## samples, although it is ad-hoc. Do hist of $bs$phat to see if there is a   ##
+  ## reasonable cutpoint.                                                       ##
+  ################################################################################
+  
+  nboot <- length(bs$bs$p0)
+  
+  if(is.null(bs$bs$convergence)) 
+    keep <- which(bs$bs$p0>=0 & bs$bs$phat>pcut)
+  else 
+    keep <- which(bs$bs$p0>=0 & bs$bs$convergence==0 & bs$bs$phat>pcut)
+  
+  nbad <- nboot-length(keep)
+  npar <- dim(bs$bs$par)[2]
+  cinames <- paste(as.character(probs*100),"%",sep="")  
+  bests <- matrix(rep(NA,(3+npar)*5),ncol=5)
+  colnames(bests) <- c("mean","std.err.","%CV",cinames)
+  parnames <- paste("par",as.character(1:npar),sep="")
+  rownames(bests) <- c("1/phat","phat","p(0)",parnames)
+  
   # relative density
-  bests[1,1]=mean(1/bs$bs$phat[keep])
-  bests[1,2]=sd(1/bs$bs$phat[keep])
-  bests[1,3]=sd(1/bs$bs$phat[keep])/mean(1/bs$bs$phat[keep])*100
-  bests[1,4:5]=quantile(1/bs$bs$phat[keep],probs=probs)
+  bests[1,1] <- mean(1/bs$bs$phat[keep])
+  bests[1,2] <- sd(1/bs$bs$phat[keep])
+  bests[1,3] <- sd(1/bs$bs$phat[keep])/mean(1/bs$bs$phat[keep])*100
+  bests[1,4:5] <- quantile(1/bs$bs$phat[keep],probs=probs)
+  
   # detection probability
-  bests[2,1]=mean(bs$bs$phat[keep])
-  bests[2,2]=sd(bs$bs$phat[keep])
-  bests[2,3]=sd(bs$bs$phat[keep])/mean(bs$bs$phat[keep])*100
-  bests[2,4:5]=quantile(bs$bs$phat[keep],probs=probs)
+  bests[2,1] <- mean(bs$bs$phat[keep])
+  bests[2,2] <- sd(bs$bs$phat[keep])
+  bests[2,3] <- sd(bs$bs$phat[keep])/mean(bs$bs$phat[keep])*100
+  bests[2,4:5] <- quantile(bs$bs$phat[keep],probs=probs)
+  
   # p(0)
-  bests[3,1]=mean(bs$bs$p0[keep])
-  bests[3,2]=sd(bs$bs$p0[keep])
-  bests[3,3]=sd(bs$bs$p0[keep])/mean(bs$bs$p0[keep])*100
-  bests[3,4:5]=quantile(bs$bs$p0[keep],probs=probs)
+  bests[3,1] <- mean(bs$bs$p0[keep])
+  bests[3,2] <- sd(bs$bs$p0[keep])
+  bests[3,3] <- sd(bs$bs$p0[keep])/mean(bs$bs$p0[keep])*100
+  bests[3,4:5] <- quantile(bs$bs$p0[keep],probs=probs)
+  
   # parameters
   for(i in 1:npar) {
-    bests[3+i,1]=sd(bs$bs$par[keep,i])
-    bests[3+i,2]=mean(bs$bs$par[keep,i])
-    bests[3+i,3]=sd(bs$bs$par[keep,i])/mean(bs$bs$par[keep,i])*100
-    bests[3+i,4:5]=quantile(bs$bs$par[keep,i],probs=probs)
+    bests[3+i,1] <- sd(bs$bs$par[keep,i])
+    bests[3+i,2] <- mean(bs$bs$par[keep,i])
+    bests[3+i,3] <- sd(bs$bs$par[keep,i])/mean(bs$bs$par[keep,i])*100
+    bests[3+i,4:5] <- quantile(bs$bs$par[keep,i],probs=probs)
   }
-  parcov=cov(bs$bs$par)
-  parcorr=cov2cor(parcov)
-  rownames(parcov)=rownames(parcorr)=colnames(parcov)=colnames(parcorr)=parnames
+  
+  parcov <- cov(bs$bs$par)
+  parcorr <- cov2cor(parcov)
+  rownames(parcov) <- rownames(parcorr) <- colnames(parcov) <- colnames(parcorr) <- parnames
+  
   return(list(nboot=nboot,nbad=nbad,bests=bests,parcov=parcov,parcorr=parcorr))
 }
