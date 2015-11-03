@@ -4,10 +4,10 @@
 \alias{simData_simple}
 \title{Simulation (one observer)}
 \usage{
-simData_simple(nbObs, pcu, gamma, b, hfun, xmax, ymax, ystep)
+simData_simple(nbAnimals, pcu, gamma, b, hfun, xmax, ymax, ystep)
 }
 \arguments{
-\item{nbObs}{Number of observations to simulate}
+\item{nbAnimals}{Number of animals}
 
 \item{pcu}{Vector of state dependent availability parameters (Pr(available|state))}
 
@@ -34,6 +34,6 @@ pcu <- c(0.9,0)
 gamma <- matrix(c(0.9,0.1,0.1,0.9),nrow=2)
 b <- c(0.9,0.75,10)
 hfun <- "h.EP2.0"
-data <- simData_simple(nbObs=100,pcu=pcu,gamma=gamma,b=b,hfun=hfun,xmax=80,ymax=80,ystep=1)
+data <- simData_simple(nbAnimals=100,pcu=pcu,gamma=gamma,b=b,hfun=hfun,xmax=80,ymax=80,ystep=1)
 }
 
