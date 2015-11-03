@@ -35,16 +35,18 @@
 #'  on the same scale as input parameters pars (which are transformed before calling \code{\link{optim}}).
 #'  
 #' @export
-fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
-                W,ymax,dy,nx=50,hessian=FALSE,
-                control=list(trace=5,reltol=1e-6,maxit=200),groupfromy=NULL)
+fit.xy <- function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
+                   W,ymax,dy,nx=50,hessian=FALSE,
+                   control=list(trace=5,reltol=1e-6,maxit=200),groupfromy=NULL)
 {
-  b=n2w_rcpp(pars,FUN)
-  fit=optim(par=b,fn=negllik.xy,control=control,hessian=hessian,xy=xy,
-            FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,
-            W=W,ymax=ymax,dy=dy,nx=nx,
-            groupfromy=groupfromy)
-  fit$par=as.vector(w2n_rcpp(fit$par,FUN))
+  b <- n2w_rcpp(pars,FUN)
+  
+  fit <- optim(par=b,fn=negllik.xy,control=control,hessian=hessian,xy=xy,
+               FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,
+               W=W,ymax=ymax,dy=dy,nx=nx,
+               groupfromy=groupfromy)
+  fit$par <- as.vector(w2n_rcpp(fit$par,FUN))
+  
   return(fit)
 }
 
@@ -94,61 +96,69 @@ fit.xy=function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
 #' 2013. Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
 #' 
 #' @export
-fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
+fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
                    control.fit,control.optim,groupfromy=NULL)
 {
   # unpack things:
-  hessian=control.fit$hessian
-  nx=control.fit$nx
-  W=survey.pars$W
-  ymax=survey.pars$ymax
-  dy=survey.pars$dy
-  pm=hmm.pars$pm
-  Pi=hmm.pars$Pi
-  delta=hmm.pars$delta
+  hessian <- control.fit$hessian
+  nx <- control.fit$nx
+  W <- survey.pars$W
+  ymax <- survey.pars$ymax
+  dy <- survey.pars$dy
+  pm <- hmm.pars$pm
+  Pi <- hmm.pars$Pi
+  delta <- hmm.pars$delta
   
   # fit model
-  est=fit.xy(pars=pars,xy=xy,FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,W=W,ymax=ymax,dy=dy,nx=nx,hessian=hessian,
-             control=control.optim,groupfromy=groupfromy)
+  est <- fit.xy(pars=pars,xy=xy,FUN=FUN,models=models,pm=pm,Pi=Pi,delta=delta,W=W,ymax=ymax,
+                dy=dy,nx=nx,hessian=hessian,control=control.optim,groupfromy=groupfromy)
   
   # store transformed parameters
-  b=n2w_rcpp(est$par,FUN)
-  est$b=b
+  b <- n2w_rcpp(est$par,FUN)
+  est$b <- b
   
-  n=length(xy$x)
-  xs=seq(0,W,length=nx)
+  n <- length(xy$x)
+  xs <- seq(0,W,length=nx)
+  
   if(is.nullmodel(models)) {
-    px=rep(0,nx)
-    px=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=rep(b,nx),pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
-    phat=sintegral(px,xs)/W
+    px <- rep(0,nx)
+    px <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=rep(b,nx),pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+    phat <- sintegral(px,xs)/W
   } else {
-    px=matrix(rep(0,nx*n),nrow=n)
-    phat=parea=rep(0,n)
-    covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
-    nb=length(covb)/n
+    px <- matrix(rep(0,nx*n),nrow=n)
+    phat <- parea=rep(0,n)
+    covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
+    nb <- length(covb)/n
+    
     for(i in 1:n) {
-      start=(i-1)*nb+1
-      bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      px[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+      start <- (i-1)*nb+1
+      bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
+      px[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
-    phat=apply(px,1,sintegral,xs)/W
+    
+    phat <- apply(px,1,sintegral,xs)/W
   }
   
   # log-likelihood and AIC
-  llik=-est$value
-  npar=length(est$par)
-  aic=-2*llik+2*npar
+  llik <- -est$value
+  npar <- length(est$par)
+  aic <- -2*llik+2*npar
   
   # return it all:
-  if(is.nullmodel(models)) pzero=px[1]
-  else pzero=mean(px[,1])
-  fitpars=list(survey.pars=survey.pars,hmm.pars=hmm.pars,control.fit=control.fit,control.optim=control.optim)
-  hmmlt=list(xy=xy,phats=phat,phat=1/mean(1/phat),pzero=pzero,h.fun=FUN,models=models,fit=est,Loglik=llik,AIC=aic,x=xs,p=px,fitpars=fitpars)
-  class(hmmlt)="hmmlt"
+  if(is.nullmodel(models)) 
+    pzero <- px[1]
+  else 
+    pzero <- mean(px[,1])
+  
+  fitpars <- list(survey.pars=survey.pars,hmm.pars=hmm.pars,control.fit=control.fit,
+                  control.optim=control.optim)
+  hmmlt <- list(xy=xy,phats=phat,phat=1/mean(1/phat),pzero=pzero,h.fun=FUN,models=models,
+                fit=est,Loglik=llik,AIC=aic,x=xs,p=px,fitpars=fitpars)
+  
+  class(hmmlt) <- "hmmlt"
   return(hmmlt)
   
 }
-
 
 #' @title HMM line transect model likelihood with perpendicular and forward distances.
 #'
@@ -172,76 +182,102 @@ fit.hmltm=function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
 #' an interval rather than passed as exact distances).
 #' 
 #' @export
-negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
+negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
 {
   # If asked to group close y's, split data accordingly:
   if(!is.null(groupfromy)){
-    if(groupfromy<0) stop("groupfromy must be greater than zero.")
-    if(groupfromy>max(xy$y)) stop(paste("With groupfromy=",groupfromy,"you are grouping all forward distances: can't do this."))
-    grouped=xy$y<=groupfromy
-    xgrp=xy$x[grouped];ygrp=xy$y[grouped]
-    x=xy$x[!grouped];y=xy$y[!grouped]
-    covb=make.covb(b,FUN,models,xy[!grouped,]) # put covariates into paramerters; ungrouped data
-    covbgrp=make.covb(b,FUN,models,xy[grouped,]) # put covariates into paramerters; ungrouped data
+    if(groupfromy<0) 
+      stop("groupfromy must be greater than zero.")
+    if(groupfromy>max(xy$y)) 
+      stop(paste("With groupfromy=",groupfromy,"you are grouping all forward distances: can't do this."))
+    
+    grouped <- xy$y<=groupfromy
+    xgrp <- xy$x[grouped]
+    ygrp <- xy$y[grouped]
+    x <- xy$x[!grouped]
+    y <- xy$y[!grouped]
+    covb <- make.covb(b,FUN,models,xy[!grouped,]) # put covariates into paramerters; ungrouped data
+    covbgrp <- make.covb(b,FUN,models,xy[grouped,]) # put covariates into paramerters; ungrouped data
   } else {
-    x=xy$x;y=xy$y
-    covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
+    x <- xy$x
+    y <- xy$y
+    covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
   }
   
-  # Deal with the ungrouped data:
-  # ----------------------------
-  n=length(x)
-  if(length(y)!=n) stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
-  llik=0
+  ###################################
+  ## Deal with the ungrouped data: ##
+  ###################################
+  n <- length(x)
+  
+  if(length(y)!=n) 
+    stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
+  
+  llik <- 0
+  
   # calculate p(see first @ y|x) at each (x,y):
-  li=p.xy(x,y,hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy)
-  if(any(li<.Machine$double.xmin)) return(.Machine$double.xmax)
-  xs=seq(0,W,length=nx)
-  nb=length(covb)/n # number of parameters for each observation
+  li <- p.xy(x,y,hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy)
+  
+  if(any(li<.Machine$double.xmin)) 
+    return(.Machine$double.xmax)
+  
+  xs <- seq(0,W,length=nx)
+  nb <- length(covb)/n # number of parameters for each observation
+  
   if(is.nullmodel(models)) {
-    bi=c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
-    ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
-    p=sintegral(ps,xs)/W
+    bi <- c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
+    ps <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+    p <- sintegral(ps,xs)/W
   } else {
-    ps=matrix(rep(0,n*nx),nrow=n)
+    ps <- matrix(rep(0,n*nx),nrow=n)
+    
     for(i in 1:n) {
-      start=(i-1)*nb+1
-      bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+      start <- (i-1)*nb+1
+      bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
+      ps[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
-    p=apply(ps,1,sintegral,xs)/W
+    
+    p <- apply(ps,1,sintegral,xs)/W
   }
   
-  llik=sum(log(li)-log(p))
+  llik <- sum(log(li)-log(p))
   
-  
-  # Deal with the grouped data:
-  # ----------------------------
+  #################################
+  ## Deal with the grouped data: ##
+  #################################
   if(!is.null(groupfromy)){
-    ngrp=length(xgrp)
+    ngrp <- length(xgrp)
+    
     if(ngrp>0){
-      if(length(ygrp)!=ngrp) stop("Length of ygrp: ",length(ygrp)," not equal to length of xgrp: ",ngrp,"\n")
-      llik.grp=0
-      xs=seq(0,W,length=nx)
-      nb=length(covbgrp)/ngrp # number of parameters for each observation
+      if(length(ygrp)!=ngrp) 
+        stop("Length of ygrp: ",length(ygrp)," not equal to length of xgrp: ",ngrp,"\n")
+      
+      llik.grp <- 0
+      xs <- seq(0,W,length=nx)
+      nb <- length(covbgrp)/ngrp # number of parameters for each observation
+      
       if(is.nullmodel(models)) {
-        bi=c(rep(covbgrp[1:nb],nx)) # nx replicates of covbgrp for ith detection
-        ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
-        p=sintegral(ps,xs)/W
+        bi <- c(rep(covbgrp[1:nb],nx)) # nx replicates of covbgrp for ith detection
+        ps <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+        p <- sintegral(ps,xs)/W
       } else {
         ps=matrix(rep(0,ngrp*nx),nrow=ngrp)
+        
         for(i in 1:ngrp) {
-          start=(i-1)*nb+1
-          bi=c(rep(covbgrp[start:(start+nb-1)],nx)) # nx replicates of covbgrp for ith detection
-          ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+          start <- (i-1)*nb+1
+          bi <- c(rep(covbgrp[start:(start+nb-1)],nx)) # nx replicates of covbgrp for ith detection
+          ps[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         }
-        p=apply(ps,1,sintegral,xs)/W
+        
+        p <- apply(ps,1,sintegral,xs)/W
       }
-      #  # calculate p(see first at or after groupfromy|x) at each x:
-      pfar=p.xy(x=xgrp,y=rep(groupfromy,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,cdf=TRUE)
-      p0=p.xy(x=xgrp,y=rep(0,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,cdf=TRUE)
-      pnear=p0-pfar
-      llik=llik+sum(log(pnear)-log(p))
+      
+      # calculate p(see first at or after groupfromy|x) at each x:
+      pfar <- p.xy(x=xgrp,y=rep(groupfromy,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,
+                   ymax=ymax,dy=dy,cdf=TRUE)
+      p0 <- p.xy(x=xgrp,y=rep(0,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,
+                 dy=dy,cdf=TRUE)
+      pnear <- p0-pfar
+      llik <- llik+sum(log(pnear)-log(p))
     }
   }
   
@@ -268,42 +304,43 @@ negllik.xandy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy
 #' @param nx number of x-values to use in evaluating detection function.
 #' 
 #' @export
-negllik.x=function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
+negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 {
-  covb=make.covb(b,FUN,models,xy) # put covariates into paramerters
-  x=xy$x;y=xy$y
-  n=length(x)
-  if(length(y)!=n) stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
-  llik=0
+  covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
+  x <- xy$x
+  y <- xy$y
+  n <- length(x)
+  
+  if(length(y)!=n) 
+    stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
+  
+  llik <- 0
+  
   # calculate p(see BY y=0 |x) at each x:
-  li=p.xy(x,y=rep(0,n),hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+  li <- p.xy(x,y=rep(0,n),hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+  
   # calculate p(see by min y in window|x) over all x:
-  #*# xs=seq(0,W,length=nx)
-  #*# px=p.xy(x=xs,y=xy$y,hfun=FUN,b=b,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b,ally=TRUE)
-  #*# wt=c(0.5,rep(1,(nx-2)),0.5)*W/nx
-  #*# p=sum(px*wt) # effective strip width
-  # cat("pars=",invtfm(b,FUN),"\n")
-  xs=seq(0,W,length=nx)
-  nb=length(covb)/n # number of parameters for each observation
+  xs <- seq(0,W,length=nx)
+  nb <- length(covb)/n # number of parameters for each observation
+  
   if(is.nullmodel(models)) {
-    bi=c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
-    ps=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
-    p=sintegral(ps,xs)/W
+    bi <- c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
+    ps <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+    p <- sintegral(ps,xs)/W
   } else {
-    ps=matrix(rep(0,n*nx),nrow=n)
+    ps <- matrix(rep(0,n*nx),nrow=n)
     for(i in 1:n) {
-      start=(i-1)*nb+1
-      bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      ps[i,]=p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+      start <- (i-1)*nb+1
+      bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
+      ps[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
-    p=apply(ps,1,sintegral,xs)/W
+    p <- apply(ps,1,sintegral,xs)/W
   }
   
-  if(any(li<.Machine$double.xmin)) return(.Machine$double.xmax)
-  else{
-    llik=sum(log(li)-log(p))
-    return(-llik)
-  }
+  if(any(li<.Machine$double.xmin)) 
+    return(.Machine$double.xmax)
+  
+  llik <- sum(log(li)-log(p))
   return(-llik)
 }
 
@@ -330,14 +367,18 @@ negllik.x=function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 #' an interval rather than passed as exact distances).
 #' 
 #' @export
-negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
+negllik.xy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
 {
-  xydat=xy[!is.na(xy$y),] # detections with x (perp) and y (forward) data
-  xdat=xy[is.na(xy$y),]   # detections with x (perp) data only (no y data)
-  xy.negllik=negllik.xandy(b,xydat,FUN,models,pm,Pi,delta,W,ymax,dy,nx,groupfromy)
-  x.negllik=0
-  if(length(xdat$x)>0) x.negllik <- negllik.x(b,xdat,FUN,models,pm,Pi,delta,W,ymax,dy,nx)
-  negllik=xy.negllik+x.negllik
+  xydat <- xy[!is.na(xy$y),] # detections with x (perp) and y (forward) data
+  xdat <- xy[is.na(xy$y),]   # detections with x (perp) data only (no y data)
+  
+  xy.negllik <- negllik.xandy(b,xydat,FUN,models,pm,Pi,delta,W,ymax,dy,nx,groupfromy)
+  
+  x.negllik <- 0
+  if(length(xdat$x)>0) 
+    x.negllik <- negllik.x(b,xdat,FUN,models,pm,Pi,delta,W,ymax,dy,nx)
+  
+  negllik <- xy.negllik+x.negllik
   return(negllik)
 }
 
@@ -346,7 +387,8 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx
 #' @title Calculates probability of first observing animal at (x,y).
 #'
 #' @description
-#' Just calls \code{\link{pxy_simple_rcpp}} >= once, cycling through 3rd index of Pi and 2nd indices of pm and delta.
+#' Just calls \code{\link{pxy_simple_rcpp}} >= once, cycling through 3rd index of Pi and 
+#' 2nd indices of pm and delta.
 # 
 #' @param x perpendicular distance.
 #' @param y forward distance.
@@ -367,28 +409,31 @@ negllik.xy=function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx
 #' @seealso \code{\link{pxy_simple_rcpp}}
 #' 
 #' @export
-p.xy=function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
+p.xy <- function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
 {
-  if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) stop("Single animal: pm is not a vector or Pi is not a matrix")
+  if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) 
+    stop("Single animal: pm is not a vector or Pi is not a matrix")
+  
   if(is.vector(pm)) { # convert to matrix and array so can use loop below
-    #    Pi=array(Pi,dim=c(2,2,1))
-    dimPi=dim(Pi)
-    Pi=array(Pi,dim=c(dimPi[1:2],1))
-    pm=matrix(pm,ncol=1)
-    delta=matrix(delta,ncol=1)
+    dimPi <- dim(Pi)
+    Pi <- array(Pi,dim=c(dimPi[1:2],1))
+    pm <- matrix(pm,ncol=1)
+    delta <- matrix(delta,ncol=1)
   }
-  nw=dim(pm)[2]
-  p=rep(0,length(x))
-  if(dim(Pi)[3]!=nw) stop("Last dimensions of pm and Pi must be the same.")
+  
+  nw <- dim(pm)[2]
+  p <- rep(0,length(x))
+  
+  if(dim(Pi)[3]!=nw) 
+    stop("Last dimensions of pm and Pi must be the same.")
+  
   for(w in 1:nw) {
-    Pi.w=Pi[,,w]
-    pm.w=pm[,w]
-    delta.w=delta[,w]
-    p.w=pxy_simple_rcpp(x,y,hfun,b,pm.w,Pi.w,delta.w,ymax,dy,ally,cdf)
-    ##print(c('p.w',p.w,' p',p))
-    p=p+p.w
+    Pi.w <- Pi[,,w]
+    pm.w <- pm[,w]
+    delta.w <- delta[,w]
+    p.w <- pxy_simple_rcpp(x,y,hfun,b,pm.w,Pi.w,delta.w,ymax,dy,ally,cdf)
+    p <- p+p.w
   }
-  ##print(p/nw);
-  ##print("step");
+  
   return(p/nw)
 }
