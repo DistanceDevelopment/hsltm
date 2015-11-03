@@ -11,8 +11,8 @@ fxfit.plot(hmltm, allx = FALSE, values = TRUE, breaks = NULL,
 \arguments{
 \item{hmltm}{object produced by \code{\link{est.hmltm}}.}
 
-\item{allx}{If TRUE, returns matrix with p(see at x, given covars) for each x in data in hmmlt (dashed gray
-lines).}
+\item{allx}{If TRUE, returns matrix with p(see at x, given covars) for each x in data
+in hmmlt (dashed gray lines).}
 
 \item{values}{If TRUE, returns function values used in plot.}
 
@@ -29,6 +29,7 @@ lines).}
 \item{text.cex}{relative text size.}
 }
 \description{
-Plots detection function on top of forward detection distance distribution. Returns a bunch of stuff.
+Plots detection function on top of forward detection distance distribution.
+Returns a bunch of stuff.
 }
 

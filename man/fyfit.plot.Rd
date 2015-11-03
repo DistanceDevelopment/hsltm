@@ -15,7 +15,8 @@ fyfit.plot(hmltm, values = TRUE, breaks = NULL, allx = FALSE, nys = 250,
 
 \item{breaks}{histogram break points.}
 
-\item{allx}{If TRUE, returns matrix with p(see at y, given x) for each x in data in hmmlt (dashed gray lines).}
+\item{allx}{If TRUE, returns matrix with p(see at y, given x) for each x in data in hmmlt
+(dashed gray lines).}
 
 \item{nys}{number of y-values to use in plotting, spaced equally from 0 to
 \code{hmmlt$fitsurvey.pars$ymax}.}
