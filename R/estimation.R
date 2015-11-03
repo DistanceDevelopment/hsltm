@@ -160,6 +160,7 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
   
 }
 
+
 #' @title HMM line transect model likelihood with perpendicular and forward distances.
 #'
 #' @description
@@ -381,7 +382,6 @@ negllik.xy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy
   negllik <- xy.negllik+x.negllik
   return(negllik)
 }
-
 
 
 #' @title Calculates probability of first observing animal at (x,y).

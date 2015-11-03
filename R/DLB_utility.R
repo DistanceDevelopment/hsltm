@@ -14,9 +14,11 @@
 #' @param size a positive number, the number of items to choose from.
 #' @param replace Should sampling be with replacement?
 #' @param prob A vector of probability weights for obtaining the elements of the vector being sampled.
-bsample=function(x,size,replace=FALSE,prob=NULL) {
-  if(length(x)==1) return(x)
-  else return(sample(x,size,replace,prob))
+bsample <- function(x,size,replace=FALSE,prob=NULL) {
+  if(length(x)==1) 
+    return(x)
+  else 
+    return(sample(x,size,replace,prob))
 }
 
 
@@ -26,7 +28,7 @@ bsample=function(x,size,replace=FALSE,prob=NULL) {
 #'  Utility function
 #'  
 #' @param x Random variable.
-cv=function(x) sd(x)/mean(x) # calculates coefficient of variation
+cv <- function(x) sd(x)/mean(x) # calculates coefficient of variation
 
 #' @title Converts nm to metres.
 #'
@@ -34,9 +36,7 @@ cv=function(x) sd(x)/mean(x) # calculates coefficient of variation
 #'  Utility function
 #'  
 #' @param x Distance in nautical miles.
-nm2m=function(x) return(x*1852) # converts nautical miles to metres
-
-#mod=function(x,y) return(x-floor(x/y)*y) # returns the integer part of x/y
+nm2m <- function(x) return(x*1852) # converts nautical miles to metres
 
 
 #' @title Draws histogram.
@@ -59,28 +59,35 @@ nm2m=function(x) return(x*1852) # converts nautical miles to metres
 #' @param ... See aargument \code{fill}.
 #' 
 #' @export
-histline=function(height,breaks,lineonly=FALSE,outline=FALSE,fill=FALSE,ylim=range(height),
+histline <- function(height,breaks,lineonly=FALSE,outline=FALSE,fill=FALSE,ylim=range(height),
                   xlab="x",ylab="y",...)
 {
-  n=length(height)
-  if(length(breaks)!=(n+1)) stop("breaks must be 1 longer than height")
+  n <- length(height)
+  if(length(breaks)!=(n+1)) 
+    stop("breaks must be 1 longer than height")
+  
   if(outline) {
-    y=c(0,rep(height,times=rep(2,n)),0)
-    x=rep(breaks,times=rep(2,(n+1)))
-  }   else {
-    y=rep(0,4*n)
-    x=rep(0,4*n+2)
-    for(i in 1:n) {
-      y[((i-1)*4+1):(i*4)]=c(0,rep(height[i],2),0)
-      x[((i-1)*4+1):(i*4)]=c(rep(breaks[i],2),rep(breaks[i+1],2))
-    }
-    x=x[1:(4*n)]
-  }
-  if(lineonly) {
-    if(!fill) lines(x,y,...)
-    else polygon(x,y,...)
+    y <- c(0,rep(height,times=rep(2,n)),0)
+    x <- rep(breaks,times=rep(2,(n+1)))
   } else {
-    if(!fill) plot(x,y,type="l",ylim=ylim,xlab=xlab,ylab=ylab,...)
+    y <- rep(0,4*n)
+    x <- rep(0,4*n+2)
+    
+    for(i in 1:n) {
+      y[((i-1)*4+1):(i*4)] <- c(0,rep(height[i],2),0)
+      x[((i-1)*4+1):(i*4)] <- c(rep(breaks[i],2),rep(breaks[i+1],2))
+    }
+    x <- x[1:(4*n)]
+  }
+  
+  if(lineonly) {
+    if(!fill) 
+      lines(x,y,...)
+    else 
+      polygon(x,y,...)
+  } else {
+    if(!fill) 
+      plot(x,y,type="l",ylim=ylim,xlab=xlab,ylab=ylab,...)
     else {
       plot(x,y,type="n",ylim=ylim,xlab=xlab,ylab=ylab)
       polygon(x,y,...)
@@ -100,7 +107,7 @@ histline=function(height,breaks,lineonly=FALSE,outline=FALSE,fill=FALSE,ylim=ran
 #'\code{n.pts} then \code{n.pts} will be set to \code{length(x)}.
 #' @param type if equal to `\code{cdf}' a list comprising x-values and cdf values at each x-value 
 #' is returned, else the integral over the range of \code{x} is returned.
-sintegral=function (fx, x, n.pts=16, type="int") 
+sintegral <- function (fx, x, n.pts=16, type="int") 
 {
   #  if (class(fx) == "function") 
   #    fx = fx(x)
@@ -109,11 +116,14 @@ sintegral=function (fx, x, n.pts=16, type="int")
   #    stop("Unequal input vector lengths")
   #  if (n.pts < 64) 
   #    n.pts = 64
-  ap = approx(x, fx, n = 2 * n.pts + 1)
-  h = diff(ap$x)[1]
-  integral = h*(ap$y[2*(1:n.pts)-1]+4*ap$y[2*(1:n.pts)]+ap$y[2*(1:n.pts)+1])/3
-  if(type!="cdf") return(sum(integral)) 
-  else return(list(x=ap$x[2*(1:n.pts)],y=cumsum(integral)))
+  ap <- approx(x, fx, n = 2 * n.pts + 1)
+  h <- diff(ap$x)[1]
+  integral <- h*(ap$y[2*(1:n.pts)-1]+4*ap$y[2*(1:n.pts)]+ap$y[2*(1:n.pts)+1])/3
+  
+  if(type!="cdf") 
+    return(sum(integral)) 
+  else 
+    return(list(x=ap$x[2*(1:n.pts)],y=cumsum(integral)))
 }
 
 
@@ -150,13 +160,16 @@ sintegral=function (fx, x, n.pts=16, type="int")
 #' 
 #' @export
 
-laake.a=function(hmm.pars,ymax,spd=NULL){
-  if(length(dim(hmm.pars$Pi))==2) hmm.pars$Pi=array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
-  nav=dim(hmm.pars$Pi)[3] # number of HMM parameter sets
-  a=rep(NA,nav)
-  for(i in 1:nav){
-    a[i]=jeffa(hmm.pars$Pi[,,i],ymax,spd)
-  }
+laake.a <- function(hmm.pars,ymax,spd=NULL){
+  if(length(dim(hmm.pars$Pi))==2) 
+    hmm.pars$Pi <- array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
+  
+  nav <- dim(hmm.pars$Pi)[3] # number of HMM parameter sets
+  a <- rep(NA,nav)
+  
+  for(i in 1:nav)
+    a[i] <- jeffa(hmm.pars$Pi[,,i],ymax,spd)
+    
   return(list(mean=mean(a),a=a))
 }
 
@@ -183,15 +196,17 @@ laake.a=function(hmm.pars,ymax,spd=NULL){
 #' porpoise from aerial surveys: estimating g(0). Journal of Wildlife Management 61, 63-75.
 #' 
 #' @export
-jeffa=function(Pi,w,spd=NULL,E=NULL)
+jeffa <- function(Pi,w,spd=NULL,E=NULL)
 {
-  if(!is.null(spd)) w=w/spd # convert distance to time if spd given
-  if(!is.null(E)) {
+  if(!is.null(spd)) 
+    w <- w/spd # convert distance to time if spd given
+  
+  if(!is.null(E))
     warning("Used E, not Pi for calculations")
-  } else {
-    E=makeE(Pi) # expected time up, expected time down
-  }
-  a=(E[2] + E[1]*(1-exp(-w/E[1])))/sum(E)    
+  else
+    E <- makeE(Pi) # expected time up, expected time down
+  
+  a <- (E[2] + E[1]*(1-exp(-w/E[1])))/sum(E)    
   return(a)
 }
 
@@ -218,22 +233,37 @@ jeffa=function(Pi,w,spd=NULL,E=NULL)
 #' instant.a(NULL,c(Eu[1],Ea[1]))
 #' 
 #' @export
-instant.a=function(hmm.pars,Et=NULL){
+instant.a <- function(hmm.pars,Et=NULL){
   if(!is.null(Et)) {
-    if(!is.null(hmm.pars)) warning("Used Et, not Pi for calculations")
-    if(is.vector(Et)) Et=matrix(Et,ncol=1)
-    if(dim(Et)[1]!=2) stop("1st dimension of Et must be 2.")
+    if(!is.null(hmm.pars)) 
+      warning("Used Et, not Pi for calculations")
+    
+    if(is.vector(Et)) 
+      Et <- matrix(Et,ncol=1)
+    
+    if(dim(Et)[1]!=2) 
+      stop("1st dimension of Et must be 2.")
+    
     nav=dim(Et)[2]
-  }else {
-    if(dim(hmm.pars$Pi)[1]!=2 | dim(hmm.pars$Pi)[2]!=2) stop("1st two dimensions of hmm.pars$Pi must be 2.")
-    if(length(dim(hmm.pars$Pi))==2) hmm.pars$Pi=array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
-    nav=dim(hmm.pars$Pi)[3] # number of HMM parameter sets
+  } else {
+    if(dim(hmm.pars$Pi)[1]!=2 | dim(hmm.pars$Pi)[2]!=2) 
+      stop("1st two dimensions of hmm.pars$Pi must be 2.")
+    
+    if(length(dim(hmm.pars$Pi))==2) 
+      hmm.pars$Pi <- array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
+    
+    nav <- dim(hmm.pars$Pi)[3] # number of HMM parameter sets
   }
-  a=rep(NA,nav)
-  for(i in 1:nav){
-    if(is.null(Et)) a[i]=simplea(hmm.pars$Pi[,,i],Et)
-    else a[i]=simplea(NULL,Et[,i])
+  
+  a <- rep(NA,nav)
+  
+  for(i in 1:nav) {
+    if(is.null(Et)) 
+      a[i] <- simplea(hmm.pars$Pi[,,i],Et)
+    else 
+      a[i] <- simplea(NULL,Et[,i])
   }
+  
   return(list(mean=mean(a),a=a))
 }
 
@@ -249,10 +279,12 @@ instant.a=function(hmm.pars,Et=NULL){
 #' @details If \code{E} is NULL, uses Pi to calculate proportion of time available, else uses \code{E}.
 #' 
 #' @export
-simplea=function(Pi,E=NULL)
+simplea <- function(Pi,E=NULL)
 {
-  if(is.null(E)) E=makeE(Pi) # expected time up, expected time down
-  a=E[2]/sum(E)    
+  if(is.null(E)) 
+    E <- makeE(Pi) # expected time up, expected time down
+  a <- E[2]/sum(E)    
+  
   return(a)
 }
 
@@ -280,15 +312,21 @@ simplea=function(Pi,E=NULL)
 #' mclaren.a(hmm.pars,w=100,spd=4) # can be greater than 1 (!)
 #' 
 #' @export
-mclaren.a=function(hmm.pars,w,spd=1){
-  if(dim(hmm.pars$Pi)[1]!=2 | dim(hmm.pars$Pi)[2]!=2) stop("1st two dimensions of hmm.pars$Pi must be 2.")
-  if(length(dim(hmm.pars$Pi))==2) hmm.pars$Pi=array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
-  nav=dim(hmm.pars$Pi)[3] # number of HMM parameter sets
-  a=rep(NA,nav)
+mclaren.a <- function(hmm.pars,w,spd=1){
+  if(dim(hmm.pars$Pi)[1]!=2 | dim(hmm.pars$Pi)[2]!=2) 
+    stop("1st two dimensions of hmm.pars$Pi must be 2.")
+  
+  if(length(dim(hmm.pars$Pi))==2) 
+    hmm.pars$Pi <- array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
+  
+  nav <- dim(hmm.pars$Pi)[3] # number of HMM parameter sets
+  a <- rep(NA,nav)
+  
   for(i in 1:nav){
-    Eti=makeE(hmm.pars$Pi[,,i])*spd # Pi is TIME; if w is DISTANCE need to multiply time by speed
-    a[i]=(Eti[2]+w)/sum(Eti)
+    Eti <- makeE(hmm.pars$Pi[,,i])*spd # Pi is TIME; if w is DISTANCE need to multiply time by speed
+    a[i] <- (Eti[2]+w)/sum(Eti)
   }
+  
   return(list(mean=mean(a),a=a))
 }
 
@@ -321,16 +359,23 @@ mclaren.a=function(hmm.pars,w,spd=1){
 #' richard.a(hmm.pars,w=rexp(20,1/100),spd=4)
 #' 
 #' @export
-richard.a=function(hmm.pars,w,spd=1){
-  y=na.omit(w)
-  n=length(y)
-  if(length(dim(hmm.pars$Pi))==2) hmm.pars$Pi=array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
-  nav=dim(hmm.pars$Pi)[3] # number of HMM parameter sets
-  ina=matrix(rep(instant.a(hmm.pars)$a,n),nrow=n,byrow=TRUE)
-  mca=matrix(rep(NA,n*nav),nrow=n)
-  for(i in 1:n) mca[i,]=mclaren.a(hmm.pars,y[i],spd)$a
-  sumfb=apply(ina/mca,2,sum)
-  a=1/((1/ina[1,])*(sumfb/n))
+richard.a <- function(hmm.pars,w,spd=1){
+  y <- na.omit(w)
+  n <- length(y)
+  
+  if(length(dim(hmm.pars$Pi))==2) 
+    hmm.pars$Pi <- array(hmm.pars$Pi,dim=c(2,2,1)) # need 3D array below
+  
+  nav <- dim(hmm.pars$Pi)[3] # number of HMM parameter sets
+  ina <- matrix(rep(instant.a(hmm.pars)$a,n),nrow=n,byrow=TRUE)
+  mca <- matrix(rep(NA,n*nav),nrow=n)
+  
+  for(i in 1:n) 
+    mca[i,] <- mclaren.a(hmm.pars,y[i],spd)$a
+  
+  sumfb <- apply(ina/mca,2,sum)
+  a <- 1/((1/ina[1,])*(sumfb/n))
+  
   return(list(mean=mean(a),a=a))
 }
 
@@ -351,10 +396,11 @@ richard.a=function(hmm.pars,w,spd=1){
 #' makePi(Eu[1],Ea[1])
 #' 
 #' @export
-makePi=function(Eu,Ea)
+makePi <- function(Eu,Ea)
 {
-  nav=length(Eu)
-  if(length(Ea)!=nav) stop("Lengths of Eu and Ea must be the same")
+  nav <- length(Eu)
+  if(length(Ea)!=nav) 
+    stop("Lengths of Eu and Ea must be the same")
   #  if(nav==1) {
   #    Pi=matrix(rep(0,4),nrow=2,
   #              dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available")))
@@ -363,16 +409,17 @@ makePi=function(Eu,Ea)
   #    Pi[1,1]=1-Pi[1,2]
   #    Pi[2,2]=1-Pi[2,1]
   #  } else {
-  Pi=array(rep(0,2*2*nav),dim=c(2,2,nav),
+  Pi <- array(rep(0,2*2*nav),dim=c(2,2,nav),
            dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
                          Animal=as.character(1:nav)))
   for(i in 1:nav) {
-    Pi[1,2,i]=1/Eu[i]
-    Pi[2,1,i]=1/Ea[i]
-    Pi[1,1,i]=1-Pi[1,2,i]
-    Pi[2,2,i]=1-Pi[2,1,i]    
+    Pi[1,2,i] <- 1/Eu[i]
+    Pi[2,1,i] <- 1/Ea[i]
+    Pi[1,1,i] <- 1-Pi[1,2,i]
+    Pi[2,2,i] <- 1-Pi[2,1,i]    
   }
   #  }
+  
   return(Pi)
 }
 
@@ -395,23 +442,24 @@ makePi=function(Eu,Ea)
 #' makeE(Pi1) # recover c(Eu,Ea)
 #' 
 #' @export
-makeE=function(Pi){
+makeE <- function(Pi){
   #----------------------------------------------------------
   # Returns expected time in states 1 and 2 for the 2x2 
   # probability transition matrix Pi for a 2-state
   # Markov process.
   #----------------------------------------------------------
   if(length(dim(Pi))==2){
-    E=c(1/Pi[1,2],1/Pi[2,1])
-    names(E)=c("Unavailable","Available")
+    E <- c(1/Pi[1,2],1/Pi[2,1])
+    names(E) <- c("Unavailable","Available")
   } else {
-    nav=dim(Pi)[3]
-    E=matrix(rep(NA,2*nav),nrow=2,
+    nav <- dim(Pi)[3]
+    E <- matrix(rep(NA,2*nav),nrow=2,
              dimnames=list(State=c("Unavailable","Available"),Animal=as.character(1:nav)))
-    for(i in 1:nav){
-      E[,i]=c(1/Pi[1,2,i],1/Pi[2,1,i])      
-    }
+    
+    for(i in 1:nav)
+      E[,i] <- c(1/Pi[1,2,i],1/Pi[2,1,i])
   }
+  
   return(E)
 }
 
@@ -475,31 +523,43 @@ makeE=function(Pi){
 #' 1064-1073.
 #' 
 #' @export
-make.hmm.pars.from.Et=function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
-  nav=length(Ea)
-  if(length(Eu)!=nav |length(seEa)!=nav |length(seEu)!=nav |length(covEt)!=nav) stop("Lengths of Ea, Eu, seEa, seEu, covEt must all be the same.")
-  if(is.null(pm)) pm=matrix(c(rep(0,nav),rep(1,nav)),nrow=2,byrow=TRUE)
+make.hmm.pars.from.Et <- function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
+  nav <- length(Ea)
+  
+  if(length(Eu)!=nav |length(seEa)!=nav |length(seEu)!=nav |length(covEt)!=nav) 
+    stop("Lengths of Ea, Eu, seEa, seEu, covEt must all be the same.")
+  
+  if(is.null(pm)) 
+    pm <- matrix(c(rep(0,nav),rep(1,nav)),nrow=2,byrow=TRUE)
+  
   if(is.vector(pm)) {
-    if(length(pm)!=2) stop("pm must either be a vector of length 2 or a matrix of dimension length(Ea)x2.")
-    pm=matrix(c(pm[1],pm[2]),ncol=2)
+    if(length(pm)!=2) 
+      stop("pm must either be a vector of length 2 or a matrix of dimension length(Ea)x2.")
+    
+    pm <- matrix(c(pm[1],pm[2]),ncol=2)
   }
-  if(dim(pm)[2]!=nav) stop("Inconsistent dimensions of Ea and pm.")
-  Pi=Sigma.Et=array(rep(NA,2*2*nav),dim=c(2,2,nav),
+  
+  if(dim(pm)[2]!=nav) 
+    stop("Inconsistent dimensions of Ea and pm.")
+  
+  Pi <- Sigma.Et <- array(rep(NA,2*2*nav),dim=c(2,2,nav),
                     dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
                                   Animal=as.character(1:nav)))
-  Et=delta=newpm=matrix(rep(NA,2*nav),ncol=nav,dimnames=list(State=c("Unavailable","Available"),
+  
+  Et <- delta <- newpm <- matrix(rep(NA,2*nav),ncol=nav,dimnames=list(State=c("Unavailable","Available"),
                                                              Animal=as.character(1:nav)))
   for(i in 1:nav) {
-    Et[,i]=c(Eu[i],Ea[i])
-    Sigma.Et[,,i]=diag(c(seEu[i],seEa[i])^2)
+    Et[,i] <- c(Eu[i],Ea[i])
+    Sigma.Et[,,i] <- diag(c(seEu[i],seEa[i])^2)
     #    cvEt=c(seEu[i]/Et[1,i],seEa[i]/Et[2,i])
     #    Sigma.Et[,,i]=diag((cvEt*Et)^2)
-    Sigma.Et[1,2,i]=Sigma.Et[2,1,i]=covEt[i]
-    Pi[,,i]=makePi(Et[1,i],Et[2,i])
-    delta[,i]=compdelta(Pi[,,i])
-    newpm[,i]=pm[,i]
+    Sigma.Et[1,2,i] <- Sigma.Et[2,1,i] <- covEt[i]
+    Pi[,,i] <- makePi(Et[1,i],Et[2,i])
+    delta[,i] <- compdelta(Pi[,,i])
+    newpm[,i] <- pm[,i]
   }
-  hmm.pars=list(pm=newpm,Pi=Pi,delta=delta,Et=Et,Sigma.Et=Sigma.Et)
+  
+  hmm.pars <- list(pm=newpm,Pi=Pi,delta=delta,Et=Et,Sigma.Et=Sigma.Et)
   return(hmm.pars)  
 }
 
@@ -525,7 +585,7 @@ make.hmm.pars.from.Et=function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
 #' \code{\link{est.hmltm}}.
 #' 
 #' @export
-make.survey.pars=function(spd,W,ymax,Wl=0,dT=1){
+make.survey.pars <- function(spd,W,ymax,Wl=0,dT=1){
   return(list(spd=spd,W=W,ymax=ymax,Wl=Wl,dT=dT,dy=spd*dT))
 }
 
@@ -538,9 +598,12 @@ make.survey.pars=function(spd,W,ymax,Wl=0,dT=1){
 #' x-covariate models. Either \code{NULL} or regression model format (without response on left).
 #' 
 #' @export
-is.nullmodel=function(models){
-  null=TRUE
-  for(i in 1:length(models)) null=null & is.null(models[[i]])
+is.nullmodel <- function(models){
+  null <- TRUE
+  
+  for(i in 1:length(models)) 
+    null <- null & is.null(models[[i]])
+  
   return(null)
 }
 
@@ -564,9 +627,9 @@ is.nullmodel=function(models){
 #' \code{$x}.
 #' 
 #' @export
-make.covb=function(b,FUN,models,dat)
+make.covb <- function(b,FUN,models,dat)
 {
-  nfixed=switch(FUN,
+  nfixed <- switch(FUN,
                 h.IP.0 = 2,
                 h.EP1.0 = 2,
                 h.EP2.0 = 3,
@@ -574,49 +637,64 @@ make.covb=function(b,FUN,models,dat)
                 h.EP2x.0 = 4,
                 0
   )
-  if(nfixed==0) stop("Hazard model ",FUN," is not progremmed (yet).")
+  
+  if(nfixed==0) 
+    stop("Hazard model ",FUN," is not progremmed (yet).")
+  
   if(is.nullmodel(models)) {
-    if(length(b) != nfixed) stop("length of b inconsistent with model")
-    n=dim(dat)[1]
+    if(length(b) != nfixed) 
+      stop("length of b inconsistent with model")
+    n <- dim(dat)[1]
     #    covb=matrix(c(rep(b,rep(n,nfixed))),ncol=nfixed)
-    covb=rep(b,n)
+    covb <- rep(b,n)
   } else {
     if(FUN=="h.EP2.0" | FUN=="h.EP1.0" | FUN=="h.IP.0"){
-      X=model.matrix(as.formula(models$y),data=dat)
-      n=dim(X)[1]
-      nb=dim(X)[2]
-      nfixed=nfixed-1
-      if(length(b) != (nfixed+nb)) stop("length of b inconsistent with model")
-      covb=matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)]),ncol=(nfixed+1))
-      covb=as.vector(t(covb))
+      X <- model.matrix(as.formula(models$y),data=dat)
+      n <- dim(X)[1]
+      nb <- dim(X)[2]
+      
+      nfixed <- nfixed-1
+      if(length(b) != (nfixed+nb)) 
+        stop("length of b inconsistent with model")
+      
+      covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)]),ncol=(nfixed+1))
+      covb <- as.vector(t(covb))
     }
     else if(FUN=="h.EP2x.0" | FUN=="h.EP1x.0"){
       if(!is.null(models$y)){
-        X=model.matrix(as.formula(models$y),data=dat)
-        n=dim(X)[1]
-        nb=dim(X)[2]        
-        if(!is.null(models$x)){ # here if have covariates for x and y
-          X.x=model.matrix(as.formula(models$x),data=dat)
-          nb.x=dim(X.x)[2]
-          nfixed=nfixed-2
-          if(length(b) != (nfixed+nb+nb.x)) stop("length of b inconsistent with model and model.x")
-          covb=matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)],X.x%*%b[nfixed+nb+(1:nb.x)]),ncol=(nfixed+2))  
-          covb=as.vector(t(covb))
+        X <- model.matrix(as.formula(models$y),data=dat)
+        n <- dim(X)[1]
+        nb <- dim(X)[2]        
+        if(!is.null(models$x)) { # here if have covariates for x and y
+          X.x <- model.matrix(as.formula(models$x),data=dat)
+          nb.x <- dim(X.x)[2]
+          nfixed <- nfixed-2
+          
+          if(length(b) != (nfixed+nb+nb.x)) 
+            stop("length of b inconsistent with model and model.x")
+          
+          covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)],X.x%*%b[nfixed+nb+(1:nb.x)]),
+                         ncol=(nfixed+2))  
+          covb <- as.vector(t(covb))
         } else { # here if have covariates for y only
-          nfixed=nfixed-1
-          if(length(b) != (nfixed+nb)) stop("length of b inconsistent with model and model.x")
-          #      covb=matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)]),ncol=(nfixed+1))   #### bitchange
-          covb=matrix(c(rep(b[1:(nfixed-1)],rep(n,(nfixed-1))),X%*%b[(nfixed-1)+(1:nb)],rep(b[length(b)],n)),ncol=(nfixed+1))  #### bitchange 
-          covb=as.vector(t(covb))
+          nfixed <- nfixed-1
+          if(length(b) != (nfixed+nb)) 
+            stop("length of b inconsistent with model and model.x")
+          
+          covb <- matrix(c(rep(b[1:(nfixed-1)],rep(n,(nfixed-1))),X%*%b[(nfixed-1)+(1:nb)],rep(b[length(b)],n)),ncol=(nfixed+1))  #### bitchange 
+          covb <- as.vector(t(covb))
         }
       } else { # here if have covariates for x only
-        X.x=model.matrix(as.formula(models$x),data=dat)
-        n.x=dim(X.x)[1]
-        nb.x=dim(X.x)[2]
-        nfixed=nfixed-1
-        if(length(b) != (nfixed+nb.x)) stop("length of b inconsistent with model and model.x")
-        covb=matrix(c(rep(b[1:nfixed],rep(n.x,nfixed)),X.x%*%b[nfixed+(1:nb.x)]),ncol=(nfixed+1))  
-        covb=as.vector(t(covb))        
+        X.x <- model.matrix(as.formula(models$x),data=dat)
+        n.x <- dim(X.x)[1]
+        nb.x <- dim(X.x)[2]
+        nfixed <- nfixed-1
+        
+        if(length(b) != (nfixed+nb.x)) 
+          stop("length of b inconsistent with model and model.x")
+        
+        covb <- matrix(c(rep(b[1:nfixed],rep(n.x,nfixed)),X.x%*%b[nfixed+(1:nb.x)]),ncol=(nfixed+1))  
+        covb <- as.vector(t(covb))        
       }
     } else {
       stop("Invalid FUN.")
@@ -637,51 +715,66 @@ make.covb=function(b,FUN,models,dat)
 #' @param zero REDUNDANT (I think - CHECK)
 #' 
 #' @export
-poiss.equiv=function(availhmm,zero=0){
-  Pois.availhmm=availhmm
-  Pi=availhmm$Pi
-  pcu=FALSE
-  if(is.element("pcu",names(availhmm))) {
-    names(availhmm)[which(names(availhmm)=="pcu")]="pm"
-    pcu=TRUE
-  }
-  pm=availhmm$pm
-  delta=availhmm$delta
-  if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) stop("Single animal: pcu/pm is not a vector or Pi is not a matrix")
-  if(is.vector(pm)) { # convert to matrix and array so can use loop below
-    Pi=array(Pi,dim=c(2,2,1))
-    pm=matrix(pm,ncol=1)
-    delta=matrix(delta,ncol=1)
-  }
-  nw=dim(pm)[2]
+poiss.equiv <- function(availhmm,zero=0){
+  Pois.availhmm <- availhmm
+  Pi <- availhmm$Pi
+  pcu <- FALSE
   
-  PiPoiss=matrix(c(zero,1-zero,zero,1-zero),byrow=TRUE,nrow=2)
-  for(i in 1:nw) {
-    Pi[,,i]=PiPoiss
-    delta[,i]=compdelta(PiPoiss)
+  if(is.element("pcu",names(availhmm))) {
+    names(availhmm)[which(names(availhmm)=="pcu")] <- "pm"
+    pcu <- TRUE
   }
-  E=Estate=matrix(rep(0,2*nw),nrow=2)
+  
+  pm <- availhmm$pm
+  delta <- availhmm$delta
+  if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) 
+    stop("Single animal: pcu/pm is not a vector or Pi is not a matrix")
+  
+  if(is.vector(pm)) { # convert to matrix and array so can use loop below
+    Pi <- array(Pi,dim=c(2,2,1))
+    pm <- matrix(pm,ncol=1)
+    delta <- matrix(delta,ncol=1)
+  }
+  
+  nw <- dim(pm)[2]
+  PiPoiss <- matrix(c(zero,1-zero,zero,1-zero),byrow=TRUE,nrow=2)
+  
+  for(i in 1:nw) {
+    Pi[,,i] <- PiPoiss
+    delta[,i] <- compdelta(PiPoiss)
+  }
+  
+  E <- Estate <- matrix(rep(0,2*nw),nrow=2)
+  
   if(nw>1) {
     for(w in 1:nw) {
-      Estate[,w]=c(1/availhmm$Pi[1,2,w],1/availhmm$Pi[2,1,w])
-      events=apply(Estate*pm,2,sum)
-      duration=apply(Estate,2,sum)
-      eventrate=rep(0,length(duration))
-      eventrate[duration>0]=events[duration>0]/duration[duration>0]
-      Pois.availhmm$Pi=Pi
-      if(pcu) Pois.availhmm$pcu=matrix(c(rep(0,nw),eventrate),nrow=2,byrow=TRUE)
-      else Pois.availhmm$pm=matrix(c(rep(0,nw),eventrate),nrow=2,byrow=TRUE)
-      Pois.availhmm$delta=delta
+      Estate[,w] <- c(1/availhmm$Pi[1,2,w],1/availhmm$Pi[2,1,w])
+      events <- apply(Estate*pm,2,sum)
+      duration <- apply(Estate,2,sum)
+      eventrate <- rep(0,length(duration))
+      eventrate[duration>0] <- events[duration>0]/duration[duration>0]
+      Pois.availhmm$Pi <- Pi
+      
+      if(pcu) 
+        Pois.availhmm$pcu <- matrix(c(rep(0,nw),eventrate),nrow=2,byrow=TRUE)
+      else 
+        Pois.availhmm$pm <- matrix(c(rep(0,nw),eventrate),nrow=2,byrow=TRUE)
+      
+      Pois.availhmm$delta <- delta
     }
-  }else {
-    Estate=c(1/availhmm$Pi[1,2],1/availhmm$Pi[2,1])
-    events=sum(Estate*pm)
-    duration=sum(Estate)
-    eventrate=events/duration
-    Pois.availhmm$Pi=Pi[,,1]
-    if(pcu) Pois.availhmm$pcu=c(0,eventrate)
-    else Pois.availhmm$pm=c(0,eventrate)
-    Pois.availhmm$delta=as.vector(delta)
+  } else {
+    Estate <- c(1/availhmm$Pi[1,2],1/availhmm$Pi[2,1])
+    events <- sum(Estate*pm)
+    duration <- sum(Estate)
+    eventrate <- events/duration
+    Pois.availhmm$Pi <- Pi[,,1]
+    
+    if(pcu) 
+      Pois.availhmm$pcu <- c(0,eventrate)
+    else 
+      Pois.availhmm$pm <- c(0,eventrate)
+    
+    Pois.availhmm$delta <- as.vector(delta)
   }
   
   return(Pois.availhmm)
@@ -693,7 +786,7 @@ poiss.equiv=function(availhmm,zero=0){
 #'  Logit function
 #'  
 #' @param p probability (scalar or vector).
-logit=function(p) return(log(p/(1-p)))  # returns logit of p
+logit <- function(p) return(log(p/(1-p)))  # returns logit of p
 
 #' @title Inverse logit function.
 #'
@@ -701,4 +794,4 @@ logit=function(p) return(log(p/(1-p)))  # returns logit of p
 #'  Inverse logit function
 #'  
 #' @param x scalar or .
-inv.logit=function(x) return(1/(1+exp(-x))) # returns p from x=(logit of p)
+inv.logit <- function(x) return(1/(1+exp(-x))) # returns p from x=(logit of p)
