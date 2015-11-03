@@ -26,7 +26,7 @@ mclaren.a(hmm.pars,w=100,spd=4) # can be greater than 1 (!)
 }
 \references{
 McLaren, I.A. 1961. Methods of determining the numbers and availability of ringed seals in the
-eastern Canadian Arctic. Arctic 14:162 – 175.
+eastern Canadian Arctic. Arctic 14:162--175.
 }
 \seealso{
 \code{\link{instant.a}}, \code{\link{laake.a}}, \code{\link{richard.a}}

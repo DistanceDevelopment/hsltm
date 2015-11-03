@@ -131,10 +131,10 @@ NULL
 #' Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
 #' 
 #' Heide-Jorgensen, M. P., Laidre, K., Borchers, D. L., Samarrra,F., and Stern, H. 2007. Increasing 
-#' abundance of bowhead whales in west greenland. Biology Letters 3, 577–580.
+#' abundance of bowhead whales in west greenland. Biology Letters 3, 577--580.
 #' 
 #' Laidre, K., Heide-Jorgensen, M. P., and Nielsen, T. 2007. Role of bowhead whale as a predator in 
-#' West Rreenland. Marine Ecology Progress Series 346, 285–297.
+#' West Rreenland. Marine Ecology Progress Series 346, 285--297.
 #' 
 #' @examples
 #'  data(bowhead.hmm.pars)

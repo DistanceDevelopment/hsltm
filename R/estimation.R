@@ -126,7 +126,7 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
     phat <- sintegral(px,xs)/W
   } else {
     px <- matrix(rep(0,nx*n),nrow=n)
-    phat <- parea=rep(0,n)
+    phat <- rep(0,n)
     covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
     nb <- length(covb)/n
     
