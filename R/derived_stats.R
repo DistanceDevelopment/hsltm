@@ -21,31 +21,37 @@
 #' @param ally If TRUE calculates detection probability at all forward distances, else at zero.
 #' 
 #' @export
-hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,
-                  type="response",ally=TRUE){
-  ymax=survey.pars$ymax
-  dy=survey.pars$dy
-  pm=hmm.pars$pm
-  Pi=hmm.pars$Pi
-  delta=hmm.pars$delta
+hmltm.px <- function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,
+                  type="response",ally=TRUE)
+{
+  ymax <- survey.pars$ymax
+  dy <- survey.pars$dy
+  pm <- hmm.pars$pm
+  Pi <- hmm.pars$Pi
+  delta <- hmm.pars$delta
   
-  b=pars
-  if(type!="link") b=n2w_rcpp(pars,hfun)
+  b <- pars
+  if(type!="link") 
+    b <- n2w_rcpp(pars,hfun)
   
-  nx=length(x)
-  n=1
-  covb=b
+  nx <- length(x)
+  n <- 1
+  covb <- b
+  
   if(!is.null(cov) & !(is.nullmodel(models))) { # only use covars if have them and model uses them
-    n=dim(cov)[1]
-    covb=make.covb(b,hfun,models,cov) # put covariates into paramerters
+    n <- dim(cov)[1]
+    covb <- make.covb(b,hfun,models,cov) # put covariates into paramerters
   } 
-  nb=length(covb)/n
-  px=matrix(rep(0,nx*n),nrow=n)
+  
+  nb <- length(covb)/n
+  px <- matrix(rep(0,nx*n),nrow=n)
+  
   for(i in 1:n) {
-    start=(i-1)*nb+1
-    bi=c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-    px[i,]=p.xy(x=x,y=rep(0,nx),hfun=hfun,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=ally)
+    start <- (i-1)*nb+1
+    bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
+    px[i,] <- p.xy(x=x,y=rep(0,nx),hfun=hfun,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=ally)
   }
+  
   return(px)
 }
 
@@ -71,13 +77,20 @@ hmltm.px=function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
 #' }
 #' 
 #' @export
-calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
-  if(stat=="esw") {return(fitted_esw(hmmlt,obs))}
-  else if(stat=="invesw") {return(fitted_invesw(hmmlt,obs))}
-  else if(stat=="p0") {return(fitted_px(hmmlt,obs,at.x=0))}
-  else if(stat=="p") {return(fitted_p(hmmlt,obs))}
-  else if(stat=="invp") {return(fitted_invp(hmmlt,obs))}
-  else stop(paste(stat," is an invalid stat type"))
+calc.derived <- function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1])
+{
+  if(stat=="esw") 
+    return(fitted_esw(hmmlt,obs))
+  else if(stat=="invesw")
+    return(fitted_invesw(hmmlt,obs))
+  else if(stat=="p0") 
+    return(fitted_px(hmmlt,obs,at.x=0))
+  else if(stat=="p") 
+    return(fitted_p(hmmlt,obs))
+  else if(stat=="invp") 
+    return(fitted_invp(hmmlt,obs))
+  else 
+    stop(paste(stat," is an invalid stat type"))
 }
 
 
@@ -105,34 +118,45 @@ calc.derived=function(stat,hmmlt,obs=1:dim(hmmlt$xy)[1]){
 #'}
 #'
 #'@export
-fitted_px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL){
-  cov=hmmlt$xy
-  if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
-  if(min(obs)<1) stop("obs < 1")
-  cov=cov[obs,]
+fitted_px <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL)
+{
+  cov <- hmmlt$xy
+  
+  if(max(obs)>dim(hmmlt$xy)[1]) 
+    stop("obs greater than number observations in hmmlt$xy")
+  if(min(obs)<1) 
+    stop("obs < 1")
+  
+  cov <- cov[obs,]
+  
   if(!is.null(at.x)) {
-    if(length(at.x)!=1 & length(at.x)!=dim(cov)[1]) stop("Length of at.x inconsistent with covariate data frame.")
-    if(length(at.x)==1) {cov$x=rep(at.x,length(cov$x));at.x=cov$x}
-    else {cov$x=at.x}
+    if(length(at.x)!=1 & length(at.x)!=dim(cov)[1]) 
+      stop("Length of at.x inconsistent with covariate data frame.")
+    
+    if(length(at.x)==1) {
+      cov$x <- rep(at.x,length(cov$x))
+      at.x <- cov$x
+    }
+    else
+      cov$x <- at.x
   } else {
-    at.x=cov$x
+    at.x <- cov$x
   }
-  if(is.nullmodel(hmmlt$models)){
-    cov=cov[1,]
-    #    at.x=at.x[1]
-  }
-  pars=hmmlt$fit$par
-  hfun=hmmlt$h.fun
-  models=hmmlt$models
-  survey.pars=hmmlt$fitpars$survey.pars
-  hmm.pars=hmmlt$fitpars$hmm.pars
-  px=hmltm.px(at.x,pars,hfun,models,cov,survey.pars,hmm.pars,ally=TRUE)
-  if(!is.nullmodel(hmmlt$models)){
-    #    rownames(px)=paste("obs",obs,sep="")
-    #    colnames(px)=paste("x=",at.x,sep="")
-    px=diag(px)
-  }
-  return(px)
+  
+  if(is.nullmodel(hmmlt$models))
+    cov <- cov[1,]
+
+  pars <- hmmlt$fit$par
+  hfun <- hmmlt$h.fun
+  models <- hmmlt$models
+  survey.pars <- hmmlt$fitpars$survey.pars
+  hmm.pars <- hmmlt$fitpars$hmm.pars
+  px <- hmltm.px(at.x,pars,hfun,models,cov,survey.pars,hmm.pars,ally=TRUE)
+  
+  if(!is.nullmodel(hmmlt$models))
+    px <- diag(px)
+  
+    return(px)
 }
 
 #' @title Calculates E[p(x)] from model.
@@ -146,9 +170,10 @@ fitted_px=function(hmmlt,obs=1:dim(hmmlt$xy)[1],at.x=NULL){
 #' @param nx number of x-values (perpendicular distance values) to use in calculation.
 #' 
 #' @export
-fitted_p=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
-  W=hmmlt$fitpars$survey.pars$W
-  esw=fitted_esw(hmmlt,obs,nx)
+fitted_p <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100)
+{
+  W <- hmmlt$fitpars$survey.pars$W
+  esw <- fitted_esw(hmmlt,obs,nx)
   return(esw/W)
 }
 
@@ -163,9 +188,10 @@ fitted_p=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @param nx number of x-values (perpendicular distance values) to use in calculation.
 #' 
 #' @export
-fitted_invp=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
-  W=hmmlt$fitpars$survey.pars$W
-  esw=fitted_esw(hmmlt,obs,nx)
+fitted_invp <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100)
+{
+  W <- hmmlt$fitpars$survey.pars$W
+  esw <- fitted_esw(hmmlt,obs,nx)
   return(W/esw)
 }
 
@@ -180,7 +206,8 @@ fitted_invp=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' @param nx number of x-values (perpendicular distance values) to use in calculation.
 #' 
 #' @export
-fitted_invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
+fitted_invesw <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100)
+{
   return(1/fitted_esw(hmmlt,obs,nx))
 }
 
@@ -200,23 +227,28 @@ fitted_invesw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100){
 #' Calls \code{\link{hmltm.esw}} to calclate effective stript width (esw) for fitted object \code{hmmlt}.
 #' 
 #' @export
-fitted_esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
+fitted_esw <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE)
+{
   if(!is.null(obs)){
-    if(max(obs)>dim(hmmlt$xy)[1]) stop("obs greater than number observations in hmmlt$xy")
-    if(min(obs)<1) stop("obs < 1")
-    cov=hmmlt$xy[obs,]
+    if(max(obs)>dim(hmmlt$xy)[1]) 
+      stop("obs greater than number observations in hmmlt$xy")
+    if(min(obs)<1) 
+      stop("obs < 1")
+    
+    cov <- hmmlt$xy[obs,]
   } 
-  if(is.nullmodel(hmmlt$models) & !all){
-    cov=hmmlt$xy[1,]
-  } else {
-    cov=hmmlt$xy[obs,]
-  }
-  pars=hmmlt$fit$par
-  hfun=hmmlt$h.fun
-  models=hmmlt$models
-  survey.pars=hmmlt$fitpars$survey.pars
-  hmm.pars=hmmlt$fitpars$hmm.pars
-  esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type="response",to.x)
+  if(is.nullmodel(hmmlt$models) & !all)
+    cov <- hmmlt$xy[1,]
+  else
+    cov <- hmmlt$xy[obs,]
+  
+  pars <- hmmlt$fit$par
+  hfun <- hmmlt$h.fun
+  models <- hmmlt$models
+  survey.pars <- hmmlt$fitpars$survey.pars
+  hmm.pars <- hmmlt$fitpars$hmm.pars
+  
+  esw <- hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type="response",to.x)
   return(esw)
 }
 
@@ -244,15 +276,24 @@ fitted_esw=function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE){
 #' it is on natural scale.
 #' 
 #' @export
-hmltm.stat=function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
-                    type="link"){
-  if(type!="link") b=n2w_rcpp(b,hfun)
-  if(stat=="p0") {return(hmltm.px(x=0,b,hfun,models,cov,survey.pars,hmm.pars,type))}  
-  else if(stat=="p") {return(hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}  
-  else if(stat=="invp") {return(1/hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}
-  else if(stat=="esw") {return(hmltm.esw(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}
-  else if(stat=="invesw") {return(1/hmltm.esw(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))}
-  else stop("Invalid stat")
+hmltm.stat <- function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
+                    type="link")
+{
+  if(type!="link") 
+    b <- n2w_rcpp(b,hfun)
+  
+  if(stat=="p0")
+    return(hmltm.px(x=0,b,hfun,models,cov,survey.pars,hmm.pars,type))
+  else if(stat=="p") 
+    return(hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))
+  else if(stat=="invp") 
+    return(1/hmltm.p(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))
+  else if(stat=="esw") 
+    return(hmltm.esw(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))
+  else if(stat=="invesw") 
+    return(1/hmltm.esw(b,hfun,models,cov,survey.pars,hmm.pars,nx,type))
+  else 
+    stop("Invalid stat")
 }
 
 
@@ -273,9 +314,10 @@ hmltm.stat=function(stat,b,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,
 #' else natural scale
 #' 
 #' @export
-hmltm.p=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
-                 type="response"){
-  esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
+hmltm.p <- function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
+                 type="response")
+{
+  esw <- hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
   return(esw/survey.pars$W)
 }
 
@@ -297,9 +339,10 @@ hmltm.p=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.p
 #' else natural scale
 #' 
 #' @export
-hmltm.invp=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
-                    type="response"){
-  esw=hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
+hmltm.invp <- function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hmm.pars,nx=100,
+                    type="response")
+{
+  esw <- hmltm.esw(pars,hfun,models,cov,survey.pars,hmm.pars,nx,type=type)
   return(survey.pars$W/esw)
 }
 
@@ -328,17 +371,23 @@ hmltm.invp=function(pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars,hm
 #' using Simpson's rule.
 #'
 #' @export
-hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="response",to.x=FALSE){
-  n=dim(cov)[1]
-  if(to.x) {maxx=cov$x}
-  else maxx=rep(survey.pars$W,n)
-  p=rep(0,n)
+hmltm.esw <- function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="response",to.x=FALSE)
+{
+  n <- dim(cov)[1]
+  
+  if(to.x) 
+    maxx <- cov$x
+  else 
+    maxx <- rep(survey.pars$W,n)
+  
+  p <- rep(0,n)
   for(i in 1:n) {
     if(maxx[i]>0){
-      xs=seq(0,maxx[i],length=nx) # set of poiints on which to evaluate p(see|x)
-      px=hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,type)
-      p[i]=sintegral(px,xs)
+      xs <- seq(0,maxx[i],length=nx) # set of poiints on which to evaluate p(see|x)
+      px <- hmltm.px(xs,pars,hfun,models,cov[i,],survey.pars,hmm.pars,type)
+      p[i] <- sintegral(px,xs)
     }
   }
+  
   return(p)
 }

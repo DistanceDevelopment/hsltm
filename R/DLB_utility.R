@@ -635,15 +635,15 @@ make.covb <- function(b,FUN,models,dat)
                    h.EP2.0 = 3,
                    h.EP1x.0 = 3,
                    h.EP2x.0 = 4,
-                   0
-  )
+                   0)
   
   if(nfixed==0) 
-    stop("Hazard model ",FUN," is not progremmed (yet).")
+    stop("Hazard model ",FUN," is not programmed (yet).")
   
   if(is.nullmodel(models)) {
     if(length(b) != nfixed) 
       stop("length of b inconsistent with model")
+    
     n <- dim(dat)[1]
     #    covb=matrix(c(rep(b,rep(n,nfixed))),ncol=nfixed)
     covb <- rep(b,n)
