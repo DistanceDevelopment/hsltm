@@ -97,7 +97,7 @@ fit.xy <- function(pars,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta=delta,
 #' 
 #' @export
 fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
-                   control.fit,control.optim,groupfromy=NULL)
+                      control.fit,control.optim,groupfromy=NULL)
 {
   # unpack things:
   hessian <- control.fit$hessian

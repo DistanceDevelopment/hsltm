@@ -110,7 +110,7 @@ fitted_esw1 <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE
 #' 
 #' @export
 hmltm.esw1 <- function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="response",to.x=FALSE,
-                    W=NULL){
+                       W=NULL){
   nmax <- dim(cov)[1]
   if(is.null(models$y) & is.null(models$x)) 
     smax <- length(ID$object) 
@@ -239,7 +239,7 @@ truncdat <- function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum",
     
     for(i in 1:nout) {
       got <- which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
-                  tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
+                     tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
       
       if(length(got)==0) { # transect no longer in truncated dataset
         tdat <- rbind(tdat,NAs) # add row of NAs
@@ -279,7 +279,7 @@ truncdat <- function(dat,minval=0,maxval=NULL,twosit=FALSE,colnames=c("stratum",
     
     for(i in 1:nout) {
       got <- which(tdat[,keepcols[1]]==outeff$stratum[i] & tdat[,keepcols[2]]==outeff$area[i] & 
-                  tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
+                     tdat[,keepcols[3]]==outeff$transect[i] & tdat[,keepcols[4]]==outeff$L[i])
       
       if(length(got)==0) { # transect no longer in truncated dataset
         tdat <- rbind(tdat,NAs) # add row of NAs
@@ -440,8 +440,8 @@ NDest <- function(dat,hmltm.fit,W){
               ests=data.frame(stratum=stratname,n=n,k=k,L=L,covered.area=a,stratum.Area=A,
                               Dgroups=signif(Dg,3),Ngroups=signif(Ng,3),mean.size=round(sbar,1),
                               D=signif(D,5),N=round(N,1))
-              )
-         )
+  )
+  )
 }
 
 #' @title Line transect estimation with a hidden Markov availability model.
@@ -553,9 +553,9 @@ NDest <- function(dat,hmltm.fit,W){
 #' 
 #' @useDynLib hsltm
 est.hmltm <- function(dat,
-                   pars,FUN,models=list(y=NULL,x=NULL),
-                   survey.pars,hmm.pars,control.fit,control.opt,
-                   twosit=FALSE,notrunc=FALSE,W.est=NULL,groupfromy=NULL)
+                      pars,FUN,models=list(y=NULL,x=NULL),
+                      survey.pars,hmm.pars,control.fit,control.opt,
+                      twosit=FALSE,notrunc=FALSE,W.est=NULL,groupfromy=NULL)
 {
   # convert mrds data to cds data format (combining detections)
   if(twosit) 
@@ -567,27 +567,27 @@ est.hmltm <- function(dat,
   if(!notrunc) 
     if(min(na.omit(dat1$x)) < survey.pars$Wl | survey.pars$W < max(na.omit(dat1$x))) 
       dat1 <- truncdat(dat1,minval=survey.pars$Wl,maxval=survey.pars$W,twosit=FALSE)
-  
-  # extract sightings rows only
-  #  sits1=!is.na(dat1$seen)
-  #  srows1=sits1 & dat1$seen==1 # mark rows that have sightings
-  srows1 <- !is.na(dat1$object)
-  sdat1 <- dat1[srows1,]
-  
-  # fit the model:
-  hmltm.fit <- fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,
-                         groupfromy=groupfromy)
-  
-  # estimate density, etc:
-  if(is.null(W.est)) 
-    W.est <- survey.pars$W
-  
-  if(!is.null(survey.pars$Wl)) 
-    W.est <- survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
-  
-  point <- NDest(dat1,hmltm.fit,W.est)
-  hmltm.obj <- list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
-  class(hmltm.obj) <- c(class(hmltm.obj),"hmltm")
-  
-  return(hmltm.obj)
+    
+    # extract sightings rows only
+    #  sits1=!is.na(dat1$seen)
+    #  srows1=sits1 & dat1$seen==1 # mark rows that have sightings
+    srows1 <- !is.na(dat1$object)
+    sdat1 <- dat1[srows1,]
+    
+    # fit the model:
+    hmltm.fit <- fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,
+                           groupfromy=groupfromy)
+    
+    # estimate density, etc:
+    if(is.null(W.est)) 
+      W.est <- survey.pars$W
+    
+    if(!is.null(survey.pars$Wl)) 
+      W.est <- survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
+    
+    point <- NDest(dat1,hmltm.fit,W.est)
+    hmltm.obj <- list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
+    class(hmltm.obj) <- c(class(hmltm.obj),"hmltm")
+    
+    return(hmltm.obj)
 }

@@ -60,7 +60,7 @@ nm2m <- function(x) return(x*1852) # converts nautical miles to metres
 #' 
 #' @export
 histline <- function(height,breaks,lineonly=FALSE,outline=FALSE,fill=FALSE,ylim=range(height),
-                  xlab="x",ylab="y",...)
+                     xlab="x",ylab="y",...)
 {
   n <- length(height)
   if(length(breaks)!=(n+1)) 
@@ -169,7 +169,7 @@ laake.a <- function(hmm.pars,ymax,spd=NULL){
   
   for(i in 1:nav)
     a[i] <- jeffa(hmm.pars$Pi[,,i],ymax,spd)
-    
+  
   return(list(mean=mean(a),a=a))
 }
 
@@ -410,8 +410,8 @@ makePi <- function(Eu,Ea)
   #    Pi[2,2]=1-Pi[2,1]
   #  } else {
   Pi <- array(rep(0,2*2*nav),dim=c(2,2,nav),
-           dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
-                         Animal=as.character(1:nav)))
+              dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
+                            Animal=as.character(1:nav)))
   for(i in 1:nav) {
     Pi[1,2,i] <- 1/Eu[i]
     Pi[2,1,i] <- 1/Ea[i]
@@ -454,7 +454,7 @@ makeE <- function(Pi){
   } else {
     nav <- dim(Pi)[3]
     E <- matrix(rep(NA,2*nav),nrow=2,
-             dimnames=list(State=c("Unavailable","Available"),Animal=as.character(1:nav)))
+                dimnames=list(State=c("Unavailable","Available"),Animal=as.character(1:nav)))
     
     for(i in 1:nav)
       E[,i] <- c(1/Pi[1,2,i],1/Pi[2,1,i])
@@ -543,11 +543,11 @@ make.hmm.pars.from.Et <- function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
     stop("Inconsistent dimensions of Ea and pm.")
   
   Pi <- Sigma.Et <- array(rep(NA,2*2*nav),dim=c(2,2,nav),
-                    dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
-                                  Animal=as.character(1:nav)))
+                          dimnames=list(From=c("Unavailable","Available"),To=c("Unavailable","Available"),
+                                        Animal=as.character(1:nav)))
   
   Et <- delta <- newpm <- matrix(rep(NA,2*nav),ncol=nav,dimnames=list(State=c("Unavailable","Available"),
-                                                             Animal=as.character(1:nav)))
+                                                                      Animal=as.character(1:nav)))
   for(i in 1:nav) {
     Et[,i] <- c(Eu[i],Ea[i])
     Sigma.Et[,,i] <- diag(c(seEu[i],seEa[i])^2)
@@ -630,12 +630,12 @@ is.nullmodel <- function(models){
 make.covb <- function(b,FUN,models,dat)
 {
   nfixed <- switch(FUN,
-                h.IP.0 = 2,
-                h.EP1.0 = 2,
-                h.EP2.0 = 3,
-                h.EP1x.0 = 3,
-                h.EP2x.0 = 4,
-                0
+                   h.IP.0 = 2,
+                   h.EP1.0 = 2,
+                   h.EP2.0 = 3,
+                   h.EP1x.0 = 3,
+                   h.EP2x.0 = 4,
+                   0
   )
   
   if(nfixed==0) 
