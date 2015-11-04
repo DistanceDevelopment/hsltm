@@ -552,10 +552,9 @@ NDest <- function(dat,hmltm.fit,W){
 #' @export
 #' 
 #' @useDynLib hsltm
-est.hmltm <- function(dat,
-                      pars,FUN,models=list(y=NULL,x=NULL),
-                      survey.pars,hmm.pars,control.fit,control.opt,
-                      twosit=FALSE,notrunc=FALSE,W.est=NULL,groupfromy=NULL)
+est.hmltm <- function(dat,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
+                      control.fit,control.opt,twosit=FALSE,notrunc=FALSE,W.est=NULL,
+                      groupfromy=NULL)
 {
   # convert mrds data to cds data format (combining detections)
   if(twosit) 

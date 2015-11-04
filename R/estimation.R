@@ -157,7 +157,6 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
   
   class(hmmlt) <- "hmmlt"
   return(hmmlt)
-  
 }
 
 
