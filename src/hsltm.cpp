@@ -83,7 +83,6 @@ arma::rowvec w2n_rcpp(arma::rowvec par, std::string hfun)
 //' @return The value of the hazard function at (x,y)
 //' 
 //' @export
-//' 
 //' @importFrom Rcpp evalCpp
 // [[Rcpp::export]]
 double h_rcpp(double x, double y, arma::rowvec b, std::string hfun)

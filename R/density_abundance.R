@@ -550,7 +550,6 @@ NDest <- function(dat,hmltm.fit,W){
 #' 2013. Using hidden Markov models to deal with availability bias on line transect surveys. Biometrics.
 #' 
 #' @export
-#' 
 #' @useDynLib hsltm
 est.hmltm <- function(dat,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
                       control.fit,control.opt,twosit=FALSE,notrunc=FALSE,W.est=NULL,

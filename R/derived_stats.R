@@ -216,12 +216,12 @@ fitted_invesw <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100)
 #' @description
 #' Calculates effective strip half-width, W*E[p(x)], where W is actual half-width, from model.
 # 
-#'  @param hmmlt output from \code{\link{fit.hmltm}}
-#'  @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
-#'  @param nx number of x values to use to implement Simpson's rule in perp dist dimension;
-#'  @param to.x If TRUE integrates only to observed x, else integrates to W
-#'  @param all If TRUE then returns esw for every observation, else returns only that for first obs 
-#'  if there are no covariates; always returns esw for every observation if there are covariates.
+#' @param hmmlt output from \code{\link{fit.hmltm}}
+#' @param obs observations (row numbers of \code{hmmlt$xy}) for which to calculate esw 
+#' @param nx number of x values to use to implement Simpson's rule in perp dist dimension;
+#' @param to.x If TRUE integrates only to observed x, else integrates to W
+#' @param all If TRUE then returns esw for every observation, else returns only that for first obs 
+#' if there are no covariates; always returns esw for every observation if there are covariates.
 #' 
 #' @details 
 #' Calls \code{\link{hmltm.esw}} to calclate effective stript width (esw) for fitted object \code{hmmlt}.

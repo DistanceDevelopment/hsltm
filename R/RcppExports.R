@@ -45,7 +45,6 @@ w2n_rcpp <- function(par, hfun) {
 #' @return The value of the hazard function at (x,y)
 #' 
 #' @export
-#' 
 #' @importFrom Rcpp evalCpp
 h_rcpp <- function(x, y, b, hfun) {
     .Call('hsltm_h_rcpp', PACKAGE = 'hsltm', x, y, b, hfun)
