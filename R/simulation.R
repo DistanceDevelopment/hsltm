@@ -36,9 +36,10 @@ cdfy.u <- function(y,x,hfun,b,pm,Pi,delta,ymax,dy,u)
 #' 
 #' @param est output from \code{est.hmltm}.
 #' @param bs output  from \code{bootsum} using the same model that created \code{est}.
+#' @param keepzeros Should zeros be kept? Default: FALSE.
 #' 
 #' @export
-estable <- function(est,bs){
+estable <- function(est,bs,keepzeros=FALSE){
   est <- est$point$ests
   nonzeros <- which(est$n>0)
   

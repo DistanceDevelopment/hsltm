@@ -4,12 +4,14 @@
 \alias{estable}
 \title{Tabulate point and interval estimates.}
 \usage{
-estable(est, bs)
+estable(est, bs, keepzeros = FALSE)
 }
 \arguments{
 \item{est}{output from \code{est.hmltm}.}
 
 \item{bs}{output  from \code{bootsum} using the same model that created \code{est}.}
+
+\item{keepzeros}{Should zeros be kept? Default: FALSE.}
 }
 \description{
 Combines point estimates from \code{est.hmltm} and bootstrap estimates from \code{bs.hmltm} 
