@@ -555,23 +555,36 @@ est.hmltm <- function(dat,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pa
                       control.fit,control.opt,twosit=FALSE,notrunc=FALSE,W.est=NULL,
                       groupfromy=NULL)
 {
-  # convert mrds data to cds data format (combining detections)
-  if(twosit) 
-    dat1 <- make.onesit(dat) 
-  else 
-    dat1 <- dat
+  ## # convert mrds data to cds data format (combining detections)
+  ## if(twosit) 
+  ##   dat1 <- make.onesit(dat) 
+  ## else 
+  ##   dat1 <- dat
+  
+  if(twosit) {
+    # add the observer's id to the x-model, and to the y-model if necessary
+    if(!is.null(models$x))
+      models$x <- update(models$x, ~ . + id)
+    else
+      models$x <- ~id
+    
+    if(!is.null(models$y))
+      models$y <- update(models$y, ~ . + id)
+    else if(!is.null(dat$y))
+      models$y <- ~id
+  }
   
   # data truncation:
   if(!notrunc) {
-    if(min(na.omit(dat1$x)) < survey.pars$Wl | survey.pars$W < max(na.omit(dat1$x)))
-      dat1 <- truncdat(dat1,minval=survey.pars$Wl,maxval=survey.pars$W,twosit=FALSE)
+    if(min(dat$x,na.rm=TRUE) < survey.pars$Wl | survey.pars$W < max(dat$x,na.rm=TRUE))
+      dat <- truncdat(dat,minval=survey.pars$Wl,maxval=survey.pars$W,twosit=FALSE)
   }
   
-  srows1 <- !is.na(dat1$object)
-  sdat1 <- dat1[srows1,]
+  srows <- !is.na(dat$object)
+  sdat <- dat[srows,]
   
   # fit the model:
-  hmltm.fit <- fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,
+  hmltm.fit <- fit.hmltm(sdat,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,
                          groupfromy=groupfromy)
   
   # estimate density, etc:
@@ -581,8 +594,8 @@ est.hmltm <- function(dat,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pa
   if(!is.null(survey.pars$Wl)) 
     W.est <- survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
   
-  point <- NDest(dat1,hmltm.fit,W.est)
-  hmltm.obj <- list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
+  point <- NDest(dat,hmltm.fit,W.est)
+  hmltm.obj <- list(hmltm.fit=hmltm.fit,point=point,dat=dat,W.est=W.est)
   class(hmltm.obj) <- c(class(hmltm.obj),"hmltm")
   
   return(hmltm.obj)
