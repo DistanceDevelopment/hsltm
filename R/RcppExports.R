@@ -99,8 +99,10 @@ pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) 
 #' of a model with two observers.
 #' Written in C++.
 #'  
-#' @param obs1 Observations of observer 1
-#' @param obs2 Observations of observer 2
+#' @param x Matrix of perpendicular distances (two columns: one for each observer)
+#' @param y Matrix of forward distances (two columns: one for each observer)
+#' @param d Matrix of detections (two columns: one for each observer). d[i,j] is
+#' 1 if observer j detected animal i, 0 otherwise.
 #' @param hfun Hazard function name.
 #' @param b1 Hazard function parameter vector of first observer.
 #' @param b2 Hazard function parameter vector of second oberver.
@@ -115,7 +117,7 @@ pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) 
 #' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
 #' 
 #' @export
-pxy_double_rccp <- function(obs1, obs2, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf) {
-    .Call('hsltm_pxy_double_rccp', PACKAGE = 'hsltm', obs1, obs2, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
+pxy_double_rccp <- function(x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf) {
+    .Call('hsltm_pxy_double_rccp', PACKAGE = 'hsltm', x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
 }
 

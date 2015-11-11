@@ -4,12 +4,15 @@
 \alias{pxy_double_rccp}
 \title{Probability of detection (double observer)}
 \usage{
-pxy_double_rccp(obs1, obs2, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
+pxy_double_rccp(x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
 }
 \arguments{
-\item{obs1}{Observations of observer 1}
+\item{x}{Matrix of perpendicular distances (two columns: one for each observer)}
 
-\item{obs2}{Observations of observer 2}
+\item{y}{Matrix of forward distances (two columns: one for each observer)}
+
+\item{d}{Matrix of detections (two columns: one for each observer). d[i,j] is
+1 if observer j detected animal i, 0 otherwise.}
 
 \item{hfun}{Hazard function name.}
 

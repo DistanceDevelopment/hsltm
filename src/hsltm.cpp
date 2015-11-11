@@ -266,8 +266,10 @@ arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowv
 //' of a model with two observers.
 //' Written in C++.
 //'  
-//' @param obs1 Observations of observer 1
-//' @param obs2 Observations of observer 2
+//' @param x Matrix of perpendicular distances (two columns: one for each observer)
+//' @param y Matrix of forward distances (two columns: one for each observer)
+//' @param d Matrix of detections (two columns: one for each observer). d[i,j] is
+//' 1 if observer j detected animal i, 0 otherwise.
 //' @param hfun Hazard function name.
 //' @param b1 Hazard function parameter vector of first observer.
 //' @param b2 Hazard function parameter vector of second oberver.
@@ -283,12 +285,12 @@ arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowv
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma::rowvec b1, 
+arma::vec pxy_double_rccp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::rowvec b1, 
                           arma::rowvec b2, arma::vec pcu, arma::mat Pi, arma::rowvec delta, 
                           double ymax, double dy, bool ally, bool cdf)
 {
   int nbStates = pcu.size();
-  int nbObs = obs1.n_rows;
+  int nbObs = x.n_rows;
   int nbPar = b1.size()/nbObs;
   
   arma::vec p(nbObs); // result
@@ -307,20 +309,20 @@ arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma
   for(int i=0 ; i<nbObs ; i++) {
     
     // set conditions which are then used to distinguish the different possible cases
-    if(obs1(i,0)==1 && obs2(i,0)==1)
+    if(d(i,0)==1 && d(i,1)==1)
       cond1 = 1; // if both observers detected the animal
     else
       cond1 = 2; // if only one observer detected the animal
     
-    if(cond1==1 && obs1(i,2)==obs2(i,2))
+    if(cond1==1 && y(i,0)==y(i,1))
       cond2 = 0; // if both observers detected the animal at the same time
-    else if(cond1==1 && obs1(i,2)>obs2(i,2))
+    else if(cond1==1 && y(i,0)>=y(i,1))
       cond2 = 1; // if observer 1 detected the animal first
-    else if(cond1==1 && obs1(i,2)<obs2(i,2))
+    else if(cond1==1 && y(i,0)<y(i,1))
       cond2 = 2; // if observer 2 detected the animal first
-    else if(obs2(i,0)==0)
+    else if(d(i,1)==0)
       cond2 = 1; // if observer 1 was the only one to detect the animal
-    else if(obs1(i,0)==0)
+    else if(d(i,0)==0)
       cond2 = 2; // if observer 2 was the only one to detect the animal
     
     // initialization
@@ -341,12 +343,12 @@ arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma
     
     // coordinates of the first observation
     if(cond2==2) {
-      x1 = obs2(i,1);
-      y1 = obs2(i,2);
+      x1 = x(i,1);
+      y1 = y(i,1);
     }
     else {
-      x1 = obs1(i,1);
-      y1 = obs1(i,2);
+      x1 = x(i,0);
+      y1 = y(i,0);
     }
     
     yi = gety_obs_rcpp(x1,false,y1,ymax,dy);
@@ -380,12 +382,12 @@ arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma
     if(cond1==1 && cond2!=0) {
       // coordinates of the second observation
       if(cond2==2) {
-        x2 = obs1(i,1);
-        y2 = obs1(i,2);
+        x2 = x(i,0);
+        y2 = y(i,0);
       }
       else {
-        x2 = obs2(i,1);
-        y2 = obs2(i,2);
+        x2 = x(i,1);
+        y2 = y(i,1);
       }
       
       yi = gety_obs_rcpp(x2,false,y2,y1,dy);
@@ -445,8 +447,8 @@ arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma
     //====================================//
     // probability of both detecting the animal at the same time, given that someone detected it
     if(cond2==0) {
-      x1 = obs1(i,1);
-      y1 = obs1(i,2);
+      x1 = x(i,0);
+      y1 = y(i,0);
       hval1 = h_rcpp(x1,y1,bb1,hfun);
       hval2 = h_rcpp(x1,y1,bb2,hfun);
       h_either = hval1 + hval2 - hval1*hval2;
@@ -455,8 +457,8 @@ arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma
     
     // probability that observer 1 detected the animal first, given that someone detected it
     if(cond2==1) {
-      x1 = obs1(i,1);
-      y1 = obs1(i,2);
+      x1 = x(i,0);
+      y1 = y(i,0);
       hval1 = h_rcpp(x1,y1,bb1,hfun);
       hval2 = h_rcpp(x1,y1,bb2,hfun);
       h_either = hval1 + hval2 - hval1*hval2;
@@ -465,8 +467,8 @@ arma::vec pxy_double_rccp(arma::mat obs1, arma::mat obs2, std::string hfun, arma
     
     // probability that observer 2 detected the animal first, given that someone detected it
     if(cond2==2) {
-      x2 = obs2(i,1);
-      y2 = obs2(i,2);
+      x2 = x(i,1);
+      y2 = y(i,1);
       hval1 = h_rcpp(x2,y2,bb1,hfun);
       hval2 = h_rcpp(x2,y2,bb2,hfun);
       h_either = hval1 + hval2 - hval1*hval2;
