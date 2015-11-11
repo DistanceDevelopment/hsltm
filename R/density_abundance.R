@@ -562,30 +562,28 @@ est.hmltm <- function(dat,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pa
     dat1 <- dat
   
   # data truncation:
-  if(!notrunc) 
-    if(min(na.omit(dat1$x)) < survey.pars$Wl | survey.pars$W < max(na.omit(dat1$x))) 
+  if(!notrunc) {
+    if(min(na.omit(dat1$x)) < survey.pars$Wl | survey.pars$W < max(na.omit(dat1$x)))
       dat1 <- truncdat(dat1,minval=survey.pars$Wl,maxval=survey.pars$W,twosit=FALSE)
-    
-    # extract sightings rows only
-    #  sits1=!is.na(dat1$seen)
-    #  srows1=sits1 & dat1$seen==1 # mark rows that have sightings
-    srows1 <- !is.na(dat1$object)
-    sdat1 <- dat1[srows1,]
-    
-    # fit the model:
-    hmltm.fit <- fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,
-                           groupfromy=groupfromy)
-    
-    # estimate density, etc:
-    if(is.null(W.est)) 
-      W.est <- survey.pars$W
-    
-    if(!is.null(survey.pars$Wl)) 
-      W.est <- survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
-    
-    point <- NDest(dat1,hmltm.fit,W.est)
-    hmltm.obj <- list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
-    class(hmltm.obj) <- c(class(hmltm.obj),"hmltm")
-    
-    return(hmltm.obj)
+  }
+  
+  srows1 <- !is.na(dat1$object)
+  sdat1 <- dat1[srows1,]
+  
+  # fit the model:
+  hmltm.fit <- fit.hmltm(sdat1,pars,FUN,models,survey.pars,hmm.pars,control.fit,control.opt,
+                         groupfromy=groupfromy)
+  
+  # estimate density, etc:
+  if(is.null(W.est)) 
+    W.est <- survey.pars$W
+  
+  if(!is.null(survey.pars$Wl)) 
+    W.est <- survey.pars$W-survey.pars$Wl # since in this case data all shifted left by $Wl
+  
+  point <- NDest(dat1,hmltm.fit,W.est)
+  hmltm.obj <- list(hmltm.fit=hmltm.fit,point=point,dat=dat1,W.est=W.est)
+  class(hmltm.obj) <- c(class(hmltm.obj),"hmltm")
+  
+  return(hmltm.obj)
 }
