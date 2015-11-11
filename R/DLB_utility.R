@@ -156,8 +156,9 @@ sintegral <- function (fx, x, n.pts=16, type="int")
 #' @examples
 #' Ea=c(10,12);Eu=c(20,22);seEa=c(2,3);seEu=c(4,6);covEt=c(2,3)
 #' hmm.pars=make.hmm.pars.from.Et(Ea,Eu,seEa,seEu,covEt)
-#' laake.a(hmm.pars,ymax=200,spd=4) # because hmm.pars is in units of time, not distance, 
-#' you need to specify spd.
+#' 
+#' # because hmm.pars is in units of time, not distance, you need to specify spd.
+#' laake.a(hmm.pars,ymax=200,spd=4) 
 #' 
 #' @export
 
