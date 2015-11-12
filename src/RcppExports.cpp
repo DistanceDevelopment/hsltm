@@ -81,8 +81,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // pxy_double_rccp
-arma::vec pxy_double_rccp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::rowvec b1, arma::rowvec b2, arma::vec pcu, arma::mat Pi, arma::rowvec delta, double ymax, double dy, bool ally, bool cdf);
-RcppExport SEXP hsltm_pxy_double_rccp(SEXP xSEXP, SEXP ySEXP, SEXP dSEXP, SEXP hfunSEXP, SEXP b1SEXP, SEXP b2SEXP, SEXP pcuSEXP, SEXP PiSEXP, SEXP deltaSEXP, SEXP ymaxSEXP, SEXP dySEXP, SEXP allySEXP, SEXP cdfSEXP) {
+arma::vec pxy_double_rccp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::mat b, arma::vec pcu, arma::mat Pi, arma::rowvec delta, double ymax, double dy, bool ally, bool cdf);
+RcppExport SEXP hsltm_pxy_double_rccp(SEXP xSEXP, SEXP ySEXP, SEXP dSEXP, SEXP hfunSEXP, SEXP bSEXP, SEXP pcuSEXP, SEXP PiSEXP, SEXP deltaSEXP, SEXP ymaxSEXP, SEXP dySEXP, SEXP allySEXP, SEXP cdfSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -90,8 +90,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP);
     Rcpp::traits::input_parameter< arma::mat >::type d(dSEXP);
     Rcpp::traits::input_parameter< std::string >::type hfun(hfunSEXP);
-    Rcpp::traits::input_parameter< arma::rowvec >::type b1(b1SEXP);
-    Rcpp::traits::input_parameter< arma::rowvec >::type b2(b2SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type b(bSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type pcu(pcuSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type Pi(PiSEXP);
     Rcpp::traits::input_parameter< arma::rowvec >::type delta(deltaSEXP);
@@ -99,7 +98,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type dy(dySEXP);
     Rcpp::traits::input_parameter< bool >::type ally(allySEXP);
     Rcpp::traits::input_parameter< bool >::type cdf(cdfSEXP);
-    __result = Rcpp::wrap(pxy_double_rccp(x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf));
+    __result = Rcpp::wrap(pxy_double_rccp(x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf));
     return __result;
 END_RCPP
 }

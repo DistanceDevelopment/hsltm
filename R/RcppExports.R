@@ -104,8 +104,7 @@ pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) 
 #' @param d Matrix of detections (two columns: one for each observer). d[i,j] is
 #' 1 if observer j detected animal i, 0 otherwise.
 #' @param hfun Hazard function name.
-#' @param b1 Hazard function parameter vector of first observer.
-#' @param b2 Hazard function parameter vector of second oberver.
+#' @param b Hazard function parameter matrix (two columns: one for each observer).
 #' @param pcu Bernoulli state-dependent probability parameters.
 #' @param Pi Markov model transition probability matrix.
 #' @param delta Markov model stationary distribution.
@@ -117,7 +116,7 @@ pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) 
 #' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
 #' 
 #' @export
-pxy_double_rccp <- function(x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf) {
-    .Call('hsltm_pxy_double_rccp', PACKAGE = 'hsltm', x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
+pxy_double_rccp <- function(x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) {
+    .Call('hsltm_pxy_double_rccp', PACKAGE = 'hsltm', x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf)
 }
 

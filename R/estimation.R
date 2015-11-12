@@ -508,6 +508,11 @@ p.xy <- function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
   if(is.vector(pm)&!is.matrix(Pi) | !is.vector(pm)&is.matrix(Pi)) 
     stop("Single animal: pm is not a vector or Pi is not a matrix")
   
+  if(is.matrix(x))
+    single <- FALSE # double observer
+  else
+    single <- TRUE # single observer
+  
   if(is.vector(pm)) { # convert to matrix and array so can use loop below
     dimPi <- dim(Pi)
     Pi <- array(Pi,dim=c(dimPi[1:2],1))
@@ -516,7 +521,19 @@ p.xy <- function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
   }
   
   nw <- dim(pm)[2]
-  p <- rep(0,length(x))
+  
+  if(single) # one observer
+    p <- rep(0,length(x))
+  else { # two observers
+    p <- rep(0,nrow(x))
+    
+    # deduce detections from values of x
+    d <- matrix(NA,nrow=nrow(x),ncol=2)
+    d[which(is.na(x[,1])),1] <- 0
+    d[which(!is.na(x[,1])),1] <- 1
+    d[which(is.na(x[,2])),2] <- 0
+    d[which(!is.na(x[,2])),2] <- 1
+  } 
   
   if(dim(Pi)[3]!=nw) 
     stop("Last dimensions of pm and Pi must be the same.")
@@ -525,7 +542,15 @@ p.xy <- function(x,y,hfun,b,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=FALSE)
     Pi.w <- Pi[,,w]
     pm.w <- pm[,w]
     delta.w <- delta[,w]
-    p.w <- pxy_simple_rcpp(x,y,hfun,b,pm.w,Pi.w,delta.w,ymax,dy,ally,cdf)
+    
+    if(single) {
+      p.w <- pxy_simple_rcpp(x=x,y=y,hfun=hfun,b=b,pcu=pm.w,Pi=Pi.w,delta=delta.w,ymax=ymax,
+                             dy=dy,ally=ally,cdf=cdf)
+    } else {
+      p.w <- pxy_double_rcpp(x=x,y=y,d=d,hfun=hfun,b=b,pcu=pm.w,Pi=Pi.w,delta=delta.w,
+                             ymax=ymax,dy=dy,ally=ally,cdf=cdf)
+    }
+    
     p <- p+p.w
   }
   

@@ -4,7 +4,7 @@
 \alias{pxy_double_rccp}
 \title{Probability of detection (double observer)}
 \usage{
-pxy_double_rccp(x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
+pxy_double_rccp(x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf)
 }
 \arguments{
 \item{x}{Matrix of perpendicular distances (two columns: one for each observer)}
@@ -16,9 +16,7 @@ pxy_double_rccp(x, y, d, hfun, b1, b2, pcu, Pi, delta, ymax, dy, ally, cdf)
 
 \item{hfun}{Hazard function name.}
 
-\item{b1}{Hazard function parameter vector of first observer.}
-
-\item{b2}{Hazard function parameter vector of second oberver.}
+\item{b}{Hazard function parameter matrix (two columns: one for each observer).}
 
 \item{pcu}{Bernoulli state-dependent probability parameters.}
 

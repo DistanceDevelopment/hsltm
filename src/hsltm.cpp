@@ -271,8 +271,7 @@ arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowv
 //' @param d Matrix of detections (two columns: one for each observer). d[i,j] is
 //' 1 if observer j detected animal i, 0 otherwise.
 //' @param hfun Hazard function name.
-//' @param b1 Hazard function parameter vector of first observer.
-//' @param b2 Hazard function parameter vector of second oberver.
+//' @param b Hazard function parameter matrix (two columns: one for each observer).
 //' @param pcu Bernoulli state-dependent probability parameters.
 //' @param Pi Markov model transition probability matrix.
 //' @param delta Markov model stationary distribution.
@@ -285,13 +284,13 @@ arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowv
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec pxy_double_rccp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::rowvec b1, 
-                          arma::rowvec b2, arma::vec pcu, arma::mat Pi, arma::rowvec delta, 
-                          double ymax, double dy, bool ally, bool cdf)
+arma::vec pxy_double_rcpp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::mat b, 
+                          arma::vec pcu, arma::mat Pi, arma::rowvec delta, double ymax, double dy,
+			  bool ally, bool cdf)
 {
   int nbStates = pcu.size();
   int nbObs = x.n_rows;
-  int nbPar = b1.size()/nbObs;
+  int nbPar = b.n_rows/nbObs;
   
   arma::vec p(nbObs); // result
   arma::rowvec bb1(nbPar), bb2(nbPar);
@@ -329,8 +328,8 @@ arma::vec pxy_double_rccp(arma::mat x, arma::mat y, arma::mat d, std::string hfu
     prodB.eye();
     
     for(int j=0 ; j<nbPar ; j++) {
-      bb1[j] = b1[i*nbPar+j]; // select appropriate row of b1
-      bb2[j] = b2[i*nbPar+j]; // select appropriate row of b2
+      bb1[j] = b(i*nbPar+j,0); // select parameters for observer 1
+      bb2[j] = b(i*nbPar+j,1); // select parameters for observer 2
     }
     
     // transform parameters to natural scale
