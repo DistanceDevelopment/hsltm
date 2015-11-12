@@ -80,9 +80,9 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
-// pxy_double_rccp
-arma::vec pxy_double_rccp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::mat b, arma::vec pcu, arma::mat Pi, arma::rowvec delta, double ymax, double dy, bool ally, bool cdf);
-RcppExport SEXP hsltm_pxy_double_rccp(SEXP xSEXP, SEXP ySEXP, SEXP dSEXP, SEXP hfunSEXP, SEXP bSEXP, SEXP pcuSEXP, SEXP PiSEXP, SEXP deltaSEXP, SEXP ymaxSEXP, SEXP dySEXP, SEXP allySEXP, SEXP cdfSEXP) {
+// pxy_double_rcpp
+arma::vec pxy_double_rcpp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::mat b, arma::vec pcu, arma::mat Pi, arma::rowvec delta, double ymax, double dy, bool ally, bool cdf);
+RcppExport SEXP hsltm_pxy_double_rcpp(SEXP xSEXP, SEXP ySEXP, SEXP dSEXP, SEXP hfunSEXP, SEXP bSEXP, SEXP pcuSEXP, SEXP PiSEXP, SEXP deltaSEXP, SEXP ymaxSEXP, SEXP dySEXP, SEXP allySEXP, SEXP cdfSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -98,7 +98,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type dy(dySEXP);
     Rcpp::traits::input_parameter< bool >::type ally(allySEXP);
     Rcpp::traits::input_parameter< bool >::type cdf(cdfSEXP);
-    __result = Rcpp::wrap(pxy_double_rccp(x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf));
+    __result = Rcpp::wrap(pxy_double_rcpp(x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf));
     return __result;
 END_RCPP
 }

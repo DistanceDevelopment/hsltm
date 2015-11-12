@@ -116,7 +116,7 @@ pxy_simple_rcpp <- function(x, y, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) 
 #' to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.
 #' 
 #' @export
-pxy_double_rccp <- function(x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) {
-    .Call('hsltm_pxy_double_rccp', PACKAGE = 'hsltm', x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf)
+pxy_double_rcpp <- function(x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf) {
+    .Call('hsltm_pxy_double_rcpp', PACKAGE = 'hsltm', x, y, d, hfun, b, pcu, Pi, delta, ymax, dy, ally, cdf)
 }
 
