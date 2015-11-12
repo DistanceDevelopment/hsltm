@@ -459,8 +459,14 @@ negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 #' @export
 negllik.xy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy,nx=100,groupfromy=NULL)
 {
-  xydat <- xy[!is.na(xy$y),] # detections with x (perp) and y (forward) data
-  xdat <- xy[is.na(xy$y),]   # detections with x (perp) data only (no y data)
+  # indices of x-only data
+  if(is.null(xy$id))
+    xind <- (is.na(xy$y)) # one observer
+  else
+    xind <- (is.na(xy$y) & !is.na(xy$x)) # two observers
+
+  xydat <- xy[!xind,] # detections with x (perp) and y (forward) data
+  xdat <- xy[xind,]   # detections with x (perp) data only (no y data)
   
   xy.negllik <- negllik.xandy(b,xydat,FUN,models,pm,Pi,delta,W,ymax,dy,nx,groupfromy)
   
@@ -471,7 +477,6 @@ negllik.xy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy
   negllik <- xy.negllik+x.negllik
   return(negllik)
 }
-
 
 #' @title Calculates probability of first observing animal at (x,y).
 #'
