@@ -233,8 +233,6 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
   ###################################
   ## Deal with the ungrouped data: ##
   ###################################
-  n <- length(x)
-  
   llik <- 0
   
   # calculate p(see first @ y|x) at each (x,y):
@@ -243,20 +241,42 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
   if(any(li<.Machine$double.xmin)) 
     return(.Machine$double.xmax)
   
-  xs <- seq(0,W,length=nx)
-  nb <- length(covb)/n # number of parameters for each observation
+  if(is.null(xy$id)) {
+    # if one observer
+    n <- length(x)
+    nb <- length(covb)/n # number of parameters for each observation
+    
+    xs <- seq(0,W,length=nx)
+    ys <- rep(0,nx)
+  } else {
+    # if two observers
+    n <- nrow(x)
+    nb <- nrow(covb)/n # number of parameters for each observation
+    
+    xs <- matrix(c(seq(0,W,length=nx),seq(0,W,length=nx)),ncol=2)
+    ys <- matrix(0,ncol=2,nrow=nx)
+  }
   
   if(is.nullmodel(models)) {
     bi <- c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
-    ps <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+    ps <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     p <- sintegral(ps,xs)/W
   } else {
     ps <- matrix(rep(0,n*nx),nrow=n)
     
     for(i in 1:n) {
       start <- (i-1)*nb+1
-      bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      ps[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+      
+      # nx replicates of covb for ith detection
+      if(is.null(xy$id))
+        bi <- c(rep(covb[start:(start+nb-1)],nx)) 
+      else {
+        # if two observers
+        bi <- c(rep(covb[start:(start+nb-1),1],nx),rep(covb[start:(start+nb-1),2],nx))
+        bi <- matrix(bi,ncol=2)
+      }
+        
+      ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     
     p <- apply(ps,1,sintegral,xs)/W
@@ -267,39 +287,69 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
   #################################
   ## Deal with the grouped data: ##
   #################################
-  if(!is.null(groupfromy)){
-    ngrp <- length(xgrp)
+  if(!is.null(groupfromy)) {
     
-    if(ngrp>0){
-      if(length(ygrp)!=ngrp) 
-        stop("Length of ygrp: ",length(ygrp)," not equal to length of xgrp: ",ngrp,"\n")
-      
-      llik.grp <- 0
-      xs <- seq(0,W,length=nx)
+    if(is.null(xy$id)) {
+      # if one observer
+      ngrp <- length(xgrp)
       nb <- length(covbgrp)/ngrp # number of parameters for each observation
+      
+      xs <- seq(0,W,length=nx)
+      ys <- rep(0,nx)
+    } else {
+      # if two observers
+      ngrp <- nrow(xgrp)
+      nb <- nrow(covbgrp)/ngrp # number of parameters for each observation
+      
+      xs <- matrix(c(seq(0,W,length=nx),seq(0,W,length=nx)),ncol=2)
+      ys <- matrix(0,ncol=2,nrow=nx)
+    }
+    
+    if(ngrp>0) {
+      llik.grp <- 0
       
       if(is.nullmodel(models)) {
         bi <- c(rep(covbgrp[1:nb],nx)) # nx replicates of covbgrp for ith detection
-        ps <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+        ps <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         p <- sintegral(ps,xs)/W
       } else {
         ps=matrix(rep(0,ngrp*nx),nrow=ngrp)
         
         for(i in 1:ngrp) {
           start <- (i-1)*nb+1
-          bi <- c(rep(covbgrp[start:(start+nb-1)],nx)) # nx replicates of covbgrp for ith detection
-          ps[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+          
+          # nx replicates of covbgrp for ith detection
+          if(is.null(xy$id))
+            bi <- c(rep(covbgrp[start:(start+nb-1)],nx))
+          else {
+            # if two observers
+            bi <- c(rep(covbgrp[start:(start+nb-1),1],nx),rep(covbgrp[start:(start+nb-1),2],nx))
+            bi <- matrix(bi,ncol=2)
+          }
+          
+          ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         }
         
         p <- apply(ps,1,sintegral,xs)/W
       }
       
       # calculate p(see first at or after groupfromy|x) at each x:
-      pfar <- p.xy(x=xgrp,y=rep(groupfromy,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,
+      if(is.null(xy$id)) {
+        # one observer
+        yfar <- rep(groupfromy,ngrp) 
+        y0 <- rep(0,ngrp)
+      } else {
+        # two observers
+        yfar <- matrix(c(rep(groupfromy,ngrp),rep(groupfromy,ngrp)),ncol=2) 
+        y0 <- matrix(c(rep(0,ngrp),rep(0,ngrp)),ncol=2)
+      }
+      
+      pfar <- p.xy(x=xgrp,y=yfar,hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,
                    ymax=ymax,dy=dy,cdf=TRUE)
-      p0 <- p.xy(x=xgrp,y=rep(0,ngrp),hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,ymax=ymax,
-                 dy=dy,cdf=TRUE)
+      p0 <- p.xy(x=xgrp,y=y0,hfun=FUN,b=covbgrp,pm=pm,Pi=Pi,delta=delta,
+                 ymax=ymax,dy=dy,cdf=TRUE)
       pnear <- p0-pfar
+      
       llik <- llik+sum(log(pnear)-log(p))
     }
   }
