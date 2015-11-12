@@ -379,30 +379,49 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
 #' @export
 negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 {
-  covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
+  covb <- make.covb(b,FUN,models,xy) # put covariates into parameters
   x <- xy$x
-  n <- length(x)
+  
+  if(is.null(xy$id)) {
+    n <- length(x)  
+    xs <- seq(0,W,length=nx)
+    y <- rep(0,n)
+    ys <- rep(0,nx)
+    nb <- length(covb)/n # number of parameters for each observation
+  } else {
+    n <- nrow(x)
+    xs <- matrix(c(seq(0,W,length=nx),seq(0,W,length=nx)),ncol=2)
+    y <- matrix(c(rep(0,n),rep(0,n)),ncol=2)
+    ys <- matrix(c(rep(0,nx),rep(0,nx)),ncol=2)
+    nb <- nrow(covb)/n # number of parameters for each observation
+  }
   
   llik <- 0
   
   # calculate p(see BY y=0 |x) at each x:
-  li <- p.xy(x,y=rep(0,n),hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+  li <- p.xy(x,y=y,hfun=FUN,b=covb,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
   
   # calculate p(see by min y in window|x) over all x:
-  xs <- seq(0,W,length=nx)
-  nb <- length(covb)/n # number of parameters for each observation
-  
   if(is.nullmodel(models)) {
     bi <- c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
-    ps <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+    ps <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     p <- sintegral(ps,xs)/W
   } else {
     ps <- matrix(rep(0,n*nx),nrow=n)
     
     for(i in 1:n) {
       start <- (i-1)*nb+1
-      bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
-      ps[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
+      
+      # nx replicates of covbgrp for ith detection
+      if(is.null(xy$id))
+        bi <- c(rep(covb[start:(start+nb-1)],nx))
+      else {
+        # if two observers
+        bi <- c(rep(covb[start:(start+nb-1),1],nx),rep(covb[start:(start+nb-1),2],nx))
+        bi <- matrix(bi,ncol=2)
+      }
+      
+      ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     
     p <- apply(ps,1,sintegral,xs)/W
