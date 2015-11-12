@@ -196,21 +196,44 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
     ygrp <- xy$y[grouped]
     x <- xy$x[!grouped]
     y <- xy$y[!grouped]
-    covb <- make.covb(b,FUN,models,xy[!grouped,]) # put covariates into paramerters; ungrouped data
-    covbgrp <- make.covb(b,FUN,models,xy[grouped,]) # put covariates into paramerters; ungrouped data
+    covb <- make.covb(b,FUN,models,xy[!grouped,]) # put covariates into parameters; ungrouped data
+    covbgrp <- make.covb(b,FUN,models,xy[grouped,]) # put covariates into parameters; grouped data
+    
+    # if two observers, split observations
+    if(!is.null(xy$id)) {
+      idgrp <- xy$id[grouped]
+      id <- xy$id[!grouped]
+      
+      xgrpmat <- matrix(c(xgrp[which(idgrp==1)],x[which(idgrp==2)]),ncol=2)
+      ygrpmat <- matrix(c(ygrp[which(idgrp==1)],y[which(idgrp==2)]),ncol=2)
+      xgrp <- xgrpmat
+      ygrp <- ygrpmat
+      
+      xmat <- matrix(c(x[which(id==1)],x[which(id==2)]),ncol=2)
+      ymat <- matrix(c(y[which(id==1)],y[which(id==2)]),ncol=2)
+      x <- xmat
+      y <- ymat
+    }
+    
   } else {
     x <- xy$x
     y <- xy$y
     covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
+  
+    # if two observers, split observations
+    if(!is.null(xy$id)) {
+      id <- xy$id
+      xmat <- matrix(c(x[which(id==1)],x[which(id==2)]),ncol=2)
+      ymat <- matrix(c(y[which(id==1)],y[which(id==2)]),ncol=2)
+      x <- xmat
+      y <- ymat
+    }
   }
   
   ###################################
   ## Deal with the ungrouped data: ##
   ###################################
   n <- length(x)
-  
-  if(length(y)!=n) 
-    stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
   
   llik <- 0
   
@@ -308,11 +331,7 @@ negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 {
   covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
   x <- xy$x
-  y <- xy$y
   n <- length(x)
-  
-  if(length(y)!=n) 
-    stop("Length of y: ",length(y)," not equal to length of x: ",n,"\n")
   
   llik <- 0
   
@@ -329,11 +348,13 @@ negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
     p <- sintegral(ps,xs)/W
   } else {
     ps <- matrix(rep(0,n*nx),nrow=n)
+    
     for(i in 1:n) {
       start <- (i-1)*nb+1
       bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
       ps[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
+    
     p <- apply(ps,1,sintegral,xs)/W
   }
   
