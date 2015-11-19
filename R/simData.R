@@ -115,7 +115,7 @@ simData_double <- function(nbObs,pcu,gamma,b,hfun,xmax,ymax,ystep)
     hfun <- c(hfun,hfun)
   
   # data frame of observations
-  data <- data.frame(j=rep(NA,2*nbObs),d=rep(NA,2*nbObs),x=rep(NA,2*nbObs),y=rep(NA,2*nbObs))
+  data <- data.frame(id=rep(NA,2*nbObs),d=rep(NA,2*nbObs),x=rep(NA,2*nbObs),y=rep(NA,2*nbObs))
   
   # initial distribution of the Markov chain
   delta <- solve(t(diag(2)-gamma+1),rep(1,2))

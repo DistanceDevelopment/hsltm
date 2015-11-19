@@ -649,61 +649,59 @@ make.covb <- function(b,FUN,models,dat)
     n <- dim(dat)[1]
     #    covb=matrix(c(rep(b,rep(n,nfixed))),ncol=nfixed)
     covb <- rep(b,n)
-  } else {
-    if(FUN=="h.EP2.0" | FUN=="h.EP1.0" | FUN=="h.IP.0"){
+  } else if(FUN=="h.EP2.0" | FUN=="h.EP1.0" | FUN=="h.IP.0") {
+    X <- model.matrix(as.formula(models$y),data=dat)
+    n <- dim(X)[1]
+    nb <- dim(X)[2]
+    
+    nfixed <- nfixed-1
+    if(length(b) != (nfixed+nb)) 
+      stop("length of b inconsistent with model")
+    
+    covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)]),ncol=(nfixed+1))
+    covb <- as.vector(t(covb))
+  } else if(FUN=="h.EP2x.0" | FUN=="h.EP1x.0") {
+    if(!is.null(models$y)){
       X <- model.matrix(as.formula(models$y),data=dat)
       n <- dim(X)[1]
-      nb <- dim(X)[2]
+      nb <- dim(X)[2]   
       
-      nfixed <- nfixed-1
-      if(length(b) != (nfixed+nb)) 
-        stop("length of b inconsistent with model")
-      
-      covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)]),ncol=(nfixed+1))
-      covb <- as.vector(t(covb))
-    }
-    else if(FUN=="h.EP2x.0" | FUN=="h.EP1x.0"){
-      if(!is.null(models$y)){
-        X <- model.matrix(as.formula(models$y),data=dat)
-        n <- dim(X)[1]
-        nb <- dim(X)[2]   
-        
-        if(!is.null(models$x)) { # here if have covariates for x and y
-          X.x <- model.matrix(as.formula(models$x),data=dat)
-          nb.x <- dim(X.x)[2]
-          nfixed <- nfixed-2
-          
-          if(length(b) != (nfixed+nb+nb.x)) 
-            stop("length of b inconsistent with model and model.x")
-          
-          covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)],X.x%*%b[nfixed+nb+(1:nb.x)]),
-                         ncol=(nfixed+2))  
-          covb <- as.vector(t(covb))
-        } else { # here if have covariates for y only
-          nfixed <- nfixed-1
-          if(length(b) != (nfixed+nb)) 
-            stop("length of b inconsistent with model and model.x")
-          
-          covb <- matrix(c(rep(b[1:(nfixed-1)],rep(n,(nfixed-1))),X%*%b[(nfixed-1)+(1:nb)],
-                           rep(b[length(b)],n)),ncol=(nfixed+1))  #### bitchange 
-          covb <- as.vector(t(covb))
-        }
-      } else { # here if have covariates for x only
+      if(!is.null(models$x)) { # here if have covariates for x and y
         X.x <- model.matrix(as.formula(models$x),data=dat)
-        n.x <- dim(X.x)[1]
         nb.x <- dim(X.x)[2]
-        nfixed <- nfixed-1
+        nfixed <- nfixed-2
         
-        if(length(b) != (nfixed+nb.x)) 
+        if(length(b) != (nfixed+nb+nb.x)) 
           stop("length of b inconsistent with model and model.x")
         
-        covb <- matrix(c(rep(b[1:nfixed],rep(n.x,nfixed)),X.x%*%b[nfixed+(1:nb.x)]),ncol=(nfixed+1))  
-        covb <- as.vector(t(covb))        
+        covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)],X.x%*%b[nfixed+nb+(1:nb.x)]),
+                       ncol=(nfixed+2))  
+        covb <- as.vector(t(covb))
+      } else { # here if have covariates for y only
+        nfixed <- nfixed-1
+        if(length(b) != (nfixed+nb)) 
+          stop("length of b inconsistent with model and model.x")
+        
+        covb <- matrix(c(rep(b[1:(nfixed-1)],rep(n,(nfixed-1))),X%*%b[(nfixed-1)+(1:nb)],
+                         rep(b[length(b)],n)),ncol=(nfixed+1))  #### bitchange 
+        covb <- as.vector(t(covb))
       }
-    } else {
-      stop("Invalid FUN.")
+    } else { # here if have covariates for x only
+      X.x <- model.matrix(as.formula(models$x),data=dat)
+      n.x <- dim(X.x)[1]
+      nb.x <- dim(X.x)[2]
+      nfixed <- nfixed-1
+      
+      if(length(b) != (nfixed+nb.x)) 
+        stop("length of b inconsistent with model and model.x")
+      
+      covb <- matrix(c(rep(b[1:nfixed],rep(n.x,nfixed)),X.x%*%b[nfixed+(1:nb.x)]),ncol=(nfixed+1))  
+      covb <- as.vector(t(covb))        
     }
+  } else {
+    stop("Invalid FUN.")
   }
+  
   return(covb)
 }
 

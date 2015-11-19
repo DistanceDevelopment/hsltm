@@ -51,7 +51,7 @@ lnci.nmin=function(n,Nhat,cv){
 #' stratum with detections (and the total) and columns as follows:
 #' \itemize{
 #' \item{Stratum} stratum number
-#' \item{n} original number of detection
+#' \item{n} original number of detections
 #' \item{n.L} original encounter rate
 #' \item{CV.n.L} percentage coefficient of variation of encounter rate
 #' \item{N.grp} original estimate of group abundance
