@@ -27,7 +27,7 @@ two observers have different detection functions)}
 }
 \value{
 A data frame with the following columns:
-\item{j}{Index of the observer}
+\item{id}{Index of the observer}
 \item{d}{1 if observed, 0 otherwise}
 \item{x}{Perpendicular distance of the observation}
 \item{y}{Forward distance of the observation}

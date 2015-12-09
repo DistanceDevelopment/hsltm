@@ -91,7 +91,7 @@ simData_simple <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
 #' @param ystep Discretization step for the forward distance
 #' 
 #' @return A data frame with the following columns:
-#' \item{j}{Index of the observer}
+#' \item{id}{Index of the observer}
 #' \item{d}{1 if observed, 0 otherwise}
 #' \item{x}{Perpendicular distance of the observation}
 #' \item{y}{Forward distance of the observation}
