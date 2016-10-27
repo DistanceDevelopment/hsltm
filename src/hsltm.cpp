@@ -261,7 +261,7 @@ arma::vec pxy_simple_rcpp(arma::vec x, arma::vec y, std::string hfun, arma::rowv
 // [[Rcpp::export]]
 arma::vec pxy_double_rcpp(arma::mat x, arma::mat y, arma::mat d, std::string hfun, arma::mat b, 
                           arma::vec pcu, arma::mat Pi, arma::rowvec delta, double ymax, double dy,
-			  bool ally, bool cdf)
+                          bool ally, bool cdf)
 {
   int nbStates = pcu.size();
   int nbObs = x.n_rows;
