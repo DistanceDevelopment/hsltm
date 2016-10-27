@@ -551,28 +551,15 @@ NDest <- function(dat,hmltm.fit,W){
 #' 
 #' @export
 #' @useDynLib hsltm
-est.hmltm <- function(dat,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.pars,
+est.hmltm <- function(dat,pars,FUN,models=list(y=~NULL,x=~NULL),survey.pars,hmm.pars,
                       control.fit,control.opt,twosit=FALSE,notrunc=FALSE,W.est=NULL,
                       groupfromy=NULL)
 {
-  ## # convert mrds data to cds data format (combining detections)
-  ## if(twosit) 
-  ##   dat1 <- make.onesit(dat) 
-  ## else 
-  ##   dat1 <- dat
-  
-  if(twosit) {
-    # add the observer's id to the x-model, and to the y-model if necessary
-    if(!is.null(models$x))
-      models$x <- update(models$x, ~ . + id)
-    else
-      models$x <- ~id
-    
-    if(!is.null(models$y))
-      models$y <- update(models$y, ~ . + id)
-    else if(!is.null(dat$y))
-      models$y <- ~id
-  }
+  # If no covariate in either dimension, set to NULL formula
+  if(is.null(models$y))
+    models$y <- ~NULL
+  if(is.null(models$x))
+    models$x <- ~NULL
   
   # data truncation:
   if(!notrunc) {
