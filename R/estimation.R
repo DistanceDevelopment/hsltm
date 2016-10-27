@@ -127,7 +127,7 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
   } else {
     px <- matrix(rep(0,nx*n),nrow=n)
     phat <- rep(0,n)
-    covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
+    covb <- makeCovPar(b,FUN,models,xy) # put covariates into paramerters
     nb <- length(covb)/n
     
     for(i in 1:n) {
@@ -196,8 +196,8 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
     ygrp <- xy$y[grouped]
     x <- xy$x[!grouped]
     y <- xy$y[!grouped]
-    covb <- make.covb(b,FUN,models,xy[!grouped,]) # put covariates into parameters; ungrouped data
-    covbgrp <- make.covb(b,FUN,models,xy[grouped,]) # put covariates into parameters; grouped data
+    covb <- makeCovPar(b,FUN,models,xy[!grouped,]) # put covariates into parameters; ungrouped data
+    covbgrp <- makeCovPar(b,FUN,models,xy[grouped,]) # put covariates into parameters; grouped data
     
     # if two observers, split observations
     if(!is.null(xy$id)) {
@@ -218,7 +218,7 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
   } else {
     x <- xy$x
     y <- xy$y
-    covb <- make.covb(b,FUN,models,xy) # put covariates into paramerters
+    covb <- makeCovPar(b,FUN,models,xy) # put covariates into paramerters
   
     # if two observers, split observations
     if(!is.null(xy$id)) {
@@ -379,7 +379,7 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
 #' @export
 negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
 {
-  covb <- make.covb(b,FUN,models,xy) # put covariates into parameters
+  covb <- makeCovPar(b,FUN,models,xy) # put covariates into parameters
   x <- xy$x
   
   if(is.null(xy$id)) {

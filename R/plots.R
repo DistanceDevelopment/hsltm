@@ -46,7 +46,7 @@ h.plot <- function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange
   h <- match.fun(hfun)
   
   if(!is.null(dat)) {
-    covb <- make.covb(b,hfun,models,dat)
+    covb <- makeCovPar(b,hfun,models,dat)
     nb <- length(covb)/n
   }
   else 
@@ -151,7 +151,7 @@ f.plot <- function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pa
   }
   
   if(!is.null(dat)) {
-    covb <- make.covb(b,hfun,models,dat)
+    covb <- makeCovPar(b,hfun,models,dat)
     nb <- length(covb)/n
   }
   else 
@@ -227,7 +227,7 @@ fyfit.plot <- function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
   #  x=sort(xy$x)
   x <- xy$x
   nx <- length(x)
-  covb <- make.covb(b,hfun,models,xy) # put covariates into parameters
+  covb <- makeCovPar(b,hfun,models,xy) # put covariates into parameters
   nb <- length(covb)/nx # number of parameters for each observation
   
   maxy <- 0

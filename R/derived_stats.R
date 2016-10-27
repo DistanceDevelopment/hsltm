@@ -40,7 +40,7 @@ hmltm.px <- function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars
   
   if(!is.null(cov) & !(is.nullmodel(models))) { # only use covars if have them and model uses them
     n <- dim(cov)[1]
-    covb <- make.covb(b,hfun,models,cov) # put covariates into paramerters
+    covb <- makeCovPar(b,hfun,models,cov) # put covariates into paramerters
   } 
   
   nb <- length(covb)/n

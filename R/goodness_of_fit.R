@@ -34,7 +34,7 @@ hmmlt.gof.y <- function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitp
   pm <- hmmlt$fitpars$hmm.pars$pm
   delta <- hmmlt$fitpars$hmm.pars$delta
   n <- length(dat$x)
-  covb <- make.covb(b,hfun,models,dat) # put covariates into paramerters
+  covb <- makeCovPar(b,hfun,models,dat) # put covariates into paramerters
   Fy <- p.xy(dat$x,dat$y,hfun,b=covb,pm,Pi,delta,ymax,dy,ally=FALSE,cdf=TRUE)
   F0 <- p.xy(dat$x,dat$y,hfun,b=covb,pm,Pi,delta,ymax,dy,ally=TRUE,cdf=FALSE)
   #  Fy=Fx.cox.Q(dat$x,dat$y,mu,ystart,Q,b) # area up to y
