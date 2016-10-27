@@ -629,82 +629,46 @@ is.nullmodel <- function(models){
 #' \code{$x}.
 #' 
 #' @export
-make.covb <- function(b,FUN,models,dat)
+makeCovPar <- function(b, FUN, models, dat)
 {
-  nfixed <- switch(FUN,
-                   h.IP.0 = 2,
-                   h.EP1.0 = 2,
-                   h.EP2.0 = 3,
-                   h.EP1x.0 = 3,
-                   h.EP2x.0 = 4,
-                   0)
+  cov_x <- model.matrix(as.formula(models$x),data=dat)
+  nbCov_x <- ncol(cov_x) - 1
+  cov_y <- model.matrix(as.formula(models$y),data=dat)
+  nbCov_y <- ncol(cov_y) - 1
   
-  if(nfixed==0) 
-    stop("Hazard model ",FUN," is not programmed (yet).")
+  if(hfun=="h.IP" | hfun=="h.EP1" | hfun=="h.EP1x")
+    nbShapePar <- 1
+  else
+    nbShapePar <- 2
   
-  if(is.nullmodel(models)) {
-    if(length(b) != nfixed) 
-      stop("length of b inconsistent with model")
-    
-    n <- dim(dat)[1]
-    #    covb=matrix(c(rep(b,rep(n,nfixed))),ncol=nfixed)
-    covb <- rep(b,n)
-  } else if(FUN=="h.EP2.0" | FUN=="h.EP1.0" | FUN=="h.IP.0") {
-    X <- model.matrix(as.formula(models$y),data=dat)
-    n <- dim(X)[1]
-    nb <- dim(X)[2]
-    
-    nfixed <- nfixed-1
-    if(length(b) != (nfixed+nb)) 
-      stop("length of b inconsistent with model")
-    
-    covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)]),ncol=(nfixed+1))
-    covb <- as.vector(t(covb))
-  } else if(FUN=="h.EP2x.0" | FUN=="h.EP1x.0") {
-    if(!is.null(models$y)){
-      X <- model.matrix(as.formula(models$y),data=dat)
-      n <- dim(X)[1]
-      nb <- dim(X)[2]   
-      
-      if(!is.null(models$x)) { # here if have covariates for x and y
-        X.x <- model.matrix(as.formula(models$x),data=dat)
-        nb.x <- dim(X.x)[2]
-        nfixed <- nfixed-2
-        
-        if(length(b) != (nfixed+nb+nb.x)) 
-          stop("length of b inconsistent with model and model.x")
-        
-        covb <- matrix(c(rep(b[1:nfixed],rep(n,nfixed)),X%*%b[nfixed+(1:nb)],X.x%*%b[nfixed+nb+(1:nb.x)]),
-                       ncol=(nfixed+2))  
-        covb <- as.vector(t(covb))
-      } else { # here if have covariates for y only
-        nfixed <- nfixed-1
-        if(length(b) != (nfixed+nb)) 
-          stop("length of b inconsistent with model and model.x")
-        
-        covb <- matrix(c(rep(b[1:(nfixed-1)],rep(n,(nfixed-1))),X%*%b[(nfixed-1)+(1:nb)],
-                         rep(b[length(b)],n)),ncol=(nfixed+1))  #### bitchange 
-        covb <- as.vector(t(covb))
-      }
-    } else { # here if have covariates for x only
-      X.x <- model.matrix(as.formula(models$x),data=dat)
-      n.x <- dim(X.x)[1]
-      nb.x <- dim(X.x)[2]
-      nfixed <- nfixed-1
-      
-      if(length(b) != (nfixed+nb.x)) 
-        stop("length of b inconsistent with model and model.x")
-      
-      covb <- matrix(c(rep(b[1:nfixed],rep(n.x,nfixed)),X.x%*%b[nfixed+(1:nb.x)]),ncol=(nfixed+1))  
-      covb <- as.vector(t(covb))        
-    }
+  if(hfun=="h.IP" | hfun=="h.EP1" | hfun=="h.EP2")
+    nbScalePar <- 1
+  else 
+    nbScalePar <- 2
+  
+  if(nbShapePar==1) {
+    shape <- b[1]
+    covb <- matrix(shape,nrow=nbObs,ncol=1)
   } else {
-    stop("Invalid FUN.")
+    shape_x <- b[1]
+    shape_y <- b[2]
+    covb <- matrix(c(rep(shape_x,nbObs),rep(shape_y,nbObs)),ncol=2)
   }
   
+  if(nbScalePar==1) {
+    beta <- b[(nbShapePar+1):length(b)]
+    scale <- cov_x%*%beta
+    covb <- cbind(covb,exp(scale))
+  } else {
+    beta_x <- b[(nbShapePar+1):(nbShapePar+nbCov_x+1)]
+    beta_y <- b[(nbShapePar+nbCov_x+2):length(b)]
+    scale_x <- cov_x%*%beta_x
+    scale_y <- cov_y%*%beta_y
+    covb <- cbind(covb,exp(scale_x),exp(scale_y))
+  }
+
   return(covb)
 }
-
 
 
 #' @title Constructs a HMM equivalent to a Poisson process.
