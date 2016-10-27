@@ -631,6 +631,8 @@ is.nullmodel <- function(models){
 #' @export
 makeCovPar <- function(b, FUN, models, dat)
 {
+  nbObs <- nrow(dat)
+  
   cov_x <- model.matrix(as.formula(models$x),data=dat)
   nbCov_x <- ncol(cov_x) - 1
   cov_y <- model.matrix(as.formula(models$y),data=dat)
@@ -666,7 +668,18 @@ makeCovPar <- function(b, FUN, models, dat)
     scale_y <- cov_y%*%beta_y
     covb <- cbind(covb,exp(scale_x),exp(scale_y))
   }
-
+  
+  if(is.null(dat$id)) {
+    # if single-observer case
+    covb <- as.vector(t(covb))
+  } else {
+    # if double-observer case
+    covb_obs1 <- covb[which(dat$obs==1),]
+    covb_obs2 <- covb[which(dat$obs==2),]
+    covb <- matrix(c(as.vector(t(covb_obs1)),as.vector(t(covb_obs2))),
+                   ncol=2)
+  }
+  
   return(covb)
 }
 
