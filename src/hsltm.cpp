@@ -84,38 +84,23 @@ double h_rcpp(double x, double y, arma::rowvec b, std::string hfun)
     a1 = pow(std::abs(x),b[1])+pow(y,b[1]);
     a2 = pow(b[2],b[1]);
     res = b[0]*exp(-a1/a2);
-  }
-  else if(hfun=="h.EP1.0") {
-    a1 = pow(std::abs(x),b[1])+pow(y,b[1]);
-    a2 = pow(b[2],b[1]);
-    res = b[0]*exp(-a1/a2);
   } 
-  else if(hfun=="h.EP1x.0") {
+  else if(hfun=="h.EP1x") {
     a1 = pow(std::abs(x)/b[2],b[0]);
     a2 = pow(std::abs(y)/b[1],b[0]);
     res = exp(-(a1+a2));
   }
-  else if(hfun=="h.EP2") {
-    a1 = pow(std::abs(x)/b[3],b[1]);
-    a2 = pow(std::abs(y)/b[3],b[2]);
-    res = b[0]*exp(-(a1+a2));
-  }
-  else if(hfun=="h.EP2x.0") {
+  else if(hfun=="h.EP2x") {
     a1 = pow(std::abs(x)/b[3],b[0]);
     a2 = pow(std::abs(y)/b[2],b[1]);
     res = exp(-(a1+a2));
   }
-  else if(hfun=="h.EP2.0") {
+  else if(hfun=="h.EP2") {
     a1 = pow(std::abs(x)/b[2],b[0]);
     a2 = pow(std::abs(y)/b[2],b[1]);
     res = exp(-(a1+a2));
   }
   else if(hfun=="h.IP") {
-    a1 = b[1]*log(b[2]);
-    a2 = b[1]/2*log(b[2]*b[2]+x*x+y*y);
-    res = b[0]*exp(a1-a2);
-  }
-  else if(hfun=="h.IP.0") {
     a1 = b[0]*log(b[1]);
     a2 = b[1]/2*log(b[1]*b[1]+x*x+y*y);
     res = exp(a1-a2);
