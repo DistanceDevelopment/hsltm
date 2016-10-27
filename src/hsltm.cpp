@@ -1,14 +1,6 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
-// logit and inv_logit are used in the parameters' transformation
-double logit(double x) {
-  return log(x/(1+x));
-}
-double inv_logit(double x) {
-  return 1/(1+exp(-x));
-}
-
 //' Parameters transformation
 //' 
 //' Scale parameters from their "natural" interval to their "working" interval, 
@@ -24,18 +16,17 @@ double inv_logit(double x) {
 // [[Rcpp::export]]
 arma::rowvec n2w_rcpp(arma::rowvec par, std::string hfun)
 {
-  arma::rowvec res(par.size());
+  int nbShapePar;
+  if(hfun=="h.IP" || hfun=="h.EP1" || hfun=="h.EP1x")
+    nbShapePar = 1;
+  else
+    nbShapePar = 2;
   
-  if(hfun=="h.EP1.0" || hfun=="h.EP1x.0" || hfun=="h.EP2x.0" || hfun=="h.EP2.0" || 
-     hfun=="h.IP" || hfun=="h.IP.0") {
-    for(int i=0 ; i<par.size() ; i++)
-      res[i] = log(par[i]);
-  }
-  else if(hfun=="h.EP1" || hfun=="h.EP2") {
-    res[0] = logit(par[0]);
-    for(int i=1 ; i<par.size() ; i++)
-      res[i] = log(par[i]);
-  }
+  arma::rowvec res(par.size());
+  for(int i=0 ; i<nbShapePar ; i++)
+    res[i] = log(par[i]); // shape > 0
+  for(int i=nbShapePar ; i<par.size() ; i++)
+    res[i] = par[i]; // betas real-valued
   
   return res;
 }
@@ -55,18 +46,17 @@ arma::rowvec n2w_rcpp(arma::rowvec par, std::string hfun)
 // [[Rcpp::export]]
 arma::rowvec w2n_rcpp(arma::rowvec par, std::string hfun)
 {
-  arma::rowvec res(par.size());
+  int nbShapePar;
+  if(hfun=="h.IP" || hfun=="h.EP1" || hfun=="h.EP1x")
+    nbShapePar = 1;
+  else
+    nbShapePar = 2;
   
-  if(hfun=="h.EP1.0" || hfun=="h.EP1x.0" || hfun=="h.EP2x.0" || hfun=="h.EP2.0" || 
-     hfun=="h.IP" || hfun=="h.IP.0") {
-    for(int i=0 ; i<par.size() ; i++)
-      res[i] = exp(par[i]);
-  }
-  else if(hfun=="h.EP1" || hfun=="h.EP2") {
-    res[0] = inv_logit(par[0]);
-    for(int i=1 ; i<par.size() ; i++)
-      res[i] = exp(par[i]);
-  }
+  arma::rowvec res(par.size());
+  for(int i=0 ; i<nbShapePar ; i++)
+    res[i] = exp(par[i]); // shape > 0
+  for(int i=nbShapePar ; i<par.size() ; i++)
+    res[i] = par[i]; // betas real-valued
   
   return res;
 }
