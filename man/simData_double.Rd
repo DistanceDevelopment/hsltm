@@ -4,10 +4,10 @@
 \alias{simData_double}
 \title{Simulation (two observers)}
 \usage{
-simData_double(nbObs, pcu, gamma, b, hfun, xmax, ymax, ystep)
+simData_double(nbAnimals, pcu, gamma, b, hfun, xmax, ymax, ystep)
 }
 \arguments{
-\item{nbObs}{Number of observations to simulate}
+\item{nbAnimals}{Number of animals}
 
 \item{pcu}{Vector of state dependent availability parameters (Pr(available|state))}
 
@@ -45,7 +45,7 @@ pcu <- c(0.9,0)
 gamma <- matrix(c(0.9,0.1,0.1,0.9),nrow=2)
 b <- list(c(0.9,0.75,10),c(0.5,0.8,8))
 hfun <- "h.EP2.0"
-data <- simData_double(nbObs=100,pcu=pcu,gamma=gamma,b=b,hfun=hfun,xmax=100,ymax=100,ystep=1)
+data <- simData_double(nbAnimals=100,pcu=pcu,gamma=gamma,b=b,hfun=hfun,xmax=100,ymax=100,ystep=1)
 
 }
 
