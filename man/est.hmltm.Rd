@@ -4,7 +4,7 @@
 \alias{est.hmltm}
 \title{Line transect estimation with a hidden Markov availability model.}
 \usage{
-est.hmltm(dat, pars, FUN, models = list(y = NULL, x = NULL), survey.pars,
+est.hmltm(dat, pars, FUN, models = list(y = ~NULL, x = ~NULL), survey.pars,
   hmm.pars, control.fit, control.opt, twosit = FALSE, notrunc = FALSE,
   W.est = NULL, groupfromy = NULL)
 }
