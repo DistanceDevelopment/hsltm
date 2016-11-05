@@ -674,8 +674,8 @@ makeCovPar <- function(b, FUN, models, dat)
     covb <- as.vector(t(covb))
   } else {
     # if double-observer case
-    covb_obs1 <- covb[which(dat$obs==1),]
-    covb_obs2 <- covb[which(dat$obs==2),]
+    covb_obs1 <- covb[which(dat$id==1),]
+    covb_obs2 <- covb[which(dat$id==2),]
     covb <- matrix(c(as.vector(t(covb_obs1)),as.vector(t(covb_obs2))),
                    ncol=2)
   }
