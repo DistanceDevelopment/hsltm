@@ -135,7 +135,7 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
       bi <- c(rep(covb[start:(start+nb-1)],nx)) # nx replicates of covb for ith detection
       px[i,] <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
-    
+
     phat <- apply(px,1,sintegral,xs)/W
   }
   
@@ -279,7 +279,7 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
       ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     
-    p <- apply(ps,1,sintegral,xs)/W
+    p <- apply(ps,1,sintegral,xs[,1])/W
   }
   
   llik <- sum(log(li)-log(p))
@@ -330,7 +330,7 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
           ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         }
         
-        p <- apply(ps,1,sintegral,xs)/W
+        p <- apply(ps,1,sintegral,xs[,1])/W
       }
       
       # calculate p(see first at or after groupfromy|x) at each x:
@@ -424,7 +424,7 @@ negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
       ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     
-    p <- apply(ps,1,sintegral,xs)/W
+    p <- apply(ps,1,sintegral,xs[,1])/W
   }
   
   if(any(li<.Machine$double.xmin)) 
