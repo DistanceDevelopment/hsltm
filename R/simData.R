@@ -23,13 +23,28 @@
 #' 
 #' @export
 
-simData_simple <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
+simData_simple <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep,
+                           models=list(x=~NULL,y=~NULL),cov=NULL)
 {
   # data frame of observations
-  data <- data.frame(x=numeric(),y=numeric())
+  data <- NULL
   
   # initial distribution of the Markov chain
   delta <- solve(t(diag(2)-gamma+1),rep(1,2))
+  
+  # upper bound for number of observations (I think)
+  nbObsMax <- nbAnimals*ceiling(ymax/ystep)
+  
+  # compute parameters as function of covariates
+  if(!is.null(cov)) {
+    covPar <- makeCovPar(b,hfun,models,cov)
+    covParMat <- matrix(covPar,nrow=nrow(cov),byrow=TRUE)
+  } else {
+    covPar <- makeCovPar(b,hfun,models,data.frame(na=rep(NA,nbObsMax)))
+    covParMat <- matrix(covPar,nrow=nbObsMax,byrow=TRUE)
+  }
+  
+  i <- 1 # covariate index
   
   # loop over the animals
   for(zoo in 1:nbAnimals) {
@@ -41,7 +56,7 @@ simData_simple <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
     ystart <- ymax
     y <- seq(ystart,0,by=-ystep) # grid of y values
     
-    if(A==1 & runif(1)<h_rcpp(x,y[t],b,hfun))
+    if(A==1 & runif(1)<h_rcpp(x,y[t],covParMat[i,],hfun))
       D <- TRUE # detection process
     else
       D <- FALSE
@@ -49,11 +64,12 @@ simData_simple <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
     # while the animal is not detected and hasn't left the observed area
     while(!D & t<length(y)) {
       t <- t+1
+      i <- i+1
       S <- sample(1:2,size=1,prob=gamma[S,])
       A <- sample(0:1,size=1,prob=c(1-pcu[S],pcu[S]))
       
       r <- runif(1)
-      p <- pcu[S]*h_rcpp(x,y[t],b,hfun)
+      p <- pcu[S]*h_rcpp(x,y[t],covParMat[i,],hfun)
       
       if(A==1 & r<p)
         D <- TRUE
@@ -61,13 +77,13 @@ simData_simple <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
     
     # if detected
     if(D)
-      data <- rbind(data,c(x,y[t]))
+      data <- rbind(data,c(x,y[t],cov[i,]))
     
     # else, the animal has gone through the observed area without being detected
   }
   
-  colnames(data) <- c("x","y")
-  return(data)
+  colnames(data) <- c("x","y",colnames(cov))
+  return(as.data.frame(data))
 }
 
 
@@ -105,16 +121,43 @@ simData_simple <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
 #' 
 #' @export
 
-simData_double <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
+simData_double <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep,
+                           models=list(x=~NULL,y=~NULL),cov=NULL)
 {
   if(length(hfun)==1)
     hfun <- c(hfun,hfun)
   
   # data frame of observations
-  data <- data.frame(id=numeric(),d=numeric(),x=numeric(),y=numeric())
+  data <- NULL
   
   # initial distribution of the Markov chain
   delta <- solve(t(diag(2)-gamma+1),rep(1,2))
+  
+  # upper bound for number of observations (I think)
+  nbObsMax <- nbAnimals*ceiling(ymax/ystep)
+  
+  # insert id in covariates (needed in makeCovPar)
+  if(!is.null(cov))
+    cov <- cbind(rep(c(1,2),nrow(cov)/2),cov)
+  else
+    cov <- data.frame(id=rep(c(1,2),nbObsMax))
+  
+  colnames(cov)[1] <- "id"
+  
+  # compute parameters as function of covariates
+  covPar <- makeCovPar(b,hfun,models,cov)
+  covParMat1 <- matrix(covPar[,1],nrow=nrow(cov)/2,byrow=TRUE)
+  covParMat2 <- matrix(covPar[,2],nrow=nrow(cov)/2,byrow=TRUE)
+  
+  # remove id from covariates if not in model
+  if(!"id"%in%attr(terms(models$x),'term.labels') & !"id"%in%attr(terms(models$y),'term.labels')) {
+    if(ncol(cov)==1)
+      cov <- NULL
+    else
+      cov <- cov[,-1]
+  }
+  
+  i <- 1 # covariate index
   
   # loop over animals
   for(zoo in 1:nbAnimals) {
@@ -127,44 +170,50 @@ simData_double <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep)
     ystart <- ymax+runif(1,0,ystep)
     y <- seq(ystart,0,by=-ystep) # grid of y values
     
-    if(A==1 & runif(1)<h_rcpp(x,y[t],b[[1]],hfun[1])) {
+    if(A==1 & runif(1)<h_rcpp(x,y[t],covParMat1[i,],hfun[1])) {
       D[1] <- TRUE
-      data <- rbind(data,c(1,1,x,y[t]))
+      data <- rbind(data,c(1,1,x,y[t],cov[2*i-1,]))
       k <- k+1
     }
-    if(A==1 & runif(1)<h_rcpp(x,y[t],b[[2]],hfun[2])) {
+    if(A==1 & runif(1)<h_rcpp(x,y[t],covParMat2[i,],hfun[2])) {
       D[2] <- TRUE
-      data <- rbind(data,c(2,1,x,y[t]))
+      data <- rbind(data,c(2,1,x,y[t],cov[2*i,]))
       k <- k+1
     }
     
     # while the animal is not detected by both observers and hasn't left the observed area
     while(length(which(D))<2 & t<length(y)) {
+      i <- i+1
       t <- t+1
       S <- sample(1:2,size=1,prob=gamma[S,])
       A <- sample(0:1,size=1,prob=c(1-pcu[S],pcu[S]))
       
-      if(A==1 & !D[1] & runif(1)<h_rcpp(x,y[t],b[[1]],hfun[1])) {
+      if(A==1 & !D[1] & runif(1)<h_rcpp(x,y[t],covParMat1[i,],hfun[1])) {
         D[1] <- TRUE
-        data <- rbind(data,c(1,1,x,y[t]))
+        data <- rbind(data,c(1,1,x,y[t],cov[2*i-1,]))
         k <- k+1
       }
       
-      if(A==1 & !D[2] & runif(1)<h_rcpp(x,y[t],b[[2]],hfun[2])) {
+      if(A==1 & !D[2] & runif(1)<h_rcpp(x,y[t],covParMat2[i,],hfun[2])) {
         D[2] <- TRUE
-        data <- rbind(data,c(2,1,x,y[t]))
+        data <- rbind(data,c(2,1,x,y[t],cov[2*i,]))
         k <- k+1
       }
     }
     
+    if(is.null(cov))
+      nbNA <- 0
+    else
+      nbNA <- ncol(cov)
+    
     # if not detected by one observer, add corresponding row
     if(D[1] & !D[2])
-      data <- rbind(data,c(2,0,NA,NA))
+      data <- rbind(data,c(2,0,NA,NA,rep(NA,nbNA)))
     if(D[2] & !D[1])
-      data <- rbind(data,c(1,0,NA,NA))
+      data <- rbind(data,c(1,0,NA,NA,rep(NA,nbNA)))
   }
   
-  colnames(data) <- c("id","d","x","y")
-  return(data)
+  colnames(data) <- c("id","d","x","y",colnames(cov))
+  return(as.data.frame(data))
 }
 
