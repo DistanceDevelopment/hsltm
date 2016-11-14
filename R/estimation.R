@@ -279,7 +279,8 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
       ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     
-    p <- apply(ps,1,sintegral,xs[,1])/W
+    # indices 1:nx to adapt to both single and double-observer cases
+    p <- apply(ps,1,sintegral,xs[1:nx])/W
   }
   
   llik <- sum(log(li)-log(p))
@@ -330,7 +331,7 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
           ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         }
         
-        p <- apply(ps,1,sintegral,xs[,1])/W
+        p <- apply(ps,1,sintegral,xs[1:nx])/W
       }
       
       # calculate p(see first at or after groupfromy|x) at each x:
@@ -424,7 +425,7 @@ negllik.x <- function(b,xy,FUN,models,pm,Pi,delta,W,ymax,dy,nx=100)
       ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
     }
     
-    p <- apply(ps,1,sintegral,xs[,1])/W
+    p <- apply(ps,1,sintegral,xs[1:nx])/W
   }
   
   if(any(li<.Machine$double.xmin)) 
