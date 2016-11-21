@@ -4,7 +4,8 @@
 \alias{simData_double}
 \title{Simulation (two observers)}
 \usage{
-simData_double(nbAnimals, pcu, gamma, b, hfun, xmax, ymax, ystep)
+simData_double(nbAnimals, pcu, gamma, b, hfun, xmax, ymax, ystep,
+  models = list(x = ~NULL, y = ~NULL), cov = NULL)
 }
 \arguments{
 \item{nbAnimals}{Number of animals}

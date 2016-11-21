@@ -34,8 +34,8 @@ This differes from specifying ally=TRUE in that ally=TRUE calculates the cdf fro
 to y=0, whereas cdf=TRUE calculates the cdf from ymax to y.}
 }
 \description{
-Just calls \code{\link{pxy_simple_rcpp}} >= once, cycling through 3rd index of Pi and 
-2nd indices of pm and delta.
+Just calls \code{\link{pxy_simple_rcpp}} or \code{\link{pxy_double_rcpp}} 
+several times, cycling through 3rd index of Pi and 2nd indices of pm and delta.
 }
 \seealso{
 \code{\link{pxy_simple_rcpp}}

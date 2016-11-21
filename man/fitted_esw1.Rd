@@ -4,7 +4,7 @@
 \alias{fitted_esw1}
 \title{Calculates esw from model.}
 \usage{
-fitted_esw1(hmmlt, obs = 1:dim(hmmlt$xy)[1], nx = 100, to.x = FALSE,
+fitted_esw1(hmmlt, obs = 1:nrow(hmmlt$xy), nx = 100, to.x = FALSE,
   all = FALSE, W = NULL)
 }
 \arguments{

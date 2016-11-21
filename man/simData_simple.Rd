@@ -4,7 +4,8 @@
 \alias{simData_simple}
 \title{Simulation (one observer)}
 \usage{
-simData_simple(nbAnimals, pcu, gamma, b, hfun, xmax, ymax, ystep)
+simData_simple(nbAnimals, pcu, gamma, b, hfun, xmax, ymax, ystep,
+  models = list(x = ~NULL, y = ~NULL), cov = NULL)
 }
 \arguments{
 \item{nbAnimals}{Number of animals}
