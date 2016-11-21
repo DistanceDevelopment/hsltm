@@ -604,7 +604,7 @@ is.nullmodel <- function(models){
   null <- TRUE
   
   for(i in 1:length(models)) 
-    null <- null & is.null(models[[i]])
+    null <- null & (is.null(models[[i]]) | models[[i]]==~NULL)
   
   return(null)
 }
@@ -679,7 +679,7 @@ makeCovPar <- function(b, FUN, models, dat)
     covb <- matrix(c(as.vector(t(covb_obs1)),as.vector(t(covb_obs2))),
                    ncol=2)
   }
-  
+
   return(covb)
 }
 
