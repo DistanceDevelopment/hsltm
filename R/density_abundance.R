@@ -19,7 +19,7 @@
 #' 
 #' @export
 fitted_invp1 <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
-  if(is.null(W)) 
+  if(is.null(W))
     W <- hmmlt$fitpars$survey.pars$W
   esw <- fitted_esw1(hmmlt,obs,nx,W=W)
   
@@ -50,7 +50,7 @@ fitted_invp1 <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,W=NULL){
 #' object \code{hmmlt}.
 #' 
 #' @export
-fitted_esw1 <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE,W=NULL){
+fitted_esw1 <- function(hmmlt,obs=1:nrow(hmmlt$xy),nx=100,to.x=FALSE,all=FALSE,W=NULL){
   if(!is.null(obs)) {
     if(max(obs)>dim(hmmlt$xy)[1]) 
       stop("obs greater than number observations in hmmlt$xy")
@@ -111,11 +111,11 @@ fitted_esw1 <- function(hmmlt,obs=1:dim(hmmlt$xy)[1],nx=100,to.x=FALSE,all=FALSE
 #' @export
 hmltm.esw1 <- function(pars,hfun,models,cov,survey.pars,hmm.pars,ID,nx=100,type="response",to.x=FALSE,
                        W=NULL){
-  nmax <- dim(cov)[1]
-  if(is.null(models$y) & is.null(models$x)) 
+  nmax <- nrow(cov)
+  if(is.nullmodel(models)) 
     smax <- length(ID$object) 
   else 
-    smax <- nmax # number detectoins
+    smax <- nmax # number detections
   
   if(to.x) 
     maxx=cov$x
@@ -403,6 +403,7 @@ NDest <- function(dat,hmltm.fit,W){
   for(i in 1:nstrat){
     stratname[i] <- as.character(strat[i])
     vdat <- dat[dat$stratum==strat[i],]
+    
     trans <- unique(vdat$transect)
     L.tr <- 0
     
