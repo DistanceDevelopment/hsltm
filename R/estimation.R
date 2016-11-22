@@ -119,7 +119,7 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
   
   n <- length(xy$x)
   xs <- seq(0,W,length=nx)
-  
+
   if(is.nullmodel(models)) {
     px <- rep(0,nx)
     px <- p.xy(x=xs,y=rep(0,nx),hfun=FUN,b=rep(b,nx),pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
@@ -127,7 +127,7 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
   } else {
     px <- matrix(rep(0,nx*n),nrow=n)
     phat <- rep(0,n)
-    covb <- makeCovPar(b,FUN,models,xy) # put covariates into paramerters
+    covb <- makeCovPar(b,FUN,models,xy) # put covariates into parameters
     nb <- length(covb)/n
     
     for(i in 1:n) {
@@ -138,7 +138,7 @@ fit.hmltm <- function(xy,pars,FUN,models=list(y=NULL,x=NULL),survey.pars,hmm.par
 
     phat <- apply(px,1,sintegral,xs)/W
   }
-  
+    
   # log-likelihood and AIC
   llik <- -est$value
   npar <- length(est$par)
@@ -218,7 +218,7 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
   } else {
     x <- xy$x
     y <- xy$y
-    covb <- makeCovPar(b,FUN,models,xy) # put covariates into paramerters
+    covb <- makeCovPar(b,FUN,models,xy) # put covariates into parameters
   
     # if two observers, split observations
     if(!is.null(xy$id)) {
@@ -258,11 +258,18 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
   }
   
   if(is.nullmodel(models)) {
-    bi <- c(rep(covb[1:nb],nx)) # nx replicates of covb for ith detection
+    bi <- c(rep(covb[1:nb],nx)) # nx replicates of covb for 1st detection
+    
+    # if 2 observers, one column per observer
+    if(!is.null(xy$id))
+      bi <- cbind(bi,bi)
+    
     ps <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
-    p <- sintegral(ps,xs)/W
+    
+    # indices 1:nx to adapt to both single and double-observer cases
+    p <- sintegral(ps,xs[1:nx])/W
   } else {
-    ps <- matrix(rep(0,n*nx),nrow=n)
+    ps <- matrix(0,nrow=n,ncol=nx)
     
     for(i in 1:n) {
       start <- (i-1)*nb+1
@@ -310,9 +317,16 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
       llik.grp <- 0
       
       if(is.nullmodel(models)) {
-        bi <- c(rep(covbgrp[1:nb],nx)) # nx replicates of covbgrp for ith detection
+        bi <- c(rep(covbgrp[1:nb],nx)) # nx replicates of covbgrp for 1st detection
+        
+        # if 2 observers, one column per observer
+        if(!is.null(xy$id))
+          bi <- cbind(bi,bi)
+        
         ps <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
-        p <- sintegral(ps,xs)/W
+        
+        # indices 1:nx to adapt to both single and double-observer cases
+        p <- sintegral(ps,xs[1:nx])/W
       } else {
         ps=matrix(rep(0,ngrp*nx),nrow=ngrp)
         
@@ -331,6 +345,7 @@ negllik.xandy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax
           ps[i,] <- p.xy(x=xs,y=ys,hfun=FUN,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,ally=TRUE)
         }
         
+        # indices 1:nx to adapt to both single and double-observer cases
         p <- apply(ps,1,sintegral,xs[1:nx])/W
       }
       
@@ -482,8 +497,8 @@ negllik.xy <- function(b,xy,FUN,models=list(y=NULL,x=NULL),pm,Pi,delta,W,ymax,dy
 #' @title Calculates probability of first observing animal at (x,y).
 #'
 #' @description
-#' Just calls \code{\link{pxy_simple_rcpp}} >= once, cycling through 3rd index of Pi and 
-#' 2nd indices of pm and delta.
+#' Just calls \code{\link{pxy_simple_rcpp}} or \code{\link{pxy_double_rcpp}} 
+#' several times, cycling through 3rd index of Pi and 2nd indices of pm and delta.
 # 
 #' @param x perpendicular distance.
 #' @param y forward distance.
