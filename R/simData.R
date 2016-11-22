@@ -154,7 +154,7 @@ simData_double <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep,
     if(ncol(cov)==1)
       cov <- NULL
     else
-      cov <- cov[,-1]
+      cov <- as.data.frame(cov[,-1])
   }
   
   i <- 1 # covariate index
