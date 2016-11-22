@@ -38,10 +38,14 @@ hmltm.px <- function(x,pars,hfun,models=list(y=NULL,x=NULL),cov=NULL,survey.pars
   n <- 1
   covb <- b
   
+  # TODO: adapt the code below for 2-observer case?
+  
   if(!is.null(cov) & !(is.nullmodel(models))) { # only use covars if have them and model uses them
-    n <- dim(cov)[1]
+    n <- nrow(cov)
     covb <- makeCovPar(b,hfun,models,cov) # put covariates into paramerters
-  } 
+  } else {
+    covb <- makeCovPar(b,hfun,models,data.frame(na=rep(NA,nx)))
+  }
   
   nb <- length(covb)/n
   px <- matrix(rep(0,nx*n),nrow=n)

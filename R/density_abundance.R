@@ -59,7 +59,7 @@ fitted_esw1 <- function(hmmlt,obs=1:nrow(hmmlt$xy),nx=100,to.x=FALSE,all=FALSE,W
     
     cov <- hmmlt$xy[obs,]
   } 
-  
+
   if(is.nullmodel(hmmlt$models) & !all)
     cov <- hmmlt$xy[1,]
   else
