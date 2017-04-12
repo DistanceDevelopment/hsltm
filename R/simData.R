@@ -127,6 +127,8 @@ simData_double <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep,
   if(length(hfun)==1)
     hfun <- c(hfun,hfun)
   
+  covnames <- colnames(cov)
+  
   # data frame of observations
   data <- NULL
   
@@ -151,10 +153,12 @@ simData_double <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep,
   
   # remove id from covariates if not in model
   if(!"id"%in%attr(terms(models$x),'term.labels') & !"id"%in%attr(terms(models$y),'term.labels')) {
-    if(ncol(cov)==1)
+    if(ncol(cov)==1) {
       cov <- NULL
-    else
+    } else {
       cov <- as.data.frame(cov[,-1])
+      colnames(cov) <- covnames
+    }
   }
   
   i <- 1 # covariate index
@@ -208,9 +212,9 @@ simData_double <- function(nbAnimals,pcu,gamma,b,hfun,xmax,ymax,ystep,
     
     # if not detected by one observer, add corresponding row
     if(D[1] & !D[2])
-      data <- rbind(data,c(2,0,NA,NA,rep(NA,nbNA)))
+      data <- rbind(data,c(2,0,NA,NA,rep(0,nbNA))) # arbitrarily set cov to 0
     if(D[2] & !D[1])
-      data <- rbind(data,c(1,0,NA,NA,rep(NA,nbNA)))
+      data <- rbind(data,c(1,0,NA,NA,rep(0,nbNA)))
   }
   
   colnames(data) <- c("id","d","x","y",colnames(cov))
