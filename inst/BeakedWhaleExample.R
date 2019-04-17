@@ -24,7 +24,6 @@ bkEP2x.null$point$ests
 # display probability of detection at zero distance
 bkEP2x.null$hmltm.fit$pzero
 
-#NOTE:  the IP model does not appear work.  The estimated pzero is negative
 # specify model and starting parameter values and fit model
 hfun="h.IP.0";models=list(y=NULL,x=NULL) # specify detection hazard model (no covariates)
 pars=c(2.482797, 31.280377); models=list(y=NULL,x=NULL)
@@ -58,9 +57,10 @@ bkIP.ht.size$point$ests
 # display probability of detection at zero distance
 bkIP.ht.size$hmltm.fit$pzero
 
+# Look at AICs of the above models
 AIC(bkIP.null,bkIP.ht,bkIP.ht.size,criterion="AIC")
 
-# Do some plots of the best model
+# Do some plots of the best model, and get goodness-of-fit stats
 ybreaks=c(0,175,500,1000,2000,3000,4200)
 xbreaks=c(0,100,300,500,1000,1500,2000)
 
