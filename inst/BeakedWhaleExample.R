@@ -2,7 +2,7 @@ library(hsltm)
 
 # get data and availability model parameters
 data(beaked.ship) # get beaked whale ship survey line transect data
-data(beaked.hmm.pars) # get bowhead availability HMM parameters (one set of parameters)
+data(beaked.hmm.pars) # get beaked availability HMM parameters (one set of parameters)
 
 # set survey and fitting parameters
 spd=1852*(6.577778)/(60*60)        # vessel speed in metres/second
