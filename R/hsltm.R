@@ -580,6 +580,35 @@ make.hmm.pars.from.Et=function(Ea,Eu,seEa,seEu,covEt=0,pm=NULL) {
   return(hmm.pars)  
 }
 
+
+#' @title Calculate lengths of all runs in availability.
+#'
+#' @description
+#' Calculates lengths of the runs of 0s and 1s in a vector.
+#'
+#' @param avail is a vecto of binary data (0s and 1s).
+#' 
+#' @value Returns a list with components \code{run1} being a vector with 
+#' the lengths of all runs of 1s, in order, and  \code{run0} being a vector with 
+#' the lengths of all runs of 0s, in order.
+#' 
+getruns = function(avail) {
+  n = length(avail)
+  run1 = run0 = NULL
+  state = avail[1]
+  runlen = 1
+  for(i in 2:n) {
+    if(avail[i]==state) runlen = runlen+1
+    else {
+      if(state==1) run1 = c(run1,runlen)
+      else run0 = c(run0,runlen)
+      state = avail[i]
+      runlen = 1
+    }
+  }
+  return(list(run1=run1,run0=run0))
+}
+
   
 # ==============- utility functions specific to avail estimation ------------------
 
@@ -1002,7 +1031,7 @@ h.plot=function(hfun,pars,dat=NULL, models=NULL, xrange=c(0,50),yrange=xrange,nx
 #' @param ... other arguments to \code{\link{image}}, \code{\link{contour}} or \code{\link{persp}}.
 f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=NULL,
                 theta.f=0,theta.b=90,
-                xrange=c(0,max(hmltm$hmltm.fit$xy$x)),yrange=c(0,1.5*max(hmltm$hmltm.fit$xy$y)),
+                xrange=c(0,max(hmltm$hmltm.fit$xy$x)),yrange=c(0,1.5*max(na.omit(hmltm$hmltm.fit$xy$y))),
                 nx=50,ny=nx,
                 xlab="Perpendicular distance",ylab="Forward distance",type="contour",
                 nlevels=20,add=FALSE,col="black",logscale=FALSE,theta=90,phi=35,
