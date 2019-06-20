@@ -1106,9 +1106,13 @@ f.plot=function(hmltm,obs=1:length(hmltm$hmltm.fit$xy$x),new.ymax=NULL,new.pars=
 #' @param ylim y-value limits.
 #' @param text.cex relative text size.
 #' @param theta.b REDUNDANT must = 90.
+#' @param doplot If FALSE, does not produce a plot, else does.
+#' @param trackprogress If TRUE, prints line for each of the x-values for which
+#' the function is computed, as it is computed.
+#' 
 fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
                     xlab="Forward distance (y)",ylab="pdf(y)",main="",ylim=NULL,theta.b=90,
-                    text.cex=0.66)
+                    text.cex=0.66,doplot=TRUE,trackprogress=FALSE)
 {
   hmmlt=hmltm$hmltm.fit
   if(theta.b !=90) stop("This function only allows theta.b=90 degrees at present.")
@@ -1164,7 +1168,7 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
     start=(i-1)*nb+1
     bi=c(rep(covb[start:(start+nb-1)],nyi)) # nx replicates of covb for ith detection
     fyx[1:nyi,i]=p.xy(x=rep(x[i],nyi),y=yi,hfun=hfun,b=bi,pm=pm,Pi=Pi,delta=delta,ymax=ymax,dy=dy,theta.f=theta.f,theta.b=theta.b)
-    cat("Done ",nx-i+1," of ",nx,"\n")
+    if(trackprogress) cat("Done ",nx-i+1," of ",nx,"\n")
   }
   f=apply(na.omit(fyx),1,mean)
 #  wt=c(0.5,rep(1,(dim(fyx)[1]-2)),0.5)
@@ -1185,11 +1189,13 @@ fyfit.plot=function(hmltm,values=TRUE,breaks=NULL,allx=FALSE,nys=250,
     if(allx) ylim=c(0,max(fyx,barheight))
     else ylim=c(0,max(f,barheight))  
   }
-  histline(barheight,breaks=breaks,ylim=ylim,xlab=xlab,ylab=ylab,main=main)
-  if(allx) for(i in 1:dim(fyx)[2]) lines(ys,fyx[,i],col="gray",lty=2)
-  lines(ys,f,lwd=2)
-  nb=length(hst$breaks)
-  text(hst$breaks[1:(nb-1)]+diff(hst$breaks)/2,0,hst$count,cex=text.cex)    
+  if(doplot) {
+    histline(barheight,breaks=breaks,ylim=ylim,xlab=xlab,ylab=ylab,main=main)
+    if(allx) for(i in 1:dim(fyx)[2]) lines(ys,fyx[,i],col="gray",lty=2)
+    lines(ys,f,lwd=2)
+    nb=length(hst$breaks)
+    text(hst$breaks[1:(nb-1)]+diff(hst$breaks)/2,0,hst$count,cex=text.cex)    
+  }
   
   if(values) return(list(xy=xy,y=ys,fyx=fyx,f=f,breaks=breaks,barheight=barheight))
 }
@@ -2030,7 +2036,8 @@ hmltm.esw=function(pars,hfun,models,cov,survey.pars,hmm.pars,nx=100,type="respon
 #' @param seplots if TRUE does additional diagnostic plots
 #' @param smult multiplier to size circles in third plot.
 #' @param ymax forward distance at which detection probability is assumed to be zero. 
-hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars$survey.pars$ymax)
+#' @param breaks breaks for Chi-squared goodness of fit test.
+hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars$survey.pars$ymax,breaks=NULL)
 {
   hmmlt=hmltm$hmltm.fit
   dat=hmmlt$xy[!is.na(hmmlt$xy$y),]
@@ -2077,8 +2084,67 @@ hmmlt.gof.y=function(hmltm,ks.plot=TRUE,seplots=FALSE,smult=5,ymax=hmmlt$fitpars
       plot(dat$x[Fy0.order],dat$y[Fy0.order],xlab="Perpendicular distance",ylab="Forward distance",cex=abs(size),col=dFcol[sign(dF)+2],main="CDF-Empirical CDF (red=negative)")
     }
   }
-  return(list(p.ks=1-p,p.cvm=p.cvm,qq.x=e.cdf,qq.y=cdf,y=yy))
+  
+  # Now calulate Chi-squared gof
+  if(is.null(breaks)) breaks =seq(0,ymax,length=11)
+  chisq.y = chisq.gof.y(hmltm,breaks,nys=250)
+  
+  return(list(p.ks=1-p,p.cvm=p.cvm,qq.x=e.cdf,qq.y=cdf,y=yy,p.chisq=chisq.y$p.chisq,chisq.gof=chisq.y))
 }
+
+#' @title Chi-squared goodness-of-fit in forward dimension.
+#'
+#' @description
+#' Calculates Chi-squared goodness-of-fit in forward dimension, plots fit, and returns p-value and other stuff.
+#' Returns a data frame  (\code{goftable}) with columns for start and end of bins, observed and expected
+#' frequencies in the bins, and the Chi-squared statistic for the bin. Also 
+#' returns the Chi-squared statistic(\code{X2stat}), the degrees of freedom of the 
+#' test (\code{df}), and the associated p-value (\code{p.Chisq}).
+# 
+#' @param hmltm fitted model, as output by \code{\link{est.hmltm}}
+#' @param breaks cutpoints on forward-distance axis defining bins
+#' @param nys number of y-values at which to calculate function before using 
+#' \code{approxfun} approximate it at arbitrary resolution.
+#' 
+#' @details 
+#' Uses \code{approxfun} to approximate the forward distance pdf and then uses
+#' \code{integrate} to integrate it within each bin.
+#'   
+chisq.gof.y = function(fit,breaks,nys=250) {
+  fplot = fyfit.plot(fit,breaks=breaks,allx=FALSE,nys=nys,doplot=FALSE)
+  model.df = length(fit$hmltm.fit$fit$par)
+  n = sum(fplot$xy$seen)
+  xcol = which(names(fplot)=="x")
+  ycol = which(names(fplot)=="y")
+  if(length(xcol)==0 & length(ycol)==0) stop("Must have column named x or named y")
+  if(length(xcol)!=0 & length(ycol)!=0) stop("Can't have column named x AND named y")
+  if(length(xcol)!=0) {
+    x = fplot[[xcol]]
+  } else {
+    x = fplot[[ycol]]
+  }
+  f = approxfun(x,fplot$f)
+  nbins = length(fplot$breaks)-1
+  o = e = rep(NA,nbins)
+  for(i in 1:nbins) {
+    o[i] = fplot$barheight[i]* (fplot$breaks[i+1]-fplot$breaks[i]) 
+    e[i] = integrate(f,fplot$breaks[i],fplot$breaks[i+1])$value
+  }
+  o = n * o/sum(o)
+  p = e/sum(e)
+  e = n * p
+  d2 = (o-e)^2
+  X2 = d2/e
+  X2stat = sum(X2)
+  nobs = length(o)
+  df = nobs-model.df
+  pval = 1 - pchisq(X2stat,df)
+  goftable = data.frame(From=breaks[-nobs],To=breaks[-1],Observed=o, Expected=e,X2=X2)
+  if(any(e<5)) warning("Some expected values < 5; p-value may not be reliable.")
+  return(list(goftable,X2stat=X2stat,df=df,p.chisq=pval))
+}
+
+
 
 
 #' @title Kolmogarov-Smirnov goodness-of-fit p-value.
